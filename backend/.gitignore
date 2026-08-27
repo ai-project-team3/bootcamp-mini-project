@@ -5,3 +5,4 @@ __pycache__/
 uvicorn.log
 *.db
 uvicorn.err
+uvicorn.out
