@@ -1,0 +1,5 @@
+.report-tab-body {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 14px;
+}

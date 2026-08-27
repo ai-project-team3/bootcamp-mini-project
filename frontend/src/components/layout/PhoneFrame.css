@@ -1,0 +1,19 @@
+.phone {
+  width: 100%;
+  max-width: 380px;
+  min-height: 720px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 18px 28px;
+}

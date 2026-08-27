@@ -1,0 +1,55 @@
+.compat-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.compat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.compat-name {
+  display: block;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.compat-grade-name {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+}
+
+.compat-grade {
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 700;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compat-grade-S {
+  background: var(--hot-soft);
+  color: var(--hot);
+}
+.compat-grade-A {
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+.compat-grade-B {
+  background: var(--line);
+  color: var(--ink-soft);
+}
+.compat-grade-C {
+  background: var(--deep-soft);
+  color: var(--deep);
+}
+.compat-grade-F {
+  background: var(--deep);
+  color: #fff;
+}

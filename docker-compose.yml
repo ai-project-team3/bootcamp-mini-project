@@ -1,0 +1,16 @@
+services:
+  mariadb:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: crewverse
+      MARIADB_USER: crewverse
+      MARIADB_PASSWORD: crewverse
+      MARIADB_ROOT_PASSWORD: crewverse_root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+volumes:
+  mariadb_data:

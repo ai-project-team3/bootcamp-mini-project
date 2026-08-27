@@ -1,0 +1,16 @@
+.survey-intro {
+  flex: 1;
+}
+
+.survey-title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 1.4rem;
+  margin: 8px 0 14px;
+}
+
+.survey-desc {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}

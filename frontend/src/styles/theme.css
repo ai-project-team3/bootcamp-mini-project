@@ -1,0 +1,35 @@
+:root {
+  --bg: #f7f3f5;
+  --surface: #ffffff;
+  --hot: #c9256b;
+  --hot-soft: #f6dce8;
+  --deep: #1f4e5f;
+  --deep-soft: #dfeaee;
+  --gold: #a8770f;
+  --gold-soft: #f3e6c8;
+  --card: #181017;
+  --line: #e2d6dc;
+  --ink: #1a1418;
+  --ink-soft: #6f6570;
+
+  --font-heading: 'Black Han Sans', sans-serif;
+  --font-body: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --radius-lg: 22px;
+  --radius-md: 14px;
+  --radius-sm: 9px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141014;
+    --surface: #1e181c;
+    --line: #332830;
+    --ink: #f2eaee;
+    --ink-soft: #a89aa1;
+    --hot-soft: #3a1b28;
+    --deep-soft: #17282c;
+    --gold-soft: #2c2413;
+  }
+}
