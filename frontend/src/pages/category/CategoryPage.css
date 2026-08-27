@@ -49,3 +49,8 @@
   color: var(--ink-soft);
   text-align: center;
 }
+
+.cat-btn.is-off {
+  opacity: 0.42;
+  cursor: not-allowed;
+}

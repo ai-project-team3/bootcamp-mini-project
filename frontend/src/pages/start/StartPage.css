@@ -44,3 +44,44 @@
   font-size: 0.72rem;
   color: var(--ink-soft);
 }
+
+.start-seg {
+  display: flex;
+  gap: 6px;
+}
+
+.start-seg-btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.start-seg-btn.is-on {
+  border-color: var(--hot);
+  background: var(--hot-soft);
+  color: var(--hot);
+  font-weight: 600;
+}
+
+.start-error {
+  font-size: 0.76rem;
+  color: var(--hot);
+}
+
+.start-join {
+  margin-top: 10px;
+  padding: 10px 0;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 0.82rem;
+  text-decoration: underline;
+  cursor: pointer;
+}

@@ -3,7 +3,11 @@ from pydantic import BaseModel
 
 class RoomCreateRequest(BaseModel):
     category: str  # TP | MT | DY | NT
-    host_nickname: str
+    user_id: str  # host
+
+
+class RoomStartRequest(BaseModel):
+    user_id: str  # must be the host
 
 
 class RoomResponse(BaseModel):

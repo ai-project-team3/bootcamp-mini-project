@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .routers import health, participants, reports, rooms
+from .routers import health, participants, reports, rooms, survey, users
 
-app = FastAPI(title="CrewVerse API")
+app = FastAPI(title="얼음땡 API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -14,6 +14,8 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
+app.include_router(users.router)
 app.include_router(rooms.router)
 app.include_router(participants.router)
+app.include_router(survey.router)
 app.include_router(reports.router)
