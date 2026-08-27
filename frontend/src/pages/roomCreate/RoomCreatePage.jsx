@@ -18,23 +18,20 @@ export default function RoomCreatePage() {
 
   // The room code comes from the server, never from the client. Two browsers
   // generating locally would eventually collide. Plan doc §12.
+  //
+  // Deliberately no cancelled-on-unmount flag. StrictMode mounts, unmounts and
+  // remounts in development; a cleanup flag would throw away the code from the
+  // first mount while the ref — which survives the remount — blocks a retry, so
+  // the room exists on the server but never reaches the screen.
   useEffect(() => {
     if (!userId || roomCode || requested.current) return
     requested.current = true
-    let cancelled = false
     createRoom({ category: category.code, userId })
-      .then((room) => {
-        if (!cancelled) setRoomCode(room.code)
-      })
+      .then((room) => setRoomCode(room.code))
       .catch((err) => {
-        if (!cancelled) {
-          requested.current = false
-          setError(err.message)
-        }
+        requested.current = false
+        setError(err.message)
       })
-    return () => {
-      cancelled = true
-    }
   }, [userId, roomCode, category.code, setRoomCode])
 
   return (

@@ -29,11 +29,26 @@ function clear() {
   }
 }
 
+// Shared across callers so a second call while the first is still in flight
+// waits on it instead of minting another account. Without this, StrictMode's
+// double mount alone issues two ids on every page load and orphans one.
+let inflight = null
+
 /**
  * Returns the stored profile, issuing a fresh anonymous account when there is
  * no usable id. Plan doc §4-1. This is the only place a user_id is created.
  */
-export async function ensureUser() {
+export function ensureUser() {
+  if (!inflight) {
+    inflight = resolveUser().catch((err) => {
+      inflight = null // let the next attempt retry rather than reusing the failure
+      throw err
+    })
+  }
+  return inflight
+}
+
+async function resolveUser() {
   const stored = read()
   if (stored) {
     try {

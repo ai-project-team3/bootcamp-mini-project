@@ -1,0 +1,16 @@
+
+> frontend@0.0.0 dev
+> vite
+
+
+  VITE v8.2.2  ready in 257 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+오후 7:07:14 [vite] (client) hmr update /src/pages/roomCreate/RoomCreatePage.jsx
+오후 7:07:22 [vite] (client) hmr update /src/context/RoomFlowContext.jsx, /src/pages/start/StartPage.jsx
+오후 7:08:29 [vite] (client) hmr update /src/pages/start/StartPage.jsx
+오후 7:08:35 [vite] (client) hmr update /src/pages/start/StartPage.jsx
+오후 7:08:43 [vite] (client) hmr update /src/pages/waiting/WaitingRoomPage.jsx
+오후 7:08:51 [vite] (client) hmr update /src/pages/waiting/WaitingRoomPage.jsx

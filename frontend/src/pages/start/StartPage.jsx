@@ -26,20 +26,24 @@ export default function StartPage() {
   const draft = draftNick ?? user?.nickname ?? ''
   const gender = draftGender ?? user?.gender ?? 'UNSET'
 
-  const handleNext = async () => {
+  // Both exits from this screen save first. Leaving straight for /join would
+  // drop the nickname that was just typed and put the person in the room as 익명.
+  const goWithProfile = async (to) => {
     if (!userId) return
     setSaving(true)
     setError(null)
     try {
       const saved = await saveProfile(userId, { nickname: draft.trim() || '플레이어', gender })
       setUser(saved)
-      navigate('/category')
+      navigate(to)
     } catch (err) {
       setError(err.message)
     } finally {
       setSaving(false)
     }
   }
+
+  const handleNext = () => goWithProfile('/category')
 
   return (
     <PhoneFrame>
@@ -89,7 +93,12 @@ export default function StartPage() {
       <Button onClick={handleNext} disabled={!userId || saving}>
         {userId ? (saving ? '저장 중…' : '다음') : '준비 중…'}
       </Button>
-      <button type="button" className="start-join" onClick={() => navigate('/join')}>
+      <button
+        type="button"
+        className="start-join"
+        onClick={() => goWithProfile('/join')}
+        disabled={!userId || saving}
+      >
         초대코드로 참여하기
       </button>
     </PhoneFrame>
