@@ -56,7 +56,12 @@ export default function WaitingRoomPage() {
   const me = participants.find((p) => p.user_id === userId)
   const isHost = Boolean(me?.is_host)
   const category = room ? findCategoryByCode(room.category) : null
-  const enough = participants.length >= (category?.minSize ?? 1)
+  // Two is the floor — a session of one has nobody to compare against. Below the
+  // recommended size we warn but still let the host start, because plan doc §15
+  // says an under-filled room degrades (skip the pairing stage) rather than
+  // being blocked outright.
+  const canStart = participants.length >= 2
+  const belowRecommended = category ? participants.length < category.minSize : false
 
   const handleStart = async () => {
     setStarting(true)
@@ -94,13 +99,16 @@ export default function WaitingRoomPage() {
         {participants.length === 0 && <li className="wr-empty">불러오는 중…</li>}
       </ul>
 
-      {!enough && category && (
-        <p className="wr-sub">최소 {category.minSize}명이 필요해요</p>
+      {belowRecommended && canStart && (
+        <p className="wr-sub">
+          {category.minSize}명부터 권장해요. 지금 시작하면 짝 맞추기 단계는 건너뜁니다
+        </p>
       )}
+      {!canStart && <p className="wr-sub">한 명 더 들어와야 시작할 수 있어요</p>}
       {error && <p className="wr-error">{error}</p>}
 
       {isHost ? (
-        <Button onClick={handleStart} disabled={starting || !enough}>
+        <Button onClick={handleStart} disabled={starting || !canStart}>
           {starting ? '시작하는 중…' : '시작'}
         </Button>
       ) : (
