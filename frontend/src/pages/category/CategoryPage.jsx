@@ -15,7 +15,7 @@ export default function CategoryPage() {
 
   const handleLeafSelect = (leaf) => {
     setCategory(leaf)
-    navigate('/room/create')
+    navigate('/entry')
   }
 
   const handleBack = () => {
