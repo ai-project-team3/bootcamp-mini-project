@@ -45,15 +45,22 @@ export default function CategoryPage() {
       {group && (
         <div className="cat-grid">
           {group.leaves.map((leaf) => (
-            <button key={leaf.code} className="cat-btn" onClick={() => handleLeafSelect(leaf)}>
+            <button
+              key={leaf.code}
+              className={`cat-btn${leaf.ready ? '' : ' is-off'}`}
+              onClick={() => handleLeafSelect(leaf)}
+              disabled={!leaf.ready}
+            >
               <span className="cat-btn-name">{leaf.label}</span>
-              <span className="cat-btn-desc">{leaf.desc}</span>
+              <span className="cat-btn-desc">{leaf.ready ? leaf.desc : '준비 중'}</span>
               <span className="cat-btn-size">{leaf.size}</span>
             </button>
           ))}
         </div>
       )}
 
+      {/* Unfinished categories stay visible but disabled — showing that they
+          exist is better than hiding them. Plan doc §3. */}
       <p className="cat-note">준비 중인 카테고리는 곧 열립니다.</p>
     </PhoneFrame>
   )

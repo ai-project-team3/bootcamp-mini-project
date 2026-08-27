@@ -18,3 +18,10 @@
   font-size: 0.85rem;
   color: var(--ink-soft);
 }
+
+.stage-todo {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  margin-top: 10px;
+}

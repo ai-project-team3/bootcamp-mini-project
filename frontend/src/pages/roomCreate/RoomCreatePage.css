@@ -46,3 +46,8 @@
   color: var(--hot);
   margin-top: 4px;
 }
+
+.rc-error {
+  font-size: 0.78rem;
+  color: var(--hot);
+}

@@ -43,7 +43,7 @@ export default function SharePage() {
         </div>
         <div className="share-foot">
           <span>{new Date().toISOString().slice(0, 10).replace(/-/g, '.')}</span>
-          <span>CREWVERSE</span>
+          <span>얼음땡</span>
         </div>
       </div>
 

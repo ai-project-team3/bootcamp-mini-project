@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import StartPage from '../pages/start/StartPage'
+import JoinPage from '../pages/join/JoinPage'
 import CategoryPage from '../pages/category/CategoryPage'
 import RoomCreatePage from '../pages/roomCreate/RoomCreatePage'
 import WaitingRoomPage from '../pages/waiting/WaitingRoomPage'
@@ -12,6 +13,7 @@ export default function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<StartPage />} />
+      <Route path="/join" element={<JoinPage />} />
       <Route path="/category" element={<CategoryPage />} />
       <Route path="/room/create" element={<RoomCreatePage />} />
       <Route path="/room/:code/waiting" element={<WaitingRoomPage />} />
