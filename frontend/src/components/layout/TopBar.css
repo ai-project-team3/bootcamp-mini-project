@@ -29,3 +29,9 @@
   color: var(--ink-soft);
   font-family: var(--font-mono);
 }
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}

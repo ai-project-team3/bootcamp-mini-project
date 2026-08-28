@@ -12,7 +12,7 @@ export default function ResultHubPage() {
     <PhoneFrame>
       <TopBar title="게임 종료" showBack={false} />
       <div className="hub-body">
-        <h1 className="hub-title">18분이 끝났어요</h1>
+        <h1 className="hub-title">게임이 끝났어요</h1>
         <p className="hub-sub">결과를 확인해보세요</p>
 
         <Button onClick={() => navigate(`/room/${code}/report/me`)}>개인 리포트</Button>
@@ -21,6 +21,9 @@ export default function ResultHubPage() {
         </Button>
         <Button variant="ghost" disabled>
           게임으로 가기 (준비 중)
+        </Button>
+        <Button variant="ghost" onClick={() => navigate('/')}>
+          홈으로
         </Button>
       </div>
     </PhoneFrame>

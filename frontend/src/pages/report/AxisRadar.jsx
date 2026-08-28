@@ -25,7 +25,16 @@ function ringPoints(axes, value) {
   return axes.map((_, i) => pointFor(i, axes.length, value).join(',')).join(' ')
 }
 
-// axes: [{ code, label, self, pre, post }] — self=실선(오늘의 나), pre/post=점선(첫인상 전/후)
+// axes: [{ code, label, self, pre }] — self=채움(오늘의 나), pre=점선(첫인상)
+//
+// 원래는 pre/post 두 점선을 같이 그렸는데, 셋을 겹치니 화면이 복잡해지고
+// post에 쓰던 --deep(파란색)이 남색 배경 위에서 거의 안 보였다. "처음 본
+// 인상 vs 실제로 드러난 나" 대비가 제일 이야기가 되는 조합이라 pre만 남기고,
+// 대신 금색(--gold)처럼 배경과 확실히 대비되는 색만 쓴다.
+//
+// 그리는 순서가 곧 z-order다. self는 안이 꽉 찬 도형이라 맨 위에 그리면
+// pre 점선을 덮어버린다. 그래서 배경 오각형 →중간눈금 → 축 선 → self(채움)
+// → pre(테두리만) 순으로 그려, 점선이 항상 self 위에 보이게 한다.
 export default function AxisRadar({ axes }) {
   return (
     <div className="radar-wrap">
@@ -38,9 +47,8 @@ export default function AxisRadar({ axes }) {
             </text>
           )
         })}
-        {/* 최대치(5.0) 오각형 — 맨 아래 배경. 연한 파란색으로 채워서 다른 배경면과
-            구별되게 하고, 그래프 전체 크기 감도 잡게 한다. */}
-        <polygon points={ringPoints(axes, MAX_VALUE)} fill="var(--deep)" fillOpacity="0.15" stroke="var(--deep)" strokeOpacity="0.4" strokeWidth="1" />
+        {/* 최대치(5.0) 오각형 — 맨 아래 배경. */}
+        <polygon points={ringPoints(axes, MAX_VALUE)} className="radar-bg" />
         {/* 중간(절반) 눈금 — 아주 얇은 점선. */}
         <polygon
           points={ringPoints(axes, MAX_VALUE / 2)}
@@ -64,29 +72,24 @@ export default function AxisRadar({ axes }) {
             />
           )
         })}
-        {/* self(오늘의 나)는 안쪽이 채워져 있어서 최대치 배경 바로 위에 깔아야 한다 —
-            먼저 그리면 나중에 그리는 pre/post 테두리 선이 그 위에 그대로 보인다. */}
-        <polygon points={polygonPoints(axes, 'self')} fill="var(--hot-soft)" stroke="var(--hot)" strokeWidth="2" />
+        <polygon
+          points={polygonPoints(axes, 'self')}
+          fill="var(--hot-soft)"
+          stroke="var(--hot)"
+          strokeWidth="2"
+          opacity="0.85"
+        />
         <polygon
           points={polygonPoints(axes, 'pre')}
           fill="none"
           stroke="var(--gold)"
-          strokeWidth="1.3"
-          strokeDasharray="3 3"
-          opacity="0.7"
-        />
-        <polygon
-          points={polygonPoints(axes, 'post')}
-          fill="none"
-          stroke="var(--deep)"
-          strokeWidth="1.6"
-          strokeDasharray="5 3"
+          strokeWidth="1.8"
+          strokeDasharray="4 3"
         />
       </svg>
       <div className="radar-legend">
         <span><i className="radar-dot radar-dot-self" /> 오늘의 나</span>
         <span><i className="radar-dot radar-dot-pre" /> 처음에 본 나</span>
-        <span><i className="radar-dot radar-dot-post" /> 끝나고 본 나</span>
       </div>
     </div>
   )
