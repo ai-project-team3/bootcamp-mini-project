@@ -1,24 +1,26 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import StartPage from '../pages/start/StartPage'
-import CategoryPage from '../pages/category/CategoryPage'
 import RoomCreatePage from '../pages/roomCreate/RoomCreatePage'
+import JoinPage from '../pages/join/JoinPage'
 import WaitingRoomPage from '../pages/waiting/WaitingRoomPage'
-import SurveyPage from '../pages/survey/SurveyPage'
-import StagePage from '../pages/stage/StagePage'
-import ReportPage from '../pages/report/ReportPage'
-import SharePage from '../pages/share/SharePage'
+import GamePage from '../pages/game/GamePage'
+import StatementsPage from '../pages/statements/StatementsPage'
+import ResultHubPage from '../pages/hub/ResultHubPage'
+import PersonalReportPage from '../pages/report/PersonalReportPage'
+import TeamReportPage from '../pages/report/TeamReportPage'
 
 export default function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<StartPage />} />
-      <Route path="/category" element={<CategoryPage />} />
       <Route path="/room/create" element={<RoomCreatePage />} />
+      <Route path="/join/:code" element={<JoinPage />} />
       <Route path="/room/:code/waiting" element={<WaitingRoomPage />} />
-      <Route path="/room/:code/survey" element={<SurveyPage />} />
-      <Route path="/room/:code/stage/:n" element={<StagePage />} />
-      <Route path="/room/:code/report" element={<ReportPage />} />
-      <Route path="/room/:code/share" element={<SharePage />} />
+      <Route path="/room/:code/game" element={<GamePage />} />
+      <Route path="/room/:code/statements" element={<StatementsPage />} />
+      <Route path="/room/:code/hub" element={<ResultHubPage />} />
+      <Route path="/room/:code/report/me" element={<PersonalReportPage />} />
+      <Route path="/room/:code/report/team" element={<TeamReportPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

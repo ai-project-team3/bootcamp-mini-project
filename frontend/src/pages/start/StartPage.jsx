@@ -4,44 +4,128 @@ import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import Button from '../../components/common/Button'
 import { useRoomFlow } from '../../context/RoomFlowContext'
+import { getRoom } from '../../api/rooms'
+import { joinRoom } from '../../api/players'
 import './StartPage.css'
 
 export default function StartPage() {
   const navigate = useNavigate()
-  const { nickname, setNickname } = useRoomFlow()
-  const [draft, setDraft] = useState(nickname)
+  const { setNickname, setGender, setMbti, setRoomCode, setPlayerId, setIsHost } = useRoomFlow()
+  const [nicknameDraft, setNicknameDraft] = useState('')
+  const [genderDraft, setGenderDraft] = useState('M')
+  const [mbtiDraft, setMbtiDraft] = useState('')
+  const [codeDraft, setCodeDraft] = useState('')
+  const [error, setError] = useState(null)
+  const [busy, setBusy] = useState(false)
 
-  const handleNext = () => {
-    setNickname(draft || '플레이어')
-    navigate('/category')
+  const commitProfile = () => {
+    const nickname = nicknameDraft.trim() || '플레이어'
+    setNickname(nickname)
+    setGender(genderDraft)
+    setMbti(mbtiDraft.trim().toUpperCase())
+    return { nickname, gender: genderDraft, mbti: mbtiDraft.trim().toUpperCase() }
+  }
+
+  const handleCreate = () => {
+    commitProfile()
+    setRoomCode(null)
+    setIsHost(true)
+    navigate('/room/create')
+  }
+
+  const handleJoin = async () => {
+    const code = codeDraft.trim().toUpperCase()
+    if (!code) {
+      setError('초대코드를 입력해주세요')
+      return
+    }
+    const { nickname, gender, mbti } = commitProfile()
+    setError(null)
+    setBusy(true)
+    try {
+      const room = await getRoom(code)
+      const player = await joinRoom(room.code, nickname, gender, mbti)
+      setIsHost(false)
+      setRoomCode(room.code)
+      setPlayerId(player.id)
+      navigate(`/room/${room.code}/waiting`)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
     <PhoneFrame>
-      <TopBar showBack={false} title="CREWVERSE" />
+      <TopBar showBack={false} />
       <div className="start-body">
-        <h1 className="start-title">
-          같이 놀고,
-          <br />
-          내 캐릭터로 남는다
-        </h1>
-        <div className="start-avatar" aria-hidden>
-          🧑‍🚀
+        <div className="start-hero">
+          <span className="start-hero-glow" aria-hidden />
+          <span className="start-hero-flake start-hero-flake-1" aria-hidden>❄</span>
+          <span className="start-hero-flake start-hero-flake-2" aria-hidden>❄</span>
+          <span className="start-hero-flake start-hero-flake-3" aria-hidden>❄</span>
+          <h1 className="start-title">얼음땡</h1>
         </div>
-        <label className="start-label" htmlFor="nickname">
-          닉네임
-        </label>
+
+        <label className="start-label" htmlFor="nickname">닉네임</label>
         <input
           id="nickname"
           className="start-input"
           placeholder="닉네임을 입력하세요"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          value={nicknameDraft}
+          onChange={(e) => setNicknameDraft(e.target.value)}
           maxLength={12}
         />
-        <p className="start-hint">외형/성별 커스터마이징은 추후 제공됩니다.</p>
+
+        <label className="start-label">성별</label>
+        <div className="start-gender-row">
+          <button
+            type="button"
+            className={`start-gender-btn ${genderDraft === 'M' ? 'start-gender-btn-active' : ''}`}
+            onClick={() => setGenderDraft('M')}
+          >
+            남
+          </button>
+          <button
+            type="button"
+            className={`start-gender-btn ${genderDraft === 'F' ? 'start-gender-btn-active' : ''}`}
+            onClick={() => setGenderDraft('F')}
+          >
+            여
+          </button>
+        </div>
+
+        <label className="start-label" htmlFor="mbti">MBTI (선택)</label>
+        <input
+          id="mbti"
+          className="start-input"
+          placeholder="예: INTJ"
+          value={mbtiDraft}
+          onChange={(e) => setMbtiDraft(e.target.value.toUpperCase())}
+          maxLength={4}
+        />
+
+        <label className="start-label" htmlFor="join-code">초대코드로 참가 (선택)</label>
+        <div className="start-join-row">
+          <input
+            id="join-code"
+            className="start-input"
+            placeholder="예: AB12CD"
+            value={codeDraft}
+            onChange={(e) => setCodeDraft(e.target.value)}
+            maxLength={6}
+          />
+          <Button variant="secondary" onClick={handleJoin} disabled={busy}>
+            참가
+          </Button>
+        </div>
+
+        {error && <p className="start-error">{error}</p>}
       </div>
-      <Button onClick={handleNext}>다음</Button>
+      <Button onClick={handleCreate} disabled={busy}>
+        {busy ? '만드는 중...' : '방 만들기'}
+      </Button>
     </PhoneFrame>
   )
 }
