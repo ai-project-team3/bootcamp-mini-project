@@ -1,29 +1,35 @@
+import json
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from ..constants import TYPES
+from ..content.game_content import trait_options, type_subtitles
 from ..database import get_db
 from ..models.ability import Ability
 from ..models.guess import Guess
 from ..models.player import Player
 from ..models.report import Report
 from ..models.room import Room
-from ..models.statement import Statement
 from ..schemas.report import CompatEntry, PlayerReport, RoomReportResponse, TeamReport, TeamRole
+from ..services import report_gen
 from ..services.scoring import (
     COMPAT_NOTES,
     assign_badges,
     build_comments,
     build_highlights,
+    DOM_ANSWER_WEIGHT,
+    DOM_NUNCHI_WEIGHT,
     compute_behavior_abilities,
     compute_compat,
-    compute_full_obs,
-    compute_half_obs,
+    compute_guess_hits,
     compute_impression_abilities,
-    compute_lie_correct_counts,
+    compute_impression_totals,
+    compute_nunchi_scores,
     compute_roles,
     compute_team_grade,
-    compute_type_guess_correct_counts,
     determine_type,
+    obs_from_hits,
 )
 
 router = APIRouter(prefix="/rooms/{code}/report", tags=["report"])
@@ -44,9 +50,10 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
     if len(players) != room.player_limit:
         raise HTTPException(status_code=400, detail="플레이어 수가 올바르지 않습니다")
 
+    subtitles = type_subtitles(db, room.id)
     behavior = compute_behavior_abilities(db, room.id, players)
-    lie_correct = compute_lie_correct_counts(db, room.id)
-    type_correct = compute_type_guess_correct_counts(db, room.id, players)
+    nunchi = compute_nunchi_scores(db, room.id, players)
+    hits = compute_guess_hits(db, room.id, players)
     impression_pre = compute_impression_abilities(db, room.id, "IMPRESSION_PRE", players)
     impression_post = compute_impression_abilities(db, room.id, "IMPRESSION_POST", players)
 
@@ -55,24 +62,23 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
     final_types: dict[str, str] = {}
     for p in players:
         a = dict(behavior[p.id])
-        # 기획안 §2 — 혼자면 남을 맞힐 기회가 없다. 0점이 아니라 중립 2.5로
-        # 두고 카드에서 "잴 수 없었다"고 밝힌다.
-        if len(players) < 2:
-            obs_half = obs_full = NEUTRAL_OBS
-        else:
-            obs_half = compute_half_obs(lie_correct, p.id, len(players))
-            obs_full = compute_full_obs(lie_correct, type_correct, p.id, len(players))
-        provisional_types[p.id] = determine_type(a["DOM"], a["EXP"], obs_half, a["SPD"])
-        a["OBS"] = obs_full
+        # §6 — 주도력은 문항 둘과 눈치 게임이 나눠 만든다.
+        a["DOM"] = a["DOM"] * DOM_ANSWER_WEIGHT + nunchi[p.id] * DOM_NUNCHI_WEIGHT
+        # §2 — 혼자면 남을 맞힐 기회가 없다. 0점이 아니라 중립으로 두고 카드에서
+        # "잴 수 없었다"고 밝힌다.
+        got, tried = hits[p.id]
+        obs = NEUTRAL_OBS if len(players) < 2 else obs_from_hits(got, tried)
+        a["OBS"] = obs
         abilities[p.id] = a
-        final_types[p.id] = determine_type(a["DOM"], a["EXP"], obs_full, a["SPD"])
+        provisional_types[p.id] = determine_type(a["DOM"], a["EXP"], obs, a["SPD"])
+        final_types[p.id] = provisional_types[p.id]
 
     self_guess_by_player: dict[str, str] = {}
     for g in db.query(Guess).filter(Guess.room_id == room.id, Guess.kind == "TYPE").all():
         if g.guesser_id == g.target_player_id and g.target_type_code:
             self_guess_by_player[g.guesser_id] = g.target_type_code
 
-    badges = assign_badges(db, room, players, lie_correct, type_correct, self_guess_by_player, provisional_types)
+    badges = assign_badges(db, room, players, hits, self_guess_by_player, final_types)
 
     compat_by_player: dict[str, list[CompatEntry]] = {p.id: [] for p in players}
     for i, a_player in enumerate(players):
@@ -84,21 +90,31 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
 
     player_reports = []
     for p in players:
-        lie_stmt = (
-            db.query(Statement)
-            .filter(Statement.room_id == room.id, Statement.player_id == p.id, Statement.is_lie.is_(True))
+        # §11 인용 — 자유 서술이 없어졌으므로 본인이 자기를 어떻게 골랐는지를
+        # 그 자리에 놓는다. 남들이 그걸 맞혔는지가 바로 옆에 붙는다.
+        own_trait = (
+            db.query(Guess)
+            .filter(Guess.room_id == room.id, Guess.kind == "TRAIT_SELF", Guess.guesser_id == p.id)
             .first()
         )
-        quote = lie_stmt.text if lie_stmt else None
-        catches = (
-            db.query(Guess)
-            .filter(Guess.room_id == room.id, Guess.kind == "LIE", Guess.target_statement_id == lie_stmt.id)
-            .count()
-            if lie_stmt
-            else 0
-        )
-        fooled = len(players) - 1 - catches
-        quote_note = f"{fooled}명이 속았습니다" if lie_stmt else None
+        quote = quote_note = None
+        if own_trait is not None and own_trait.target_choice is not None:
+            options = trait_options(db, room.id)
+            idx = int(own_trait.target_choice)
+            if 0 <= idx < len(options):
+                quote = options[idx]
+                guessers = (
+                    db.query(Guess)
+                    .filter(Guess.room_id == room.id, Guess.kind == "TRAIT", Guess.target_player_id == p.id)
+                    .all()
+                )
+                right = sum(1 for g in guessers if g.target_choice == own_trait.target_choice)
+                if guessers:
+                    quote_note = (
+                        f"{len(guessers)}명 중 {right}명이 맞혔습니다"
+                        if right
+                        else f"{len(guessers)}명 전원이 못 맞혔습니다"
+                    )
 
         player_reports.append(
             PlayerReport(
@@ -110,6 +126,8 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
                 impression_pre=impression_pre[p.id],
                 impression_post=impression_post[p.id],
                 type_code=final_types[p.id],
+                # §7 — 이름은 고정, 부제만 프로젝트 맥락을 탄다
+                type_subtitle=subtitles.get(final_types[p.id]) or TYPES[final_types[p.id]]["subtitle"],
                 self_guess=self_guess_by_player.get(p.id),
                 badges=badges[p.id],
                 quote=quote,
@@ -122,6 +140,24 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
     team = compute_team_grade(db, room, players, abilities)
     roles = compute_roles(players, abilities)
     highlights = build_highlights(db, room, players, badges)
+
+    # §5-2 나올 때 호출 — 세션당 한 번. 이미 쓰인 리포트가 있으면 그걸 그대로
+    # 쓴다. 다시 열 때마다 문장이 바뀌면 캡처해서 공유한 것과 달라진다.
+    cached = _cached_lines(db, room, players)
+    if cached is not None:
+        for pr in player_reports:
+            if pr.player_id in cached:
+                pr.comment_lines = cached[pr.player_id]
+        if room.report_summary:
+            team["summary"] = room.report_summary
+        if room.report_reasons:
+            team["reasons"] = json.loads(room.report_reasons)
+        if room.report_highlights:
+            highlights = json.loads(room.report_highlights)
+    else:
+        written = _write_report_text(db, room, players, player_reports, hits, team, highlights)
+        if written:
+            highlights = written
 
     _upsert_cache(db, room, players, final_types, badges, player_reports)
     _persist_abilities(db, room, abilities, impression_pre, impression_post)
@@ -137,6 +173,65 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
             highlights=highlights,
         ),
     )
+
+
+def _cached_lines(db: Session, room: Room, players: list[Player]) -> dict[str, list[str]] | None:
+    """이미 문장이 쓰인 리포트가 있으면 꺼낸다. 전원 몫이 다 있어야 유효하다."""
+    rows = db.query(Report).filter(Report.room_id == room.id).all()
+    by_player = {r.player_id: r.comment_lines for r in rows if r.comment_lines}
+    if len(by_player) < len(players):
+        return None
+    return by_player
+
+
+def _write_report_text(
+    db: Session,
+    room: Room,
+    players: list[Player],
+    player_reports: list[PlayerReport],
+    hits: dict,
+    team: dict,
+    highlights: list[str],
+) -> list[str] | None:
+    """LLM이 코멘트와 팀 문장을 쓴다. 실패하면 사전 문장 그대로 두고 None."""
+    pre_totals = compute_impression_totals(db, room.id, "IMPRESSION_PRE")
+    post_totals = compute_impression_totals(db, room.id, "IMPRESSION_POST")
+    payload = []
+    by_id = {pr.player_id: pr for pr in player_reports}
+    for p in players:
+        pr = by_id[p.id]
+        got, tried = hits.get(p.id, (0, 0))
+        payload.append(
+            {
+                "nickname": p.nickname,
+                "mbti": p.mbti,
+                "type_name": TYPES[pr.type_code]["name"],
+                "abilities": pr.abilities,
+                "pre_votes": pre_totals.get(p.id, 0),
+                "post_votes": post_totals.get(p.id, 0),
+                "trait": pr.quote,
+                "trait_note": pr.quote_note,
+                "hits": got,
+                "tries": tried,
+                "badges": pr.badges,
+            }
+        )
+    context = report_gen.build_context(room.context_line, payload, team["rank"])
+    result = report_gen.generate(context, {p.nickname for p in players})
+    if result is None:
+        return None
+
+    by_nick = {c.nickname: [c.line1, c.line2, c.line3] for c in result.players}
+    for pr in player_reports:
+        if pr.nickname in by_nick:
+            pr.comment_lines = by_nick[pr.nickname]
+    team["summary"] = result.team_summary
+    team["reasons"] = result.team_reasons
+    room.report_summary = result.team_summary
+    room.report_reasons = json.dumps(result.team_reasons, ensure_ascii=False)
+    room.report_highlights = json.dumps(result.highlights, ensure_ascii=False)
+    db.commit()
+    return result.highlights
 
 
 def _upsert_cache(

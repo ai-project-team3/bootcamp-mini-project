@@ -1,0 +1,483 @@
+/* 기획안 §13 — 새 게임 화면과 연출.
+ *
+ * 전환은 0.6초를 넘기지 않는다. 아홉 단계라 전환이 길면 그게 다 진행 시간이다.
+ * 모든 움직임은 transform/opacity로만 — 레이아웃을 흔들면 저사양 폰에서 끊긴다. */
+
+/* ── 단계 전환 — 이름이 화면을 가로질러 쓸려 들어온다 ── */
+.stage-intro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 13, 34, 0.92);
+  z-index: 20;
+  animation: intro-fade 1.4s ease forwards;
+  pointer-events: none;
+}
+
+.stage-intro span {
+  font-family: var(--font-heading);
+  font-size: 1.9rem;
+  color: var(--hot);
+  text-align: center;
+  padding: 0 20px;
+  animation: intro-slide 0.6s var(--ease-pop) both;
+}
+
+@keyframes intro-fade {
+  0%, 68% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes intro-slide {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ── 선택지 버튼 — 화면의 절반씩, 색이 곧 정보 ── */
+.answer-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.answer-choice-btn {
+  flex: 1;
+  min-height: 96px;
+  border: none;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.45;
+  padding: 18px 16px;
+  word-break: keep-all;
+  /* 큰 색면 한가운데에 글자를 둔다. 왼쪽 위에 붙으면 버튼이 아니라 카드처럼 보인다. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.answer-choice-btn.choice-a { background: var(--c1); border-left: none; }
+.answer-choice-btn.choice-b { background: var(--c2); border-left: none; }
+.answer-choice-btn:active { transform: scale(0.97); filter: brightness(1.12); }
+
+/* ── 텔레파시 ── */
+.tele-step,
+.tele-results,
+.trait-step,
+.trait-reveal,
+.liar-step,
+.nunchi {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tele-prompt {
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+}
+
+.tele-prompt b { color: var(--hot); }
+
+.tele-picks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.tele-pick {
+  padding: 20px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 600;
+  transition: transform 0.12s ease, background 0.15s ease;
+}
+
+.tele-pick:active { transform: scale(0.96); background: var(--hot); }
+
+.tele-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tele-group {
+  border-radius: var(--radius-md);
+  padding: 16px;
+  animation: card-drop 0.45s var(--ease-pop) both;
+}
+
+.tele-group.a { background: var(--c1); }
+.tele-group.b { background: var(--c2); animation-delay: 0.1s; }
+
+.tele-word {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  color: #fff;
+}
+
+.tele-names {
+  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.88rem;
+}
+
+.tele-verdict {
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  animation: pop-in 0.4s var(--ease-pop) 0.25s both;
+}
+
+.tele-verdict.hit { color: var(--ok); }
+
+.tele-hits {
+  text-align: center;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* ── ○○님은 ___한 사람이다 ── */
+.trait-prompt {
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+}
+
+.trait-prompt b { color: var(--hot); }
+
+.trait-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  flex: 1;
+  align-content: start;
+}
+
+.trait-option {
+  padding: 22px 8px;
+  border-radius: var(--radius-md);
+  border: none;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  word-break: keep-all;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.trait-option:nth-child(6n + 1) { background: var(--c1); }
+.trait-option:nth-child(6n + 2) { background: var(--c2); }
+.trait-option:nth-child(6n + 3) { background: var(--c3); color: #2a2000; }
+.trait-option:nth-child(6n + 4) { background: var(--c4); }
+.trait-option:nth-child(6n + 5) { background: #9a5cff; }
+.trait-option:nth-child(6n + 6) { background: #ff8c42; }
+.trait-option:active { transform: scale(0.96); filter: brightness(1.12); }
+
+.trait-note,
+.trait-hits,
+.liar-hint,
+.nunchi-hint {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.trait-reveal {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.trait-target {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+}
+
+.trait-answer {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 2.1rem;
+  color: var(--gold);
+  animation: pop-in 0.45s var(--ease-pop) both;
+}
+
+/* ── 눈치 게임 ── */
+.nunchi {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: var(--radius-md);
+  margin: -6px;
+  padding: 24px 16px;
+  transition: background var(--dur) ease;
+  background: transparent;
+}
+
+.nunchi.ok { background: var(--ok); }
+.nunchi.fail { background: var(--no); animation: shake 0.4s ease; }
+
+.nunchi-round {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+}
+
+.nunchi.ok .nunchi-round,
+.nunchi.fail .nunchi-round,
+.nunchi.ok .nunchi-cap,
+.nunchi.fail .nunchi-cap,
+.nunchi.ok .nunchi-order,
+.nunchi.fail .nunchi-order {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.nunchi-big {
+  font-family: var(--font-heading);
+  font-size: 5.4rem;
+  line-height: 1;
+  margin: 8px 0 0;
+  color: var(--hot);
+  animation: pop-in 0.35s var(--ease-pop) both;
+}
+
+.nunchi.ok .nunchi-big,
+.nunchi.fail .nunchi-big { color: #fff; }
+
+.nunchi-cap {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.nunchi-order {
+  margin: 10px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+.nunchi-btn {
+  margin-top: 22px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  border: none;
+  background: var(--hot);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  box-shadow: 0 0 0 0 rgba(255, 46, 136, 0.55);
+  animation: pulse 1.8s ease-out infinite;
+  transition: transform 0.1s ease;
+}
+
+.nunchi-btn:active { transform: scale(0.93); }
+
+.nunchi-btn:disabled {
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  animation: none;
+  box-shadow: none;
+}
+
+/* ── 라이어 ── */
+.liar-step { align-items: center; justify-content: center; text-align: center; }
+
+.liar-round,
+.liar-cap {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+}
+
+.liar-peek {
+  width: 100%;
+  padding: 46px 16px;
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.liar-word {
+  width: 100%;
+  border-radius: var(--radius-md);
+  padding: 30px 16px;
+  background: var(--deep);
+  animation: pop-in 0.3s var(--ease-pop) both;
+}
+
+.liar-word.liar { background: var(--hot); }
+
+.liar-word-label {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.08em;
+}
+
+.liar-word-text {
+  margin: 8px 0 0;
+  font-family: var(--font-heading);
+  font-size: 2.4rem;
+  color: #fff;
+}
+
+.liar-word-hint {
+  margin: 8px 0 0;
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.liar-turn { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+.liar-turn-name {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1.9rem;
+  animation: pop-in 0.4s var(--ease-pop) both;
+}
+
+.liar-turn.mine .liar-turn-name { color: var(--hot); }
+
+/* 링 타이머 — 남은 시간이 테두리를 따라 줄어든다 */
+.liar-ring {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--hot) var(--p), var(--surface-2) 0);
+  transition: background 0.9s linear;
+}
+
+.liar-ring span {
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  background: var(--card);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-heading);
+  font-size: 2.4rem;
+  color: var(--ink);
+}
+
+.liar-prompt {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.liar-verdict {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  color: var(--no);
+  animation: pop-in 0.4s var(--ease-pop) both;
+}
+
+.liar-step.liar-won .liar-verdict { color: var(--gold); }
+
+.liar-answer { margin: 0; font-size: 1.1rem; }
+.liar-answer b { color: var(--hot); }
+.liar-answer-word { margin: 0; color: var(--ink-soft); font-size: 0.95rem; }
+
+.liar-winner {
+  margin: 6px 0 0;
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--gold);
+}
+
+.liar-lastchance { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+
+.liar-input {
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* ── 공통 키프레임 ── */
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes card-drop {
+  from { opacity: 0; transform: translateY(-18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 46, 136, 0.5); }
+  70% { box-shadow: 0 0 0 22px rgba(255, 46, 136, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 46, 136, 0); }
+}
+
+/* 대기 화면 — 정지 화면이 앱이 멈춘 걸로 보이지 않게 점이 숨 쉰다 */
+.game-waiting p {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.game-waiting b { color: var(--hot); }
+
+.game-dots {
+  display: flex;
+  gap: 10px;
+}
+
+.game-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  transition: background 0.25s ease, transform 0.25s var(--ease-pop);
+}
+
+.game-dot.on {
+  background: var(--hot);
+  transform: scale(1.2);
+}
+
+.game-waiting-count {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+}

@@ -29,3 +29,35 @@ button {
 a {
   color: inherit;
 }
+
+/* 배경에 은은한 빛 두 개. 정지 화면이 앱이 멈춘 걸로 보이지 않게 한다. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(52vmax 52vmax at 12% -8%, rgba(255, 46, 136, 0.16), transparent 62%),
+    radial-gradient(46vmax 46vmax at 92% 108%, rgba(46, 134, 255, 0.16), transparent 62%);
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+::selection {
+  background: var(--hot);
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

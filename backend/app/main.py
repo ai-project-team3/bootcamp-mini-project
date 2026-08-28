@@ -6,12 +6,15 @@ from .routers import (
     answers,
     health,
     impressions,
+    liar,
+    nunchi,
     persona,
     players,
     questions,
     reports,
     rooms,
-    statements,
+    telepathy,
+    trait,
     type_guess,
 )
 
@@ -30,7 +33,10 @@ app.include_router(players.router)
 app.include_router(questions.router)
 app.include_router(answers.router)
 app.include_router(impressions.router)
-app.include_router(statements.router)
+app.include_router(telepathy.router)
+app.include_router(trait.router)
+app.include_router(nunchi.router)
+app.include_router(liar.router)
 app.include_router(type_guess.router)
 app.include_router(persona.router)
 app.include_router(reports.router)

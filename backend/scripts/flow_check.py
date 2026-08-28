@@ -119,44 +119,93 @@ def run(n: int) -> None:
                     str(status),
                 )
 
-        elif current == "STATEMENT":
-            for me in ids:
-                r = client.post(
-                    f"/rooms/{code}/statements",
-                    json={
-                        "player_id": me,
-                        "statements": [
-                            {"slot": 1, "text": "라면에 계란을 안 넣는다", "is_lie": False},
-                            {"slot": 2, "text": "번지점프를 해봤다", "is_lie": True},
-                            {"slot": 3, "text": "아침을 안 먹는다", "is_lie": False},
-                        ],
-                    },
+        elif current == "TELEPATHY":
+            rnd = client.get(f"/rooms/{code}/telepathy/1").json()
+            for r in range(1, rnd["total_rounds"] + 1):
+                for i, me in enumerate(ids):
+                    others = [pid for pid in ids if pid != me]
+                    resp = client.post(
+                        f"/rooms/{code}/telepathy/{r}",
+                        json={
+                            "player_id": me,
+                            "choice": "A" if i % 2 == 0 else "B",
+                            "predicted_player_id": others[0],
+                        },
+                    )
+                    check(f"텔레파시 {r} 제출", resp.status_code == 200, resp.text)
+                st = client.get(f"/rooms/{code}/telepathy/{r}/status").json()
+                check(f"텔레파시 {r} 공개", st["revealed"], str(st))
+
+        elif current == "TRAIT":
+            for i, me in enumerate(ids):
+                resp = client.post(
+                    f"/rooms/{code}/trait/self", json={"player_id": me, "option_index": i % 6}
                 )
-                check("문장 제출", r.status_code == 200, r.text)
+                check("특성 자기 선택", resp.status_code == 200, resp.text)
             guard2 = 0
             while True:
                 guard2 += 1
-                if guard2 > 20:
-                    check("거짓 찾기 턴이 안 끝남", False)
+                if guard2 > 30:
+                    check("특성 턴이 안 끝남", False)
                     return
-                turn = client.get(f"/rooms/{code}/statements/turn")
-                if turn.status_code != 200:
-                    check("턴 조회", False, turn.text)
-                    return
-                data = turn.json()
-                if data.get("done") or not data.get("target_player_id"):
+                turn = client.get(f"/rooms/{code}/trait/turn").json()
+                if turn.get("done") or not turn.get("target_player_id"):
                     break
-                tid = data["target_player_id"]
+                tid = turn["target_player_id"]
                 for me in ids:
                     if me == tid:
                         continue
-                    r = client.post(
-                        f"/rooms/{code}/statements/{tid}/guess",
-                        json={"guesser_id": me, "guessed_slot": 2},
+                    resp = client.post(
+                        f"/rooms/{code}/trait/{tid}/guess",
+                        json={"guesser_id": me, "option_index": 0},
                     )
-                    if r.status_code != 200:
-                        check("거짓 지목", False, r.text)
+                    if resp.status_code != 200:
+                        check("특성 맞히기", False, resp.text)
                         return
+
+        elif current == "NUNCHI":
+            guard2 = 0
+            while phase(code) == "NUNCHI":
+                guard2 += 1
+                if guard2 > 10:
+                    check("눈치 게임이 안 끝남", False)
+                    return
+                for me in ids:
+                    resp = client.post(f"/rooms/{code}/nunchi/press", json={"player_id": me})
+                    if resp.status_code not in (200, 409):
+                        check("눈치 누름", False, resp.text)
+                        return
+            check("눈치 게임 종료", True)
+
+        elif current == "LIAR":
+            guard2 = 0
+            while phase(code) == "LIAR":
+                guard2 += 1
+                if guard2 > 40:
+                    check("라이어가 안 끝남", False, str(client.get(f"/rooms/{code}/liar/state").json()))
+                    return
+                st = client.get(f"/rooms/{code}/liar/state").json()
+                stage = st["stage"]
+                if stage == "WORD":
+                    for me in ids:
+                        client.post(f"/rooms/{code}/liar/seen", json={"player_id": me})
+                elif stage == "SPEAK":
+                    client.post(f"/rooms/{code}/liar/next-speaker")
+                elif stage == "VOTE":
+                    for me in ids:
+                        client.post(f"/rooms/{code}/liar/continue-vote", json={"player_id": me, "more": False})
+                elif stage == "ACCUSE":
+                    for me in ids:
+                        others = [pid for pid in ids if pid != me]
+                        client.post(
+                            f"/rooms/{code}/liar/accuse",
+                            json={"player_id": me, "target_player_id": others[0]},
+                        )
+                elif stage == "REVEAL":
+                    client.post(f"/rooms/{code}/liar/next")
+                else:
+                    break
+            check("라이어 종료", True)
 
         elif current == "TYPE_GUESS":
             for me in ids:

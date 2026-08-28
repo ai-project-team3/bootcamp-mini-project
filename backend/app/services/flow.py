@@ -9,10 +9,15 @@ Keep the ordering here and nowhere else. Routers ask for the next phase; they
 do not each decide what follows what.
 """
 
+# 기획안 §4 — 노출도가 오르는 순서. 남을 찍기 → 가벼운 취향 → 익명 선택 →
+# 남이 본 나 → 나섬 → 말하기 → 나에 대한 평가 → 내 유형 공개.
 PHASE_ORDER: tuple[str, ...] = (
     "IMPRESSION_PRE",
+    "TELEPATHY",
     "ANSWER",
-    "STATEMENT",
+    "TRAIT",
+    "NUNCHI",
+    "LIAR",
     "IMPRESSION_POST",
     "TYPE_GUESS",
 )
@@ -22,14 +27,20 @@ DONE = "DONE"
 # Smallest room in which the stage means anything.
 #   IMPRESSION_*  three, because with two people every one of the five
 #                 questions has the same single answer available
-#   STATEMENT     two, so there is somebody to fool
+#   TELEPATHY     two, so there is somebody to guess about
+#   TRAIT         two, so somebody's answer can be guessed
+#   NUNCHI        two, a race needs an opponent
+#   LIAR          three — one liar plus two who can disagree about who it is
 #   ANSWER        one, it only ever reads your own choices
 #   TYPE_GUESS    one; alone you still pick the type you expect to get, and
 #                 the card-assignment half is simply empty
 _MIN_PLAYERS: dict[str, int] = {
     "IMPRESSION_PRE": 3,
+    "TELEPATHY": 2,
     "ANSWER": 1,
-    "STATEMENT": 2,
+    "TRAIT": 2,
+    "NUNCHI": 2,
+    "LIAR": 3,
     "IMPRESSION_POST": 3,
     "TYPE_GUESS": 1,
 }

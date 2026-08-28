@@ -4,7 +4,6 @@ import RoomCreatePage from '../pages/roomCreate/RoomCreatePage'
 import JoinPage from '../pages/join/JoinPage'
 import WaitingRoomPage from '../pages/waiting/WaitingRoomPage'
 import GamePage from '../pages/game/GamePage'
-import StatementsPage from '../pages/statements/StatementsPage'
 import ResultHubPage from '../pages/hub/ResultHubPage'
 import PersonalReportPage from '../pages/report/PersonalReportPage'
 import TeamReportPage from '../pages/report/TeamReportPage'
@@ -17,7 +16,6 @@ export default function AppRouter() {
       <Route path="/join/:code" element={<JoinPage />} />
       <Route path="/room/:code/waiting" element={<WaitingRoomPage />} />
       <Route path="/room/:code/game" element={<GamePage />} />
-      <Route path="/room/:code/statements" element={<StatementsPage />} />
       <Route path="/room/:code/hub" element={<ResultHubPage />} />
       <Route path="/room/:code/report/me" element={<PersonalReportPage />} />
       <Route path="/room/:code/report/team" element={<TeamReportPage />} />

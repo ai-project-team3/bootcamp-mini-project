@@ -7,12 +7,16 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
 
-# Plan doc §4: 6-stage phase machine driving GamePage/StatementsPage.
+# Plan doc §4 — 노출도가 오르는 순서. 실제 전이는 services/flow.py가 정하고
+# 인원에 따라 일부를 건너뛴다. 여기는 그 전체 목록일 뿐이다.
 PHASES = (
     "ENTRY",
     "IMPRESSION_PRE",
+    "TELEPATHY",
     "ANSWER",
-    "STATEMENT",
+    "TRAIT",
+    "NUNCHI",
+    "LIAR",
     "IMPRESSION_POST",
     "TYPE_GUESS",
     "DONE",
@@ -42,4 +46,8 @@ class Room(Base):
     project_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     team_kind: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
     context_line: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    # §5-2 나올 때 호출 결과. 세션당 한 번만 쓰고 이후에는 이걸 그대로 낸다.
+    report_summary: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    report_reasons: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    report_highlights: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     question_source: Mapped[str] = mapped_column(String(10), default="DEFAULT")  # GENERATED|DEFAULT
