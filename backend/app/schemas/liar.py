@@ -42,4 +42,6 @@ class LiarStateResponse(BaseModel):
     liar_nickname: Optional[str] = None
     liar_caught: bool = False
     major_word: Optional[str] = None
+    # 걸린 라이어가 아직 제시어를 안 냈다 — 제시어도 승패도 아직 공개 전
+    word_pending: bool = False
     liar_won: bool = False

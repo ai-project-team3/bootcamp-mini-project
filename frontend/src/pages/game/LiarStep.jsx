@@ -218,32 +218,38 @@ export default function LiarStep({ code, playerId, onAdvance }) {
   }
 
   // REVEAL
-  const canGuessWord = state.am_i_liar && state.liar_caught && !state.liar_won
   return (
     <div className={`liar-step reveal${state.liar_won ? ' liar-won' : ''}`}>
       <p className="liar-verdict">{state.liar_caught ? '잡혔습니다' : '못 잡았습니다'}</p>
       <p className="liar-answer">
         라이어는 <b>{state.liar_nickname}</b>
       </p>
-      <p className="liar-answer-word">제시어는 “{state.major_word}”였습니다</p>
 
-      {canGuessWord && (
-        <div className="liar-lastchance">
-          <p className="liar-hint">제시어를 맞히면 아직 이길 수 있습니다</p>
-          <input
-            className="liar-input"
-            value={wordDraft}
-            onChange={(e) => setWordDraft(e.target.value)}
-            placeholder="제시어"
-          />
-          <Button onClick={() => guessLiarWord(code, playerId, wordDraft).then(setState)}>제출</Button>
-        </div>
+      {state.word_pending ? (
+        // 아직 제시어를 안 보여준다. 답을 보여주고 맞히라고 할 수는 없다.
+        state.am_i_liar ? (
+          <div className="liar-lastchance">
+            <p className="liar-hint">제시어를 맞히면 아직 이길 수 있습니다</p>
+            <input
+              className="liar-input"
+              value={wordDraft}
+              onChange={(e) => setWordDraft(e.target.value)}
+              placeholder="제시어"
+            />
+            <Button onClick={() => guessLiarWord(code, playerId, wordDraft).then(setState)}>제출</Button>
+          </div>
+        ) : (
+          <p className="liar-hint">{state.liar_nickname}님이 제시어를 맞히는 중...</p>
+        )
+      ) : (
+        <>
+          <p className="liar-answer-word">제시어는 “{state.major_word}”였습니다</p>
+          <p className="liar-winner">{state.liar_won ? '라이어 승' : '시민 승'}</p>
+          <Button onClick={() => nextLiarRound(code).then(setState)}>
+            {state.round_no >= state.total_rounds ? '끝내기' : '다음 판'}
+          </Button>
+        </>
       )}
-
-      <p className="liar-winner">{state.liar_won ? '라이어 승' : '시민 승'}</p>
-      <Button onClick={() => nextLiarRound(code).then(setState)}>
-        {state.round_no >= state.total_rounds ? '끝내기' : '다음 판'}
-      </Button>
     </div>
   )
 }

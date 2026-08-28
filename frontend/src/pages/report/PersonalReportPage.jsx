@@ -79,6 +79,20 @@ export default function PersonalReportPage() {
           ))}
         </Card>
 
+        {me.impression_shift && (
+          <Card className="report-shift">
+            <p className="report-shift-title">첫인상이 이렇게 바뀌었습니다</p>
+            <p className="report-shift-row">
+              <span className="report-shift-when">처음</span>
+              {me.impression_shift.pre_label} <b>{me.impression_shift.pre_votes}표</b>
+            </p>
+            <p className="report-shift-row">
+              <span className="report-shift-when">나중</span>
+              {me.impression_shift.post_label} <b>{me.impression_shift.post_votes}표</b>
+            </p>
+          </Card>
+        )}
+
         {me.quote && (
           <Card>
             <p className="report-quote">"{me.quote}"</p>

@@ -567,11 +567,113 @@ def build_highlights(db: Session, room: Room, players: list[Player], badges: dic
     if best_q:
         highlights.append(f"제일 크게 갈린 문항 — {best_q}번, {by_q[best_q].count('A')} 대 {by_q[best_q].count('B')}")
 
-    return highlights
+    # 세 줄을 채운다. 위 후보가 다 비면 팀 카드에 장면이 하나도 안 남는다.
+    if len(highlights) < 3:
+        best = None
+        for pid, (hit, tried) in compute_guess_hits(db, room.id, players).items():
+            if tried and (best is None or hit / tried > best[1]):
+                best = (pid, hit / tried, hit, tried)
+        if best:
+            who = next((p.nickname for p in players if p.id == best[0]), None)
+            if who:
+                highlights.append(f"제일 잘 맞힌 사람 — {who}, {best[3]}번 중 {best[2]}번")
+
+    if len(highlights) < 3:
+        pre = compute_impression_totals(db, room.id, "IMPRESSION_PRE")
+        top = max(pre, key=lambda pid: pre[pid]) if pre else None
+        if top:
+            who = next((p.nickname for p in players if p.id == top), None)
+            if who:
+                highlights.append(f"첫인상 최다 지목 — {who}, {pre[top]}표")
+
+    return highlights[:3]
+
+
+def build_scene_line(db: Session, room: Room, player: Player, players: list[Player]) -> Optional[str]:
+    """§12 두 번째 줄 — 오늘 실제로 있었던 장면.
+
+    사전에서 뽑을 수 없는 유일한 줄이다. 그 판에서 벌어진 일을 그대로 적어야
+    하고, 없으면 없는 채로 둔다(억지로 만든 장면은 첫 줄과 세 번째 줄 사이에서
+    바로 티가 난다).
+
+    후보가 여럿이면 눈에 띄는 순서로 하나만 고른다.
+    """
+    others = max(len(players) - 1, 1)
+
+    survived = (
+        db.query(GameResult)
+        .filter(
+            GameResult.room_id == room.id,
+            GameResult.kind == "LIAR_SURVIVED",
+            GameResult.player_id == player.id,
+        )
+        .first()
+    )
+    if survived:
+        rnd = (
+            db.query(LiarRound)
+            .filter(LiarRound.room_id == room.id, LiarRound.round_no == survived.round_no)
+            .first()
+        )
+        if rnd:
+            return f'라이어였는데 아무도 못 잡았습니다. 제시어는 "{rnd.major_word}"였고요.'
+
+    clashed = (
+        db.query(GameResult)
+        .filter(
+            GameResult.room_id == room.id,
+            GameResult.kind == "NUNCHI_CLASH",
+            GameResult.player_id == player.id,
+        )
+        .count()
+    )
+    if clashed:
+        return f"눈치 게임에서 {clashed}판을 혼자 못 참고 눌러 깼습니다."
+
+    own = (
+        db.query(Guess)
+        .filter(Guess.room_id == room.id, Guess.kind == "TRAIT_SELF", Guess.guesser_id == player.id)
+        .first()
+    )
+    if own is not None:
+        guessers = (
+            db.query(Guess)
+            .filter(Guess.room_id == room.id, Guess.kind == "TRAIT", Guess.target_player_id == player.id)
+            .all()
+        )
+        if guessers:
+            right = sum(1 for g in guessers if g.target_choice == own.target_choice)
+            if right == 0:
+                return "자기가 고른 자기 설명을 아무도 못 맞혔습니다."
+            if right == len(guessers):
+                return "자기가 고른 자기 설명을 전원이 맞혔습니다. 숨긴 게 없더군요."
+
+    tele = (
+        db.query(Guess)
+        .filter(Guess.room_id == room.id, Guess.kind == "TELEPATHY", Guess.guesser_id == player.id)
+        .all()
+    )
+    if tele:
+        choice = {
+            (g.guesser_id, g.round_no): g.target_choice
+            for g in db.query(Guess).filter(Guess.room_id == room.id, Guess.kind == "TELEPATHY").all()
+        }
+        hit = sum(
+            1 for g in tele if choice.get((g.target_player_id, g.round_no)) == g.target_choice
+        )
+        if hit == len(tele):
+            return "텔레파시를 전부 맞혔습니다. 처음 본 사이라기엔 너무 잘 읽습니다."
+        if hit == 0:
+            return "텔레파시를 한 번도 못 맞혔습니다. 아직 서로를 모르는 게 맞습니다."
+
+    post = compute_impression_totals(db, room.id, "IMPRESSION_POST")
+    if post.get(player.id, 0) >= others:
+        return "끝나고 다시 물었을 때 표가 이 사람에게 몰렸습니다."
+    return None
 
 
 def build_comments(abilities: dict[str, float], impression_pre: dict[str, float]) -> list[str]:
-    """§11: 첫 줄(어긋난 지점) + 마지막 줄(뒤집어 칭찬)을 사전에서 그대로 조합."""
+    """§12: 첫 줄(어긋난 지점) + 마지막 줄(뒤집어 칭찬)을 사전에서 그대로 조합."""
     axes = ("DOM", "EXP", "EMP", "SPD")
     best_axis, best_gap, best_key = None, 0.0, None
     for axis in axes:
