@@ -38,3 +38,9 @@
   fill: var(--ink-soft);
   font-family: var(--font-body);
 }
+
+.radar-bg {
+  fill: rgba(255, 255, 255, 0.04);
+  stroke: var(--line);
+  stroke-width: 1;
+}
