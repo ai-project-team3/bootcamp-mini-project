@@ -51,6 +51,12 @@ A game only opens if the group is the right size for it — 마피아 needs 4~8,
 with three people its card is greyed with the reason on it. The backend enforces
 the same limits and answers with its own message.
 
+A launched game may need a setting its own entry screen used to collect, which a
+group coming from the shared room never sees. 커플 브루마블's 일반/19금 mode is
+the one such setting today, so the confirm dialog asks for it and it travels in
+`options` on the launch. `components/room/ContentModeChoice` is the single copy
+of that choice, used by both the game's own lobby and the room's chooser.
+
 ## One room screen for every game
 
 `src/components/room/` holds the room-creation and waiting-room markup that the

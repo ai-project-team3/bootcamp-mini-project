@@ -4,6 +4,7 @@ from ..schemas.demo_room import (
     DemoPlayerResponse,
     DemoRoomClaimResponse,
     DemoRoomCreateResponse,
+    DemoRoomGameLaunchRequest,
     DemoRoomGameSelectRequest,
     DemoRoomLaunchResponse,
     DemoRoomLeaveResponse,
@@ -156,7 +157,7 @@ def start_selected_demo_game(
 @router.post('/{code}/game-launch', response_model=DemoRoomResponse)
 def launch_room_game(
     code: str,
-    payload: DemoRoomGameSelectRequest,
+    payload: DemoRoomGameLaunchRequest,
     store: DemoRoomStore = Depends(get_demo_room_store),
 ) -> DemoRoomResponse:
     """Start a game that runs its own rooms, for everyone already gathered.
@@ -168,6 +169,7 @@ def launch_room_game(
         launched = launch_game(
             payload.game_id,
             [LaunchablePlayer(id=p.id, nickname=p.nickname, is_host=p.is_host) for p in players],
+            payload.options,
         )
         return DemoLaunch(
             game_id=launched.game_id,

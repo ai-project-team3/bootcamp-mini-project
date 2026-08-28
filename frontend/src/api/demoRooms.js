@@ -47,12 +47,14 @@ export function startSelectedDemoGame(code, playerId) {
  * Start a game that runs its own rooms, for everyone already in this one.
  *
  * Host only. The server builds the game's room around the current roster, so
- * nobody re-enters a nickname or an invite code.
+ * nobody re-enters a nickname or an invite code. `options` carries settings the
+ * game's own entry screen would have asked for — 커플 브루마블's 일반/19금 mode
+ * — which a group coming from the shared room never gets to see.
  */
-export function launchDemoGame(code, playerId, gameId) {
+export function launchDemoGame(code, playerId, gameId, options = {}) {
   return apiFetch(`/demo/rooms/${code}/game-launch`, {
     method: 'POST',
-    body: JSON.stringify({ player_id: playerId, game_id: gameId }),
+    body: JSON.stringify({ player_id: playerId, game_id: gameId, options }),
   })
 }
 

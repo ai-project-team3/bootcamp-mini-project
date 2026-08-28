@@ -66,7 +66,56 @@ describe('the room chooses a game', () => {
     fireEvent.click(cardButton('마피아'))
     fireEvent.click(screen.getByRole('button', { name: '확인' }))
 
-    await waitFor(() => expect(launch).toHaveBeenCalledWith('AB12CD', 'p1', 'mafia'))
+    await waitFor(() => expect(launch).toHaveBeenCalledWith('AB12CD', 'p1', 'mafia', {}))
+  })
+
+  it('asks 커플 브루마블 which mode to play, since its own lobby is skipped', async () => {
+    const launch = vi.spyOn(demoRooms, 'launchDemoGame').mockResolvedValue({})
+    renderHub({ playerCount: 3 })
+
+    fireEvent.click(cardButton('커플 브루마블'))
+    fireEvent.click(screen.getByTestId('pm-mode-adult'))
+    fireEvent.click(screen.getByRole('button', { name: '확인' }))
+
+    await waitFor(() => expect(launch).toHaveBeenCalledWith('AB12CD', 'p1', 'marble', {
+      content_mode: 'adult',
+    }))
+  })
+
+  it('plays 커플 브루마블 in 일반 모드 unless the host says otherwise', async () => {
+    const launch = vi.spyOn(demoRooms, 'launchDemoGame').mockResolvedValue({})
+    renderHub({ playerCount: 3 })
+
+    fireEvent.click(cardButton('커플 브루마블'))
+    expect(screen.getByTestId('pm-mode-general')).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByRole('button', { name: '확인' }))
+
+    await waitFor(() => expect(launch).toHaveBeenCalledWith('AB12CD', 'p1', 'marble', {
+      content_mode: 'general',
+    }))
+  })
+
+  it('does not offer a mode for games that have none', () => {
+    renderHub()
+
+    fireEvent.click(cardButton('마피아'))
+
+    expect(screen.queryByTestId('pm-mode-adult')).toBeNull()
+  })
+
+  it('forgets a mode picked for a game the host backed out of', async () => {
+    const launch = vi.spyOn(demoRooms, 'launchDemoGame').mockResolvedValue({})
+    renderHub({ playerCount: 3 })
+
+    fireEvent.click(cardButton('커플 브루마블'))
+    fireEvent.click(screen.getByTestId('pm-mode-adult'))
+    fireEvent.click(screen.getByRole('button', { name: '취소' }))
+    fireEvent.click(cardButton('커플 브루마블'))
+    fireEvent.click(screen.getByRole('button', { name: '확인' }))
+
+    await waitFor(() => expect(launch).toHaveBeenCalledWith('AB12CD', 'p1', 'marble', {
+      content_mode: 'general',
+    }))
   })
 
   it('selects a game that plays inside this room the way it always did', async () => {

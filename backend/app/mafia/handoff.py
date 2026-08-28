@@ -32,11 +32,17 @@ def check_player_count(count: int) -> None:
         raise MafiaHandoffError(f"마피아는 {allowed}명일 때만 시작할 수 있어요")
 
 
-def create_room_for(nicknames: list[str], host_index: int = 0) -> tuple[str, list[str]]:
+def create_room_for(
+    nicknames: list[str],
+    host_index: int = 0,
+    options: dict[str, str] | None = None,
+) -> tuple[str, list[str]]:
     """Seat a whole group in a new mafia room.
 
     Returns the room code and one player id per nickname, in the same order, so
     the caller can hand each person their own id without exposing anyone else's.
+    `options` is the per-game settings the host chose; mafia's room size comes
+    from the group itself, so there is nothing here for it to read yet.
     """
     check_player_count(len(nicknames))
     if not 0 <= host_index < len(nicknames):
