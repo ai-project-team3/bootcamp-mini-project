@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -10,6 +12,8 @@ class Settings(BaseSettings):
     db_password: str = "iceddaeng"
     db_name: str = "iceddaeng"
     cors_origins: str = "http://localhost:5173"
+    # 얼음땡 기획안 §5 문항 생성용(Gemini 무료 키). 없으면 항상 기본 문항 세트로 폴백한다.
+    gemini_api_key: Optional[str] = None
 
     @property
     def database_url(self) -> str:

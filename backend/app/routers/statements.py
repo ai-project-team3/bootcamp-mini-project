@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..constants import MAX_PLAYERS, STATEMENT_MAX_LEN
+from ..constants import STATEMENT_MAX_LEN
 from ..database import get_db
 from ..models.guess import Guess
 from ..models.player import Player
@@ -42,29 +42,30 @@ def submit_statements(code: str, payload: StatementsSubmitRequest, db: Session =
         db.add(Statement(room_id=room.id, player_id=payload.player_id, slot=s.slot, text=s.text, is_lie=s.is_lie))
     db.commit()
 
-    return _progress(room.id, db)
+    return _progress(room, db)
 
 
 @router.get("/progress", response_model=StatementsProgressResponse)
 def get_progress(code: str, db: Session = Depends(get_db)) -> StatementsProgressResponse:
     room = _get_room(code, db)
-    return _progress(room.id, db)
+    return _progress(room, db)
 
 
-def _progress(room_id: str, db: Session) -> StatementsProgressResponse:
+def _progress(room: Room, db: Session) -> StatementsProgressResponse:
     submitted = (
-        db.query(Statement.player_id).filter(Statement.room_id == room_id).distinct().count()
+        db.query(Statement.player_id).filter(Statement.room_id == room.id).distinct().count()
     )
-    return StatementsProgressResponse(submitted=submitted, total=MAX_PLAYERS)
+    return StatementsProgressResponse(submitted=submitted, total=room.player_limit)
 
 
 @router.get("/turn", response_model=TurnResponse)
 def get_turn(code: str, db: Session = Depends(get_db)) -> TurnResponse:
     room = _get_room(code, db)
-    progress = _progress(room.id, db)
-    if progress.submitted < MAX_PLAYERS:
+    progress = _progress(room, db)
+    if progress.submitted < room.player_limit:
         return TurnResponse(done=False, target_player_id=None)
 
+    others_count = room.player_limit - 1
     players = db.query(Player).filter(Player.room_id == room.id).order_by(Player.seat_no).all()
     for target in players:
         guess_count = (
@@ -73,7 +74,7 @@ def get_turn(code: str, db: Session = Depends(get_db)) -> TurnResponse:
             .distinct()
             .count()
         )
-        if guess_count < MAX_PLAYERS - 1:
+        if guess_count < others_count:
             statements = (
                 db.query(Statement)
                 .filter(Statement.room_id == room.id, Statement.player_id == target.id)
@@ -86,7 +87,7 @@ def get_turn(code: str, db: Session = Depends(get_db)) -> TurnResponse:
                 nickname=target.nickname,
                 statements=[StatementOut(slot=s.slot, text=s.text) for s in statements],
                 submitted=guess_count,
-                total=MAX_PLAYERS - 1,
+                total=others_count,
                 revealed=False,
             )
 
@@ -116,7 +117,7 @@ def _revealed_turn(room: Room, target: Player, statements: list[Statement], db: 
         nickname=target.nickname,
         statements=[StatementOut(slot=s.slot, text=s.text) for s in statements],
         submitted=len(guesses),
-        total=MAX_PLAYERS - 1,
+        total=room.player_limit - 1,
         revealed=True,
         correct_slot=correct_slot,
         guesses=guess_outs,
@@ -159,6 +160,7 @@ def submit_lie_guess(
         existing.target_statement_id = target_statement.id
     db.commit()
 
+    others_count = room.player_limit - 1
     target = db.get(Player, target_player_id)
     statements = (
         db.query(Statement).filter(Statement.room_id == room.id, Statement.player_id == target_player_id).order_by(Statement.slot).all()
@@ -169,12 +171,12 @@ def submit_lie_guess(
         .distinct()
         .count()
     )
-    revealed = guess_count >= MAX_PLAYERS - 1
+    revealed = guess_count >= others_count
 
     if revealed:
         # 전체 진행 상황을 확인해 마지막 대상자였다면 다음 단계로 자동 전이.
         total_lie_guesses = db.query(Guess).filter(Guess.room_id == room.id, Guess.kind == "LIE").count()
-        if total_lie_guesses == MAX_PLAYERS * (MAX_PLAYERS - 1) and room.phase == "STATEMENT":
+        if total_lie_guesses == room.player_limit * others_count and room.phase == "STATEMENT":
             room.phase = "IMPRESSION_POST"
             db.commit()
         return _revealed_turn(room, target, statements, db, done=False)
@@ -185,6 +187,6 @@ def submit_lie_guess(
         nickname=target.nickname,
         statements=[StatementOut(slot=s.slot, text=s.text) for s in statements],
         submitted=guess_count,
-        total=MAX_PLAYERS - 1,
+        total=others_count,
         revealed=False,
     )

@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react'
 import ProgressBar from '../../components/common/ProgressBar'
 import { getAnswerStatus, submitAnswer } from '../../api/answers'
-import { EITHER_OR_QUESTIONS } from '../../data/eitherOrQuestions'
 
 const REVEAL_DISPLAY_MS = 2500
 const STATUS_POLL_MS = 1000
 
-export default function AnswerStep({ code, playerId, onAdvance }) {
+export default function AnswerStep({ code, playerId, questions, onAdvance }) {
   const [questionNo, setQuestionNo] = useState(1)
   const [startedAt, setStartedAt] = useState(() => Date.now())
   const [submitted, setSubmitted] = useState(false)
   const [status, setStatus] = useState(null)
   const [error, setError] = useState(null)
 
-  const question = EITHER_OR_QUESTIONS.find((q) => q.questionNo === questionNo)
+  const question = questions.find((q) => q.questionNo === questionNo)
 
   useEffect(() => {
     setStartedAt(Date.now())
@@ -32,7 +31,7 @@ export default function AnswerStep({ code, playerId, onAdvance }) {
           if (s.revealed) {
             setTimeout(() => {
               if (cancelled) return
-              if (questionNo < EITHER_OR_QUESTIONS.length) {
+              if (questionNo < questions.length) {
                 setQuestionNo(questionNo + 1)
               } else {
                 onAdvance()
@@ -84,7 +83,7 @@ export default function AnswerStep({ code, playerId, onAdvance }) {
 
   return (
     <div className="answer-step">
-      <ProgressBar current={questionNo} total={EITHER_OR_QUESTIONS.length} />
+      <ProgressBar current={questionNo} total={questions.length} />
       <p className="answer-situation">{question.situation}</p>
       <div className="answer-choices">
         <button className="answer-choice-btn" onClick={() => handleChoice('A')}>
