@@ -1,8 +1,6 @@
 import type { RoomPlayer } from "../api/types";
-import tokenA from "../assets/token-a.png";
-import tokenB from "../assets/token-b.png";
+import { seatArt } from "./seatArt";
 
-const SEAT_ART = [tokenA, tokenB];
 
 interface GameOverScreenProps {
   players: RoomPlayer[];
@@ -42,7 +40,7 @@ export function GameOverScreen({
               player.player_id === winnerId ? "pm-gameover__score-card--winner" : ""
             }`}
           >
-            <img className="pm-gameover__token" src={SEAT_ART[seat]} alt="" aria-hidden="true" />
+            <img className="pm-gameover__token" src={seatArt(seat)} alt="" aria-hidden="true" />
             <p className="pm-player-card__name">{player.nickname}</p>
             <p className="pm-gameover__score-value">{player.score}점</p>
             <p className="pm-gameover__steps">{player.steps_moved}칸 이동</p>

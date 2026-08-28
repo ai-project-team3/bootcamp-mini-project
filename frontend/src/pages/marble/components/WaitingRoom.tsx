@@ -1,9 +1,7 @@
 import { useState } from "react";
 import type { RoomState } from "../api/types";
-import tokenA from "../assets/token-a.png";
-import tokenB from "../assets/token-b.png";
+import { seatArt } from "./seatArt";
 
-const SEAT_ART = [tokenA, tokenB];
 
 interface WaitingRoomProps {
   state: RoomState;
@@ -24,7 +22,10 @@ export function WaitingRoom({ state, playerId, onStart, onLeave, starting, error
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
 
   const isHost = state.host_player_id === playerId;
-  const isFull = state.players.length >= 2;
+  const seatCount = state.max_players;
+  const joined = state.players.length;
+  const isFull = joined >= seatCount;
+  const remaining = Math.max(seatCount - joined, 0);
 
   const copy = async (text: string, kind: "code" | "link") => {
     try {
@@ -63,8 +64,23 @@ export function WaitingRoom({ state, playerId, onStart, onLeave, starting, error
         {copied === "code" && <span className="pm-waiting__copied">코드가 복사됐어요</span>}
       </div>
 
+      <div className="pm-waiting__tally">
+        <span className="pm-waiting__tally-count">
+          {joined} / {seatCount}명
+        </span>
+        <span className="pm-waiting__tally-label">
+          {isFull ? "모두 모였어요" : `${remaining}명 더 들어오면 시작해요`}
+        </span>
+        <span className="pm-waiting__tally-bar" aria-hidden="true">
+          <span
+            className="pm-waiting__tally-fill"
+            style={{ width: `${(joined / seatCount) * 100}%` }}
+          />
+        </span>
+      </div>
+
       <ul className="pm-waiting__seats">
-        {[0, 1].map((seat) => {
+        {Array.from({ length: seatCount }, (_, seat) => {
           const player = state.players[seat];
           return (
             <li
@@ -72,14 +88,14 @@ export function WaitingRoom({ state, playerId, onStart, onLeave, starting, error
               className={`pm-waiting__seat ${player ? "pm-waiting__seat--filled" : ""}`}
               data-testid={`pm-seat-${seat}`}
             >
-              <img className="pm-waiting__seat-token" src={SEAT_ART[seat]} alt="" aria-hidden="true" />
+              <img className="pm-waiting__seat-token" src={seatArt(seat)} alt="" aria-hidden="true" />
               {player ? (
                 <span className="pm-waiting__seat-name">
                   {player.nickname}
                   {player.player_id === playerId && <em className="pm-waiting__you">나</em>}
                 </span>
               ) : (
-                <span className="pm-waiting__seat-empty">상대를 기다리는 중...</span>
+                <span className="pm-waiting__seat-empty">비어 있음</span>
               )}
             </li>
           );
@@ -95,11 +111,17 @@ export function WaitingRoom({ state, playerId, onStart, onLeave, starting, error
           onClick={onStart}
           disabled={!isFull || starting}
         >
-          {isFull ? (starting ? "시작하는 중..." : "게임 시작") : "상대를 기다리는 중..."}
+          {isFull
+            ? starting
+              ? "시작하는 중..."
+              : "게임 시작"
+            : `${remaining}명을 더 기다리는 중...`}
         </button>
       ) : (
         <p className="pm-waiting__hint">
-          {isFull ? "방장이 시작하기를 기다리는 중..." : "상대가 들어오면 방장이 시작할 수 있어요."}
+          {isFull
+            ? "방장이 시작하기를 기다리는 중..."
+            : `${remaining}명이 더 들어오면 방장이 시작할 수 있어요.`}
         </p>
       )}
 

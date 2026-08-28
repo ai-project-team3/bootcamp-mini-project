@@ -1,8 +1,6 @@
 import type { RoomPlayer } from "../api/types";
-import tokenA from "../assets/token-a.png";
-import tokenB from "../assets/token-b.png";
+import { seatArt } from "./seatArt";
 
-const SEAT_ART = [tokenA, tokenB];
 
 interface ScoreDashboardProps {
   players: RoomPlayer[];
@@ -29,7 +27,7 @@ export function ScoreDashboard({ players, currentPlayerId, myPlayerId, boardSize
             className={`pm-player-card ${player.player_id === currentPlayerId ? "pm-player-card--active" : ""}`}
             data-testid={`pm-player-card-${seat}`}
           >
-            <img className="pm-player-card__token" src={SEAT_ART[seat]} alt="" aria-hidden="true" />
+            <img className="pm-player-card__token" src={seatArt(seat)} alt="" aria-hidden="true" />
             <div className="pm-player-card__body">
               <span className="pm-player-card__name">
                 {player.nickname}

@@ -5,8 +5,7 @@ import tileEmpathy from "../assets/tile-empathy.png";
 import tileDrive from "../assets/tile-drive.png";
 import tileCaution from "../assets/tile-caution.png";
 import tileChance from "../assets/tile-chance.png";
-import tokenA from "../assets/token-a.png";
-import tokenB from "../assets/token-b.png";
+import { seatArt } from "./seatArt";
 
 const TILE_LABELS: Record<TileModel["type"], string> = {
   START: "출발",
@@ -36,7 +35,6 @@ const TILE_CLASS: Record<TileModel["type"], string> = {
 };
 
 /** Token art is assigned by seat, so each player keeps one marble all game. */
-const SEAT_ART = [tokenA, tokenB];
 const SEAT_CLASS = ["pm-token--a", "pm-token--b"];
 
 interface TileProps {
@@ -58,7 +56,7 @@ export function Tile({ tile, occupantSeats, playerNames, hoppingSeat, style }: T
             <img
               key={seat}
               className={`pm-token ${SEAT_CLASS[seat]} ${seat === hoppingSeat ? "pm-token--hopping" : ""}`}
-              src={SEAT_ART[seat]}
+              src={seatArt(seat)}
               alt={playerNames[seat] ?? `플레이어 ${seat + 1}`}
             />
           ))}

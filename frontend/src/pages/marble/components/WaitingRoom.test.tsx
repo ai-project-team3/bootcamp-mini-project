@@ -55,7 +55,7 @@ describe("WaitingRoom", () => {
       <WaitingRoom state={roomState([player("p1", "민수")])} playerId="p1" onStart={noop} onLeave={noop} />
     );
     expect(screen.getByTestId("pm-seat-0")).toHaveTextContent("민수");
-    expect(screen.getByTestId("pm-seat-1")).toHaveTextContent("상대를 기다리는 중");
+    expect(screen.getByTestId("pm-seat-1")).toHaveTextContent("비어 있음");
   });
 
   it("marks which seat is you", () => {
@@ -69,7 +69,7 @@ describe("WaitingRoom", () => {
     render(
       <WaitingRoom state={roomState([player("p1", "민수")])} playerId="p1" onStart={noop} onLeave={noop} />
     );
-    expect(screen.getByRole("button", { name: /상대를 기다리는 중/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /1명을 더 기다리는 중/ })).toBeDisabled();
   });
 
   it("lets the host start once both players are in", () => {
@@ -102,6 +102,86 @@ describe("WaitingRoom", () => {
 
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining("?room=ABC123"));
     vi.unstubAllGlobals();
+  });
+
+
+  it("draws one seat per person the room was created for", () => {
+    render(
+      <WaitingRoom
+        state={roomState([player("p1", "민수"), player("p2", "지은")], { max_players: 6 })}
+        playerId="p1"
+        onStart={noop}
+        onLeave={noop}
+      />
+    );
+
+    for (let seat = 0; seat < 6; seat += 1) {
+      expect(screen.getByTestId(`pm-seat-${seat}`)).toBeInTheDocument();
+    }
+    expect(screen.queryByTestId("pm-seat-6")).not.toBeInTheDocument();
+  });
+
+  it("counts who has arrived against the room size", () => {
+    render(
+      <WaitingRoom
+        state={roomState([player("p1", "민수"), player("p2", "지은"), player("p3", "현우")], {
+          max_players: 5,
+        })}
+        playerId="p1"
+        onStart={noop}
+        onLeave={noop}
+      />
+    );
+
+    expect(screen.getByText("3 / 5명")).toBeInTheDocument();
+    expect(screen.getByText(/2명 더 들어오면 시작해요/)).toBeInTheDocument();
+  });
+
+  it("says the room is full once every seat is taken", () => {
+    const players = [player("p1", "민수"), player("p2", "지은"), player("p3", "현우")];
+    render(
+      <WaitingRoom
+        state={roomState(players, { max_players: 3 })}
+        playerId="p1"
+        onStart={noop}
+        onLeave={noop}
+      />
+    );
+
+    expect(screen.getByText("3 / 3명")).toBeInTheDocument();
+    expect(screen.getByText("모두 모였어요")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "게임 시작" })).not.toBeDisabled();
+  });
+
+  it("keeps a larger room from starting early", () => {
+    render(
+      <WaitingRoom
+        state={roomState([player("p1", "민수"), player("p2", "지은")], { max_players: 8 })}
+        playerId="p1"
+        onStart={noop}
+        onLeave={noop}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: /6명을 더 기다리는 중/ })).toBeDisabled();
+  });
+
+  it("gives every seat its own token art", () => {
+    const { container } = render(
+      <WaitingRoom
+        state={roomState([player("p1", "민수")], { max_players: 8 })}
+        playerId="p1"
+        onStart={noop}
+        onLeave={noop}
+      />
+    );
+
+    const sources = Array.from(container.querySelectorAll<HTMLImageElement>(".pm-waiting__seat-token")).map(
+      (img) => img.getAttribute("src"),
+    );
+    expect(sources).toHaveLength(8);
+    expect(sources.every(Boolean)).toBe(true);
+    expect(new Set(sources).size).toBe(8);
   });
 
   it("shows the selected content mode", () => {

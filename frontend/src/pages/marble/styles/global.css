@@ -1058,3 +1058,49 @@
   background: var(--pm-accent);
   color: #fff;
 }
+
+/* ===== Waiting-room headcount ===== */
+.pm-waiting__tally {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 14px 0 4px;
+}
+
+.pm-waiting__tally-count {
+  font-family: var(--pm-font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--pm-ink);
+}
+
+.pm-waiting__tally-label {
+  font-size: 0.9rem;
+  color: var(--pm-ink-soft);
+}
+
+.pm-waiting__tally-bar {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--pm-line);
+  overflow: hidden;
+}
+
+.pm-waiting__tally-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--pm-accent);
+  transition: width 0.3s ease-out;
+}
+
+/* Seats wrap once a room holds more than a couple of people. */
+.pm-waiting__seats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
