@@ -1,0 +1,6 @@
+.game-guide-head { padding: 18px 4px 8px; }
+.game-guide-head h1 { margin: 14px 0 8px; font-size: 24px; line-height: 1.35; }
+.game-guide-head p { color: var(--ink-soft); }
+.game-guide-steps, .game-guide-rules { display: grid; gap: 12px; padding-left: 22px; line-height: 1.55; }
+.game-guide-steps li::marker { color: var(--hot); font-weight: 800; }
+.game-guide-tip { margin-top: 16px; padding: 12px; border-radius: 12px; background: var(--hot-soft); line-height: 1.5; }

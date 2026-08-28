@@ -2,24 +2,25 @@ import { useState } from 'react'
 import Button from '../../../components/common/Button'
 import Card from '../../../components/common/Card'
 import FlavorToggle from '../../../components/common/FlavorToggle'
-import { DemoPlayerTabs } from '../../../components/common/GameDemoControls'
-import { DEMO_PLAYERS, FLAVORED_GAME_CONTENT } from '../../../data/gameDemo/gameDemoData'
+import { FLAVORED_GAME_CONTENT } from '../../../data/gameDemo/gameDemoData'
+import { useRoomFlow } from '../../../context/RoomFlowContext'
+import { getPrivateDemoPlayerId } from '../../../data/gameDemo/gameDemoModels'
 
-export default function LiarGame() {
+export default function LiarGame({ players }) {
+  const { playerId } = useRoomFlow()
   const [mode, setMode] = useState('mild')
   const [round, setRound] = useState(0)
-  const [activeId, setActiveId] = useState('seojun')
+  const activeId = getPrivateDemoPlayerId(players, playerId)
   const [seen, setSeen] = useState([])
   const [openId, setOpenId] = useState(null)
   const [started, setStarted] = useState(false)
   const [revealed, setRevealed] = useState(false)
   const content = FLAVORED_GAME_CONTENT.liar[mode]
   const topic = content[round]
-  const liar = DEMO_PLAYERS[(round + 2) % DEMO_PLAYERS.length]
-  const active = DEMO_PLAYERS.find((player) => player.id === activeId)
+  const liar = players[(round + 2) % players.length]
+  const active = players.find((player) => player.id === activeId)
 
   const resetRound = () => {
-    setActiveId('seojun')
     setSeen([])
     setOpenId(null)
     setStarted(false)
@@ -30,11 +31,6 @@ export default function LiarGame() {
     setMode(nextMode)
     setRound(0)
     resetRound()
-  }
-
-  const changePlayer = (playerId) => {
-    setActiveId(playerId)
-    setOpenId(null)
   }
 
   const seeRole = () => {
@@ -57,7 +53,6 @@ export default function LiarGame() {
 
       {!started ? (
         <>
-          <DemoPlayerTabs players={DEMO_PLAYERS} activeId={activeId} onChange={changePlayer} />
           <Card>
             {openId !== activeId ? (
               <div className="party-cover">
@@ -73,7 +68,7 @@ export default function LiarGame() {
               </div>
             )}
           </Card>
-          <Button disabled={seen.length < DEMO_PLAYERS.length} onClick={() => { setStarted(true); setOpenId(null) }}>
+          <Button disabled={!seen.includes(activeId)} onClick={() => { setStarted(true); setOpenId(null) }}>
             폰 내려놓고 게임 시작
           </Button>
         </>

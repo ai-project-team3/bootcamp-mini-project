@@ -1,0 +1,92 @@
+.report-error {
+  font-size: 0.78rem;
+  color: var(--hot);
+}
+
+.report-hint {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.report-section-title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 0.95rem;
+  margin: 4px 0 0;
+}
+
+.team-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.team-rank {
+  text-align: center;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 2.6rem;
+  color: var(--gold);
+  margin-top: 8px;
+}
+
+.team-summary {
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  margin: 0 0 8px;
+}
+
+.team-reason-line {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.team-reason-line:last-child {
+  margin-bottom: 0;
+}
+
+.team-roles {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.team-role-card {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 4px 10px;
+  align-items: center;
+}
+
+.team-role-name {
+  font-weight: 700;
+  color: var(--deep);
+}
+
+.team-role-nickname {
+  font-family: var(--font-mono);
+}
+
+.team-role-why {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.team-highlight-line {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.team-highlight-line:last-child {
+  margin-bottom: 0;
+}

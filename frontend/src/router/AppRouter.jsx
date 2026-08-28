@@ -1,33 +1,43 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import StartPage from '../pages/start/StartPage'
-import CategoryPage from '../pages/category/CategoryPage'
 import RoomCreatePage from '../pages/roomCreate/RoomCreatePage'
+import JoinPage from '../pages/join/JoinPage'
 import WaitingRoomPage from '../pages/waiting/WaitingRoomPage'
-import SurveyPage from '../pages/survey/SurveyPage'
-import StagePage from '../pages/stage/StagePage'
-import ReportPage from '../pages/report/ReportPage'
-import SharePage from '../pages/share/SharePage'
+import GameDemoAccessGuard from '../components/common/GameDemoAccessGuard'
 import GameDemoHubPage from '../pages/gameDemoHub/GameDemoHubPage'
+import GameDemoEntryPage from '../pages/gameDemoEntry/GameDemoEntryPage'
+import GameDemoRoomPage from '../pages/gameDemoRoom/GameDemoRoomPage'
+import GameGuidePage from '../pages/gameGuide/GameGuidePage'
 import PersonaImpostorDemoPage from '../pages/personaImpostorDemo/PersonaImpostorDemoPage'
 import PersonaPredictionDemoPage from '../pages/personaPredictionDemo/PersonaPredictionDemoPage'
 import PartyGamesDemoPage from '../pages/partyGamesDemo/PartyGamesDemoPage'
 import AfterDateDemoPage from '../pages/afterDateDemo/AfterDateDemoPage'
+import GamePage from '../pages/game/GamePage'
+import StatementsPage from '../pages/statements/StatementsPage'
+import ResultHubPage from '../pages/hub/ResultHubPage'
+import PersonalReportPage from '../pages/report/PersonalReportPage'
+import TeamReportPage from '../pages/report/TeamReportPage'
 
 export default function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<StartPage />} />
-      <Route path="/category" element={<CategoryPage />} />
       <Route path="/room/create" element={<RoomCreatePage />} />
+      <Route path="/join/:code" element={<JoinPage />} />
       <Route path="/room/:code/waiting" element={<WaitingRoomPage />} />
-      <Route path="/room/:code/survey" element={<SurveyPage />} />
-      <Route path="/room/:code/stage/:n" element={<StagePage />} />
-      <Route path="/room/:code/report" element={<ReportPage />} />
-      <Route path="/room/:code/share" element={<SharePage />} />
-      <Route path="/games/demo" element={<GameDemoHubPage />} />
-      <Route path="/games/demo/persona-impostor" element={<PersonaImpostorDemoPage />} />
-      <Route path="/games/demo/persona-prediction" element={<PersonaPredictionDemoPage />} />
-      <Route path="/games/demo/party" element={<PartyGamesDemoPage />} />
+      <Route path="/room/:code/game" element={<GamePage />} />
+      <Route path="/room/:code/statements" element={<StatementsPage />} />
+      <Route path="/room/:code/hub" element={<ResultHubPage />} />
+      <Route path="/room/:code/report/me" element={<PersonalReportPage />} />
+      <Route path="/room/:code/report/team" element={<TeamReportPage />} />
+      <Route path="/games/demo" element={<GameDemoEntryPage />} />
+      <Route path="/games/demo/join/:code" element={<GameDemoEntryPage />} />
+      <Route path="/games/demo/room/:code" element={<GameDemoRoomPage />} />
+      <Route path="/games/demo/room/:code/games" element={<GameDemoAccessGuard><GameDemoHubPage /></GameDemoAccessGuard>} />
+      <Route path="/games/demo/room/:code/guide/:gameId" element={<GameDemoAccessGuard><GameGuidePage /></GameDemoAccessGuard>} />
+      <Route path="/games/demo/persona-impostor" element={<GameDemoAccessGuard><PersonaImpostorDemoPage /></GameDemoAccessGuard>} />
+      <Route path="/games/demo/persona-prediction" element={<GameDemoAccessGuard><PersonaPredictionDemoPage /></GameDemoAccessGuard>} />
+      <Route path="/games/demo/party" element={<GameDemoAccessGuard><PartyGamesDemoPage /></GameDemoAccessGuard>} />
       <Route path="/after-date/demo" element={<AfterDateDemoPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

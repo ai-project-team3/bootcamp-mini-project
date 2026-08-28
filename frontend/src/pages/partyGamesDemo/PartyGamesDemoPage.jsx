@@ -1,8 +1,10 @@
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
+import GameDemoExitControl from '../../components/common/GameDemoExitControl'
+import { useGameDemo } from '../../context/GameDemoContext'
 import { PARTY_CATALOG } from '../../data/gameDemo/gameDemoData'
-import { resolvePartyGameId } from '../../data/gameDemo/gameDemoModels'
+import { getDemoHubPath, resolvePartyGameId } from '../../data/gameDemo/gameDemoModels'
 import CategoryMarketGame from './games/CategoryMarketGame'
 import CharadesGame from './games/CharadesGame'
 import ForbiddenWordGame from './games/ForbiddenWordGame'
@@ -21,12 +23,13 @@ const GAME_COMPONENTS = {
 }
 
 export default function PartyGamesDemoPage() {
-  const navigate = useNavigate()
+  const { players } = useGameDemo()
   const [searchParams] = useSearchParams()
   const selectedId = resolvePartyGameId(searchParams.get('game'), PARTY_CATALOG)
+  const hubPath = getDemoHubPath(searchParams.get('room'))
   const SelectedGame = selectedId ? GAME_COMPONENTS[selectedId] : null
 
-  if (!SelectedGame) return <Navigate to="/games/demo" replace />
+  if (!SelectedGame) return <Navigate to={hubPath} replace />
 
-  return <PhoneFrame><TopBar title="Party Games · DEMO" onBack={() => navigate('/games/demo', { replace: true })} /><SelectedGame /></PhoneFrame>
+  return <PhoneFrame><TopBar title="Party Games" showBack={false} action={<GameDemoExitControl />} /><SelectedGame players={players} /></PhoneFrame>
 }

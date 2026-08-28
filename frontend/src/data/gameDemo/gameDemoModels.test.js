@@ -7,6 +7,69 @@ import * as gameModels from './gameDemoModels.js'
 const { allPlayersLocked, groupMatchingAnswers, syncImpostorChoice } = gameModels
 const { DEMO_GAME_CATALOG } = gameData
 
+test('demo room starts only for a host with 2 to 10 players', () => {
+  assert.equal(gameModels.canStartDemoRoom({ isHost: true, playerCount: 1 }), false)
+  assert.equal(gameModels.canStartDemoRoom({ isHost: true, playerCount: 2 }), true)
+  assert.equal(gameModels.canStartDemoRoom({ isHost: true, playerCount: 10 }), true)
+  assert.equal(gameModels.canStartDemoRoom({ isHost: true, playerCount: 11 }), false)
+  assert.equal(gameModels.canStartDemoRoom({ isHost: false, playerCount: 4 }), false)
+})
+
+test('demo room entry trims nicknames and normalizes invite codes', () => {
+  assert.equal(gameModels.normalizeDemoNickname('  민우  '), '민우')
+  assert.equal(gameModels.normalizeDemoNickname('   '), '')
+  assert.equal(gameModels.normalizeDemoRoomCode(' ab12cd '), 'AB12CD')
+})
+
+test('room-aware game links preserve an existing party game query', () => {
+  assert.equal(
+    gameModels.withDemoRoomCode('/games/demo/party?game=liar', 'AB12CD'),
+    '/games/demo/party?game=liar&room=AB12CD',
+  )
+  assert.equal(
+    gameModels.withDemoRoomCode('/games/demo/persona-impostor', 'AB12CD'),
+    '/games/demo/persona-impostor?room=AB12CD',
+  )
+  assert.equal(gameModels.withDemoRoomCode('/games/demo/persona-impostor', ''), '/games/demo/persona-impostor')
+})
+
+test('game back navigation returns to the current room hub', () => {
+  assert.equal(gameModels.getDemoHubPath('AB12CD'), '/games/demo/room/AB12CD/games')
+  assert.equal(gameModels.getDemoHubPath(''), '/games/demo')
+})
+
+test('demo access requires membership and a started room', () => {
+  assert.equal(gameModels.resolveDemoAccess({
+    contextRoomCode: 'AB12CD', playerId: 'p1', requestedRoomCode: 'AB12CD', roomStatus: 'IN_PROGRESS',
+  }), 'allowed')
+  assert.equal(gameModels.resolveDemoAccess({
+    contextRoomCode: 'AB12CD', playerId: 'p1', requestedRoomCode: 'AB12CD', roomStatus: 'WAITING',
+  }), 'waiting')
+  assert.equal(gameModels.resolveDemoAccess({
+    contextRoomCode: 'OTHER', playerId: 'p1', requestedRoomCode: 'AB12CD', roomStatus: 'IN_PROGRESS',
+  }), 'entry')
+  assert.equal(gameModels.resolveDemoAccess({
+    contextRoomCode: 'AB12CD', playerId: null, requestedRoomCode: 'AB12CD', roomStatus: 'IN_PROGRESS',
+  }), 'entry')
+})
+
+test('shared game phase sends every member to the same guide or game route', () => {
+  assert.equal(
+    gameModels.getSharedDemoGamePath({ code: 'ABC123', gameId: 'liar', gamePhase: 'GUIDE', path: '/games/demo/room/ABC123/games' }),
+    '/games/demo/room/ABC123/guide/liar',
+  )
+  assert.equal(
+    gameModels.getSharedDemoGamePath({ code: 'ABC123', gameId: 'liar', gamePhase: 'PLAYING', path: '/games/demo/room/ABC123/guide/liar' }),
+    '/games/demo/party?game=liar&room=ABC123',
+  )
+})
+
+test('private games resolve the current room member instead of a selectable opponent', () => {
+  const players = [{ id: 'host' }, { id: 'guest' }]
+  assert.equal(gameModels.getPrivateDemoPlayerId(players, 'guest'), 'guest')
+  assert.equal(gameModels.getPrivateDemoPlayerId(players, 'missing'), 'host')
+})
+
 test('impostor copies the stolen persona owner choice', () => {
   assert.deepEqual(syncImpostorChoice({ yuna: 1, jian: 2 }, 'yuna', 'seojun'), {
     yuna: 1, jian: 2, seojun: 1,
