@@ -16,6 +16,11 @@ class RoomStore:
     def exists(self, room_id: str) -> bool:
         return room_id in self._rooms
 
+    def remove(self, room_id: str) -> None:
+        """Forget a room. Missing is not an error: two players leaving at once
+        should both succeed rather than race each other into a 404."""
+        self._rooms.pop(room_id, None)
+
     def clear(self) -> None:
         self._rooms.clear()
 

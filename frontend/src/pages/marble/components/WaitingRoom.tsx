@@ -1,9 +1,7 @@
-import { useState } from "react";
 import type { RoomState } from "../api/types";
 import { seatArt } from "./seatArt";
 import { PLAYER_COUNT_OPTIONS } from "../constants";
-import { copyText } from "../../../shared/clipboard";
-
+import RoomWaitingLayout from "../../../components/room/RoomWaitingLayout";
 
 interface WaitingRoomProps {
   state: RoomState;
@@ -22,6 +20,13 @@ function inviteLink(roomId: string): string {
   return `${origin}${pathname}?room=${roomId}`;
 }
 
+/**
+ * 커플 브루마블's waiting room, drawn by the app's shared one.
+ *
+ * Marble keeps two things of its own: each seat shows the token that player
+ * will move on the board, and the host can still resize the room while people
+ * are arriving.
+ */
 export function WaitingRoom({
   state,
   playerId,
@@ -31,143 +36,80 @@ export function WaitingRoom({
   starting,
   error,
 }: WaitingRoomProps) {
-  const [copied, setCopied] = useState<"code" | "link" | null>(null);
-
   const isHost = state.host_player_id === playerId;
   const seatCount = state.max_players;
   const joined = state.players.length;
   const isFull = joined >= seatCount;
   const remaining = Math.max(seatCount - joined, 0);
-
-  const [copyFailed, setCopyFailed] = useState(false);
-
-  const copy = async (text: string, kind: "code" | "link") => {
-    // Over the LAN the page is not a secure context, so navigator.clipboard is
-    // missing; copyText falls back and reports whether it actually worked.
-    const ok = await copyText(text);
-    setCopyFailed(!ok);
-    setCopied(ok ? kind : null);
-    window.setTimeout(() => {
-      setCopied(null);
-      setCopyFailed(false);
-    }, 2600);
-  };
+  const isAdult = state.content_mode === "adult";
 
   return (
-    <div className="pm-card pm-waiting">
-      <p className="pm-eyebrow">대기실</p>
-      <h1 className="pm-heading pm-waiting__title">
-        {state.content_mode === "adult" ? "19금 모드" : "일반 모드"}
-      </h1>
-
-      <div className="pm-waiting__code-block">
-        <span className="pm-waiting__code-label">방 코드</span>
-        <button
-          type="button"
-          className="pm-waiting__code"
-          onClick={() => copy(state.room_id, "code")}
-          title="눌러서 복사"
-        >
-          {state.room_id}
-        </button>
-        <button
-          type="button"
-          className="pm-button pm-button--ghost pm-waiting__invite"
-          onClick={() => copy(inviteLink(state.room_id), "link")}
-        >
-          {copied === "link" ? "복사됨!" : "초대 링크 복사"}
-        </button>
-        {copied === "code" && <span className="pm-waiting__copied">코드가 복사됐어요</span>}
-        {copyFailed && (
-          <span className="pm-waiting__copied">복사가 안 돼요. 방 코드를 직접 알려주세요.</span>
-        )}
-      </div>
-
-      <div className="pm-waiting__tally">
-        <span className="pm-waiting__tally-count">
-          {joined} / {seatCount}명
-        </span>
-        <span className="pm-waiting__tally-label">
-          {isFull ? "모두 모였어요" : `${remaining}명 더 들어오면 시작해요`}
-        </span>
-        <span className="pm-waiting__tally-bar" aria-hidden="true">
-          <span
-            className="pm-waiting__tally-fill"
-            style={{ width: `${(joined / seatCount) * 100}%` }}
-          />
-        </span>
-      </div>
-
-      {isHost && (
-        <div className="pm-seat-picker pm-waiting__resize">
-          <span className="pm-seat-picker__label">인원 변경</span>
-          <div className="pm-seat-picker__options" role="group" aria-label="인원 변경">
-            {PLAYER_COUNT_OPTIONS.map((count) => (
-              <button
-                key={count}
-                type="button"
-                className={`pm-seat ${seatCount === count ? "pm-seat--selected" : ""}`}
-                aria-pressed={seatCount === count}
-                // Shrinking below the people already here would strand them.
-                disabled={count < joined}
-                onClick={() => onChangeMaxPlayers(count)}
-              >
-                {count}
-              </button>
-            ))}
+    <RoomWaitingLayout
+      tone={isAdult ? "dark" : "light"}
+      eyebrow="대기실"
+      title={isAdult ? "19금 모드" : "일반 모드"}
+      lead={`${joined} / ${seatCount}명 · ${
+        isFull ? "모두 모였어요" : `${remaining}명 더 들어오면 시작해요`
+      }`}
+      code={state.room_id}
+      inviteUrl={inviteLink(state.room_id)}
+      players={state.players.map((p) => ({
+        id: p.player_id,
+        nickname: p.nickname,
+        isHost: p.player_id === state.host_player_id,
+        isMe: p.player_id === playerId,
+      }))}
+      emptySeats={remaining}
+      seatAvatar={(seat) => (
+        <img className="pm-waiting__seat-token" src={seatArt(seat)} alt="" aria-hidden="true" />
+      )}
+      error={error}
+      options={
+        isHost ? (
+          <div className="game-room-option-group">
+            <span className="game-room-option-label">인원 변경</span>
+            <div className="game-room-chips" role="group" aria-label="인원 변경">
+              {PLAYER_COUNT_OPTIONS.map((count) => (
+                <button
+                  key={count}
+                  type="button"
+                  className="game-room-chip"
+                  aria-pressed={seatCount === count}
+                  // Shrinking below the people already here would strand them.
+                  disabled={count < joined}
+                  onClick={() => onChangeMaxPlayers(count)}
+                >
+                  {count}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-
-      <ul className="pm-waiting__seats">
-        {Array.from({ length: seatCount }, (_, seat) => {
-          const player = state.players[seat];
-          return (
-            <li
-              key={seat}
-              className={`pm-waiting__seat ${player ? "pm-waiting__seat--filled" : ""}`}
-              data-testid={`pm-seat-${seat}`}
+        ) : null
+      }
+      footer={
+        <>
+          {isHost ? (
+            <button
+              type="button"
+              className="pm-button pm-button--primary pm-waiting__cta"
+              onClick={onStart}
+              disabled={!isFull || starting}
             >
-              <img className="pm-waiting__seat-token" src={seatArt(seat)} alt="" aria-hidden="true" />
-              {player ? (
-                <span className="pm-waiting__seat-name">
-                  {player.nickname}
-                  {player.player_id === playerId && <em className="pm-waiting__you">나</em>}
-                </span>
-              ) : (
-                <span className="pm-waiting__seat-empty">비어 있음</span>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+              {isFull ? (starting ? "시작하는 중..." : "게임 시작") : `${remaining}명을 더 기다리는 중...`}
+            </button>
+          ) : (
+            <p className="pm-waiting__hint">
+              {isFull
+                ? "방장이 시작하기를 기다리는 중..."
+                : `${remaining}명이 더 들어오면 방장이 시작할 수 있어요.`}
+            </p>
+          )}
 
-      {error && <p className="pm-waiting__error">{error}</p>}
-
-      {isHost ? (
-        <button
-          type="button"
-          className="pm-button pm-button--primary pm-waiting__cta"
-          onClick={onStart}
-          disabled={!isFull || starting}
-        >
-          {isFull
-            ? starting
-              ? "시작하는 중..."
-              : "게임 시작"
-            : `${remaining}명을 더 기다리는 중...`}
-        </button>
-      ) : (
-        <p className="pm-waiting__hint">
-          {isFull
-            ? "방장이 시작하기를 기다리는 중..."
-            : `${remaining}명이 더 들어오면 방장이 시작할 수 있어요.`}
-        </p>
-      )}
-
-      <button type="button" className="pm-button pm-button--ghost" onClick={onLeave}>
-        나가기
-      </button>
-    </div>
+          <button type="button" className="pm-button pm-button--ghost" onClick={onLeave}>
+            나가기
+          </button>
+        </>
+      }
+    />
   );
 }

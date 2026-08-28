@@ -15,17 +15,18 @@ afterEach(() => {
 describe("MarbleApp", () => {
   it("shows the lobby first", async () => {
     render(<MarbleApp />);
-    expect(await screen.findByRole("tab", { name: "방 만들기" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "새 방 만들기" })).toBeInTheDocument();
     expect(screen.getByLabelText("닉네임")).toBeInTheDocument();
   });
 
-  it("keeps the create button disabled until a nickname is entered", async () => {
+  it("will not make a room without a nickname", async () => {
+    vi.spyOn(client, "createRoom");
     render(<MarbleApp />);
-    const button = await screen.findByRole("button", { name: "방 만들기" });
-    expect(button).toBeDisabled();
-
-    fireEvent.change(screen.getByLabelText("닉네임"), { target: { value: "민수" } });
-    expect(button).not.toBeDisabled();
+    // The shared screen keeps the button live and says what is missing, so a
+    // player is never left wondering why nothing happens.
+    fireEvent.click(await screen.findByRole("button", { name: "새 방 만들기" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("닉네임을 입력해주세요.");
+    expect(client.createRoom).not.toHaveBeenCalled();
   });
 
   it("creates a room then joins it, landing in the waiting room", async () => {
@@ -37,7 +38,7 @@ describe("MarbleApp", () => {
 
     render(<MarbleApp />);
     fireEvent.change(await screen.findByLabelText("닉네임"), { target: { value: "민수" } });
-    fireEvent.click(screen.getByRole("button", { name: "방 만들기" }));
+    fireEvent.click(screen.getByRole("button", { name: "새 방 만들기" }));
 
     await waitFor(() => expect(screen.getByText("ABC123")).toBeInTheDocument());
     expect(screen.getByText("대기실")).toBeInTheDocument();
@@ -52,7 +53,7 @@ describe("MarbleApp", () => {
     render(<MarbleApp />);
     fireEvent.click(await screen.findByTestId("pm-mode-adult"));
     fireEvent.change(screen.getByLabelText("닉네임"), { target: { value: "민수" } });
-    fireEvent.click(screen.getByRole("button", { name: "방 만들기" }));
+    fireEvent.click(screen.getByRole("button", { name: "새 방 만들기" }));
 
     await waitFor(() => expect(client.createRoom).toHaveBeenCalledWith("adult", 2));
   });
@@ -62,10 +63,9 @@ describe("MarbleApp", () => {
     vi.spyOn(client, "getRoomState").mockResolvedValue(makeRoomState({ phase: "WAITING" }));
 
     render(<MarbleApp />);
-    fireEvent.click(await screen.findByRole("tab", { name: "방 참여하기" }));
-    fireEvent.change(screen.getByLabelText("방 코드"), { target: { value: "xyz789" } });
+    fireEvent.change(await screen.findByLabelText("초대코드"), { target: { value: "xyz789" } });
     fireEvent.change(screen.getByLabelText("닉네임"), { target: { value: "지은" } });
-    fireEvent.click(screen.getByRole("button", { name: "방 참여하기" }));
+    fireEvent.click(screen.getByRole("button", { name: "방 참가하기" }));
 
     // The code is normalised to upper case before it reaches the server.
     await waitFor(() => expect(client.joinRoom).toHaveBeenCalledWith("XYZ789", "지은"));
@@ -75,10 +75,9 @@ describe("MarbleApp", () => {
     vi.spyOn(client, "joinRoom").mockRejectedValue(new Error("API error 400: Room is full"));
 
     render(<MarbleApp />);
-    fireEvent.click(await screen.findByRole("tab", { name: "방 참여하기" }));
-    fireEvent.change(screen.getByLabelText("방 코드"), { target: { value: "ABC123" } });
+    fireEvent.change(await screen.findByLabelText("초대코드"), { target: { value: "ABC123" } });
     fireEvent.change(screen.getByLabelText("닉네임"), { target: { value: "제삼자" } });
-    fireEvent.click(screen.getByRole("button", { name: "방 참여하기" }));
+    fireEvent.click(screen.getByRole("button", { name: "방 참가하기" }));
 
     await waitFor(() => expect(screen.getByText(/Room is full/)).toBeInTheDocument());
     expect(screen.getByLabelText("닉네임")).toBeInTheDocument();

@@ -8,7 +8,9 @@ export interface MarbleSession {
   isHost: boolean;
 }
 
-function read(): MarbleSession | null {
+/** The stored session, readable from outside React — the exit control needs it
+ *  to tell the server which player is leaving. */
+export function readMarbleSession(): MarbleSession | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     return raw ? (JSON.parse(raw) as MarbleSession) : null;
@@ -18,9 +20,19 @@ function read(): MarbleSession | null {
   }
 }
 
+/** Forget the room. Leaving this behind is what used to drop a player back
+ *  into a game they had already quit. */
+export function clearMarbleSession(): void {
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Non-fatal.
+  }
+}
+
 /** Keeps the player in their room across a reload, the way the mafia game does. */
 export function useMarbleSession() {
-  const [session, setSessionState] = useState<MarbleSession | null>(read);
+  const [session, setSessionState] = useState<MarbleSession | null>(readMarbleSession);
 
   const setSession = useCallback((next: MarbleSession) => {
     setSessionState(next);
@@ -33,11 +45,7 @@ export function useMarbleSession() {
 
   const clearSession = useCallback(() => {
     setSessionState(null);
-    try {
-      window.localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // Non-fatal.
-    }
+    clearMarbleSession();
   }, []);
 
   return { session, setSession, clearSession };

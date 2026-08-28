@@ -11,3 +11,7 @@ class UpdatePlayerCountRequest(BaseModel):
 
 class JoinRoomRequest(BaseModel):
     nickname: str
+
+
+class LeaveRoomRequest(BaseModel):
+    player_id: str

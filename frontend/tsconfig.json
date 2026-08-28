@@ -10,6 +10,11 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    // The merged app runs two stacks side by side: the party games are JSX,
+    // the mafia and marble games are TypeScript. Allowing JS lets a shared
+    // .tsx component import minwoo's Button/Card without duplicating them.
+    "allowJs": true,
+    "checkJs": false,
     "strict": true,
     "types": ["vitest/globals", "@testing-library/jest-dom"]
   },

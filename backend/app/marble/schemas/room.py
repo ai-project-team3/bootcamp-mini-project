@@ -16,3 +16,7 @@ class JoinRoomRequest(BaseModel):
 
 class UpdateMaxPlayersRequest(BaseModel):
     max_players: int = Field(ge=MIN_PLAYERS, le=MAX_PLAYERS)
+
+
+class LeaveRoomRequest(BaseModel):
+    player_id: str

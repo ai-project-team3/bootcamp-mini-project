@@ -37,9 +37,15 @@ function readInviteCode(): string {
 interface MarbleAppProps {
   /** Lets the host shell follow the room's palette (일반=light, 19금=dark). */
   onToneChange?: (tone: "light" | "dark") => void;
+  /**
+   * Leaving the game for good: release the room and go back to the game list.
+   * The page owns it because the teardown outlives this component — see
+   * `resetGame.ts`. Without one, leaving just returns to this game's lobby.
+   */
+  onExit?: () => void;
 }
 
-export function MarbleApp({ onToneChange }: MarbleAppProps = {}) {
+export function MarbleApp({ onToneChange, onExit }: MarbleAppProps = {}) {
   const { session, setSession, clearSession } = useMarbleSession();
   const { state, error: pollError } = useMarbleRoom(session?.roomId ?? null);
 
@@ -216,10 +222,15 @@ export function MarbleApp({ onToneChange }: MarbleAppProps = {}) {
   }, [run, session]);
 
   const handleLeave = useCallback(() => {
-    // TODO: 미니프로젝트의 게임 허브(다른 미니게임 선택 화면)로 이동 — 지금은 로비로 대체
+    // The page tears the room down and navigates to the game list; it reads
+    // the stored session to do so, so this must not clear it first.
+    if (onExit) {
+      onExit();
+      return;
+    }
     clearSession();
     setActionError(null);
-  }, [clearSession]);
+  }, [clearSession, onExit]);
 
   // Who the dare could land on, and where the reel must stop. The server picks
   // the target; the reel only replays that choice, so a client cannot influence
@@ -254,7 +265,7 @@ export function MarbleApp({ onToneChange }: MarbleAppProps = {}) {
   if (!session) {
     return (
       <div className="pm-app" data-pm-theme={themeMode}>
-        <div className="pm-shell pm-shell--center">
+        <div className="pm-shell">
           <LobbyScreen
             contentMode={contentMode}
             onContentModeChange={setContentMode}
@@ -284,7 +295,7 @@ export function MarbleApp({ onToneChange }: MarbleAppProps = {}) {
   if (state.phase === "WAITING") {
     return (
       <div className="pm-app" data-pm-theme={themeMode}>
-        <div className="pm-shell pm-shell--center">
+        <div className="pm-shell">
           <WaitingRoom
             state={state}
             playerId={session.playerId}
