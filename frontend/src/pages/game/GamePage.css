@@ -137,35 +137,107 @@
   gap: 14px;
 }
 
-.answer-tally {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* 집계 공개 — 기획안 §3-4. 이름 없이 몇 대 몇만 보여준다. */
+.split {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.split-side {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
 }
 
-.answer-tally li {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  background: var(--bg);
-  border: 1px solid var(--line);
-  font-size: 0.88rem;
-}
-
-.answer-tally-a {
-  border-left: 3px solid var(--hot);
-}
-
-.answer-tally-b {
-  border-left: 3px solid var(--deep);
-}
-
-.answer-tally-choice {
+.split-num {
+  font-family: var(--font-heading);
+  font-size: 2.6rem;
+  line-height: 1;
   color: var(--ink-soft);
+  animation: split-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.split-num.mine {
+  color: var(--hot);
+}
+
+.split-label {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ink-soft);
+  word-break: keep-all;
+}
+
+.split-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 8px;
+  height: 96px;
+  justify-content: center;
+}
+
+.split-fill {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  transform-origin: left;
+  animation: split-grow 0.5s ease-out both;
+}
+
+.split-fill.a { background: var(--hot); }
+.split-fill.b { background: var(--deep); }
+
+.split-note {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+@keyframes split-pop {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes split-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* 제출 표시 — 답을 낼 때마다 하나씩 켜진다 */
+.game-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.game-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.game-dot.on {
+  background: var(--hot);
+  transform: scale(1.15);
+}
+
+.choice-a { border-left: 4px solid var(--hot); }
+.choice-b { border-left: 4px solid var(--deep); }
+
+@media (prefers-reduced-motion: reduce) {
+  .split-num,
+  .split-fill { animation: none; }
+  .game-dot { transition: none; }
 }
 
 /* 유형 맞히기 */

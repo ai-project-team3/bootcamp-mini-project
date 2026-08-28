@@ -3,7 +3,7 @@
 # 기획안은 5명 고정을 전제하지만(§2), 테스트·소규모 진행 편의를 위해 방마다
 # 인원을 설정할 수 있게 했다(사용자 요청). 실제 정원은 Room.player_limit에
 # 저장되며, 여기 값은 그 허용 범위일 뿐이다.
-MIN_PLAYERS = 2
+MIN_PLAYERS = 1
 MAX_PLAYERS = 8
 DEFAULT_PLAYER_LIMIT = 5
 

@@ -27,6 +27,9 @@ from ..services.scoring import (
 
 router = APIRouter(prefix="/rooms/{code}/report", tags=["report"])
 
+# 관찰력을 잴 수 없을 때 쓰는 중립값 (0~5 스케일의 한가운데)
+NEUTRAL_OBS = 2.5
+
 
 @router.get("", response_model=RoomReportResponse)
 def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
@@ -51,8 +54,13 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
     final_types: dict[str, str] = {}
     for p in players:
         a = dict(behavior[p.id])
-        obs_half = compute_half_obs(lie_correct, p.id, len(players))
-        obs_full = compute_full_obs(lie_correct, type_correct, p.id, len(players))
+        # 기획안 §2 — 혼자면 남을 맞힐 기회가 없다. 0점이 아니라 중립 2.5로
+        # 두고 카드에서 "잴 수 없었다"고 밝힌다.
+        if len(players) < 2:
+            obs_half = obs_full = NEUTRAL_OBS
+        else:
+            obs_half = compute_half_obs(lie_correct, p.id, len(players))
+            obs_full = compute_full_obs(lie_correct, type_correct, p.id, len(players))
         provisional_types[p.id] = determine_type(a["DOM"], a["EXP"], obs_half, a["SPD"])
         a["OBS"] = obs_full
         abilities[p.id] = a

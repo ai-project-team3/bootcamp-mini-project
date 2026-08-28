@@ -8,6 +8,7 @@ from ..database import get_db
 from ..models.guess import Guess
 from ..models.player import Player
 from ..models.room import Room
+from ..services.flow import next_phase
 from ..schemas.impression import (
     ImpressionQuestionResult,
     ImpressionStatusResponse,
@@ -18,7 +19,6 @@ from ..schemas.impression import (
 router = APIRouter(prefix="/rooms/{code}/impressions/{round}", tags=["impressions"])
 
 _KIND_BY_ROUND = {"pre": "IMPRESSION_PRE", "post": "IMPRESSION_POST"}
-_NEXT_PHASE = {"pre": "ANSWER", "post": "TYPE_GUESS"}
 
 
 def _get_room(code: str, db: Session) -> Room:
@@ -67,7 +67,7 @@ def submit_impression(
         .count()
     )
     if submitted == room.player_limit and room.phase == kind:
-        room.phase = _NEXT_PHASE[round]
+        room.phase = next_phase(kind, room.player_limit)
         db.commit()
 
     return _status(room, kind, db)
