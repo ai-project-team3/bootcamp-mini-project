@@ -10,6 +10,13 @@ class CompatEntry(BaseModel):
     note: str
 
 
+class ImpressionShift(BaseModel):
+    pre_label: str
+    pre_votes: int
+    post_label: str
+    post_votes: int
+
+
 class PlayerReport(BaseModel):
     player_id: str
     nickname: str
@@ -20,6 +27,8 @@ class PlayerReport(BaseModel):
     impression_post: dict[str, float]
     type_code: str
     type_subtitle: Optional[str] = None
+    # §11-1 인상 변화 — 처음/나중에 제일 많이 받은 문항과 그 표 수
+    impression_shift: Optional["ImpressionShift"] = None
     self_guess: Optional[str] = None
     badges: list[str]
     quote: Optional[str] = None

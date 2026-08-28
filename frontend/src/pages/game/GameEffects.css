@@ -481,3 +481,48 @@
   color: var(--ink-soft);
   letter-spacing: 0.1em;
 }
+
+/* ── 첫인상 투표 — 지목 버튼도 큰 색면으로 통일 ── */
+.impression-choices {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-content: start;
+}
+
+.impression-choices button {
+  min-height: 84px;
+  border: none !important;
+  border-radius: var(--radius-md);
+  color: #fff !important;
+  font-size: 1.05rem;
+  font-weight: 700;
+  word-break: keep-all;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.impression-choices button:nth-child(4n + 1) { background: var(--c1) !important; }
+.impression-choices button:nth-child(4n + 2) { background: var(--c2) !important; }
+.impression-choices button:nth-child(4n + 3) { background: var(--c3) !important; color: #2a2000 !important; }
+.impression-choices button:nth-child(4n + 4) { background: var(--c4) !important; }
+.impression-choices button:active { transform: scale(0.96); filter: brightness(1.12); }
+
+/* 지목 대상이 한 명뿐이면 한 칸을 다 쓴다 */
+.impression-choices button:only-child { grid-column: 1 / -1; }
+
+.impression-question {
+  text-wrap: balance;
+}
+
+/* 첫인상 결과 카드도 어두운 바탕에 맞춘다 */
+.impression-result-card {
+  background: var(--surface-2) !important;
+  border-color: var(--line) !important;
+  animation: card-drop 0.4s var(--ease-pop) both;
+}
+
+.impression-tally-votes {
+  font-family: var(--font-mono);
+  color: var(--hot) !important;
+  font-weight: 600;
+}

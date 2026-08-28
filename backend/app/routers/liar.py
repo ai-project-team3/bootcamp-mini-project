@@ -307,8 +307,11 @@ def _state(room: Room, rnd: LiarRound | None, db: Session, player_id: str) -> Li
     votes = _continue_votes(room, rnd, db)
 
     caught = rnd.accused_player_id == rnd.liar_player_id if rnd.accused_player_id else False
+    # 걸린 라이어에게는 아직 한 번의 기회가 남아 있다. 그 기회가 끝나기 전에는
+    # 제시어도 승패도 확정하지 않는다 — 답을 보여주고 맞히라고 할 수는 없다.
+    pending = rnd.stage == "REVEAL" and caught and rnd.liar_guessed_word is None
     liar_won = False
-    if rnd.stage == "REVEAL":
+    if rnd.stage == "REVEAL" and not pending:
         liar_won = (not caught) or (rnd.liar_guessed_word == rnd.major_word)
 
     return LiarStateResponse(
@@ -330,6 +333,7 @@ def _state(room: Room, rnd: LiarRound | None, db: Session, player_id: str) -> Li
         accused_nickname=nickname.get(rnd.accused_player_id) if rnd.accused_player_id else None,
         liar_nickname=nickname.get(rnd.liar_player_id) if rnd.stage == "REVEAL" else None,
         liar_caught=caught,
-        major_word=rnd.major_word if rnd.stage == "REVEAL" else None,
+        major_word=rnd.major_word if rnd.stage == "REVEAL" and not pending else None,
+        word_pending=pending,
         liar_won=liar_won,
     )
