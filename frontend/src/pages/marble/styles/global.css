@@ -749,98 +749,6 @@
   justify-content: center;
 }
 
-.pm-start {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--pm-space-4);
-  text-align: center;
-  padding: var(--pm-space-6) var(--pm-space-5);
-}
-
-.pm-start__hero {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  margin-bottom: var(--pm-space-1);
-}
-
-.pm-start__token {
-  width: 76px;
-  height: 76px;
-  object-fit: contain;
-  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.3));
-}
-
-.pm-start__token--a {
-  transform: rotate(-8deg) translateX(10px);
-}
-
-.pm-start__token--b {
-  width: 62px;
-  height: 62px;
-  transform: rotate(8deg) translateX(-10px);
-}
-
-.pm-start__title {
-  font-size: 2.1rem;
-}
-
-.pm-start__lead {
-  color: var(--pm-text-muted);
-  font-size: 0.92rem;
-  line-height: 1.7;
-  margin: 0;
-}
-
-.pm-mode-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--pm-space-3);
-  width: 100%;
-}
-
-.pm-mode-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--pm-space-1);
-  padding: var(--pm-space-4);
-  border-radius: var(--pm-radius-sm);
-  border: 2px solid var(--pm-border);
-  background: var(--pm-surface-raised);
-  color: var(--pm-text);
-  cursor: pointer;
-  transition: border-color var(--pm-transition), transform var(--pm-transition);
-}
-
-.pm-mode-option:hover {
-  transform: translateY(-1px);
-}
-
-.pm-mode-option--selected {
-  border-color: var(--pm-accent);
-  box-shadow: 0 0 0 1px var(--pm-accent) inset;
-}
-
-.pm-mode-option__icon {
-  font-size: 1.6rem;
-}
-
-.pm-mode-option__title {
-  font-weight: 700;
-  font-size: 0.95rem;
-}
-
-.pm-mode-option__desc {
-  font-size: 0.78rem;
-  color: var(--pm-text-muted);
-}
-
-.pm-start__cta {
-  width: 100%;
-}
-
 @media (max-width: 480px) {
   .pm-mode-options {
     grid-template-columns: 1fr;
@@ -857,74 +765,6 @@
   padding: var(--pm-space-6) var(--pm-space-5);
 }
 
-.pm-waiting__title {
-  font-size: 1.5rem;
-}
-
-.pm-waiting__code-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--pm-space-2);
-  width: 100%;
-}
-
-.pm-waiting__code-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--pm-text-faint);
-}
-
-.pm-waiting__code {
-  font-family: var(--pm-font-display);
-  font-size: 2.4rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: var(--pm-accent);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.pm-waiting__invite {
-  font-size: 0.82rem;
-  padding: var(--pm-space-2) var(--pm-space-4);
-}
-
-.pm-waiting__copied {
-  font-size: 0.78rem;
-  color: var(--pm-success);
-}
-
-.pm-waiting__seats {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--pm-space-3);
-  width: 100%;
-}
-
-.pm-waiting__seat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--pm-space-2);
-  padding: var(--pm-space-4);
-  border-radius: 14px;
-  border: 2px dashed var(--pm-border);
-  background: var(--pm-surface-raised);
-}
-
-.pm-waiting__seat--filled {
-  border-style: solid;
-  border-color: var(--pm-accent);
-}
-
 .pm-waiting__seat-token {
   width: 48px;
   height: 48px;
@@ -932,17 +772,11 @@
   filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
 }
 
-.pm-waiting__seat:not(.pm-waiting__seat--filled) .pm-waiting__seat-token {
+/* An empty chair's token, greyed out until someone takes the seat. The seat
+   list is the app's shared one now, so this hangs off its empty-seat class. */
+.game-room-seat-empty .pm-waiting__seat-token {
   opacity: 0.28;
   filter: grayscale(1);
-}
-
-.pm-waiting__seat-name {
-  font-weight: 700;
-  font-size: 0.92rem;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--pm-space-2);
 }
 
 .pm-waiting__you {
@@ -953,11 +787,6 @@
   border-radius: var(--pm-radius-pill);
   background: var(--pm-accent);
   color: var(--pm-accent-ink);
-}
-
-.pm-waiting__seat-empty {
-  font-size: 0.82rem;
-  color: var(--pm-text-faint);
 }
 
 .pm-waiting__cta {
@@ -986,25 +815,6 @@
   border: 1px solid var(--pm-border);
 }
 
-.pm-tab {
-  flex: 1;
-  font-family: var(--pm-font-body);
-  font-size: 0.86rem;
-  font-weight: 700;
-  padding: var(--pm-space-2) var(--pm-space-4);
-  border: none;
-  border-radius: var(--pm-radius-pill);
-  background: transparent;
-  color: var(--pm-text-muted);
-  cursor: pointer;
-  transition: background var(--pm-transition), color var(--pm-transition);
-}
-
-.pm-tab--active {
-  background: var(--pm-accent);
-  color: var(--pm-accent-ink);
-}
-
 /* ===== Join form ===== */
 .pm-field {
   display: flex;
@@ -1012,36 +822,6 @@
   gap: var(--pm-space-2);
   width: 100%;
   text-align: left;
-}
-
-.pm-field__label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--pm-text-muted);
-}
-
-.pm-input {
-  font-family: var(--pm-font-body);
-  font-size: 1rem;
-  padding: var(--pm-space-3) var(--pm-space-4);
-  border-radius: var(--pm-radius-sm);
-  border: 1px solid var(--pm-border-strong);
-  background: var(--pm-surface-raised);
-  color: var(--pm-text);
-  width: 100%;
-}
-
-.pm-input:focus {
-  outline: 2px solid var(--pm-accent);
-  outline-offset: 1px;
-}
-
-.pm-input--code {
-  font-family: var(--pm-font-display);
-  font-size: 1.4rem;
-  letter-spacing: 0.18em;
-  text-align: center;
-  text-transform: uppercase;
 }
 
 @media (max-width: 480px) and (min-width: 421px) {
@@ -1058,41 +838,6 @@
   margin-top: 14px;
 }
 
-.pm-seat-picker__label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--pm-text-muted);
-}
-
-.pm-seat-picker__options {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.pm-seat {
-  min-width: 44px;
-  padding: 10px 0;
-  flex: 1 1 44px;
-  border: 1px solid var(--pm-border);
-  border-radius: 10px;
-  background: var(--pm-surface);
-  color: var(--pm-text);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.pm-seat:hover {
-  border-color: var(--pm-accent);
-}
-
-.pm-seat--selected {
-  border-color: var(--pm-accent);
-  background: var(--pm-accent);
-  color: #fff;
-}
-
 /* ===== Waiting-room headcount ===== */
 .pm-waiting__tally {
   display: flex;
@@ -1100,36 +845,6 @@
   align-items: center;
   gap: 6px;
   margin: 14px 0 4px;
-}
-
-.pm-waiting__tally-count {
-  font-family: var(--pm-font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--pm-text);
-}
-
-.pm-waiting__tally-label {
-  font-size: 0.9rem;
-  color: var(--pm-text-muted);
-}
-
-.pm-waiting__tally-bar {
-  display: block;
-  width: 100%;
-  max-width: 260px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--pm-border);
-  overflow: hidden;
-}
-
-.pm-waiting__tally-fill {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: var(--pm-accent);
-  transition: width 0.3s ease-out;
 }
 
 /* Seats wrap once a room holds more than a couple of people. */

@@ -15,6 +15,11 @@ class RoomStore:
             raise KeyError(f"Room not found: {room_id}")
         return self._rooms[room_id]
 
+    def remove(self, room_id: str) -> None:
+        """Forget a room. Missing is not an error: two players leaving at once
+        should both succeed rather than race each other into a 404."""
+        self._rooms.pop(room_id, None)
+
     def clear(self) -> None:
         self._rooms.clear()
 

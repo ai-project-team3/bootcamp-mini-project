@@ -29,3 +29,12 @@ button {
 a {
   color: inherit;
 }
+
+/* Form errors on the room screens. Lives here rather than beside one screen
+   because the hub, the guide and the room layouts all raise the same message. */
+.game-room-error {
+  margin: 10px 0;
+  color: var(--hot);
+  font-size: 13px;
+  font-weight: 700;
+}

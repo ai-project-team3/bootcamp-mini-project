@@ -54,15 +54,15 @@ describe("WaitingRoom", () => {
     render(
       <WaitingRoom state={roomState([player("p1", "민수")])} playerId="p1" onStart={noop} onLeave={noop} onChangeMaxPlayers={noop} />
     );
-    expect(screen.getByTestId("pm-seat-0")).toHaveTextContent("민수");
-    expect(screen.getByTestId("pm-seat-1")).toHaveTextContent("비어 있음");
+    expect(screen.getByTestId("game-room-seat-0")).toHaveTextContent("민수");
+    expect(screen.getByTestId("game-room-seat-1")).toHaveTextContent("비어 있음");
   });
 
   it("marks which seat is you", () => {
     const players = [player("p1", "민수"), player("p2", "지은")];
     render(<WaitingRoom state={roomState(players)} playerId="p2" onStart={noop} onLeave={noop} onChangeMaxPlayers={noop} />);
-    expect(screen.getByTestId("pm-seat-1")).toHaveTextContent("나");
-    expect(screen.getByTestId("pm-seat-0")).not.toHaveTextContent("나");
+    expect(screen.getByTestId("game-room-seat-1")).toHaveTextContent("나");
+    expect(screen.getByTestId("game-room-seat-0")).not.toHaveTextContent("나");
   });
 
   it("keeps the host's start button disabled until the room is full", () => {
@@ -116,9 +116,9 @@ describe("WaitingRoom", () => {
     );
 
     for (let seat = 0; seat < 6; seat += 1) {
-      expect(screen.getByTestId(`pm-seat-${seat}`)).toBeInTheDocument();
+      expect(screen.getByTestId(`game-room-seat-${seat}`)).toBeInTheDocument();
     }
-    expect(screen.queryByTestId("pm-seat-6")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("game-room-seat-6")).not.toBeInTheDocument();
   });
 
   it("counts who has arrived against the room size", () => {
@@ -133,8 +133,7 @@ describe("WaitingRoom", () => {
       />
     );
 
-    expect(screen.getByText("3 / 5명")).toBeInTheDocument();
-    expect(screen.getByText(/2명 더 들어오면 시작해요/)).toBeInTheDocument();
+    expect(screen.getByText("3 / 5명 · 2명 더 들어오면 시작해요")).toBeInTheDocument();
   });
 
   it("says the room is full once every seat is taken", () => {
@@ -148,8 +147,7 @@ describe("WaitingRoom", () => {
       />
     );
 
-    expect(screen.getByText("3 / 3명")).toBeInTheDocument();
-    expect(screen.getByText("모두 모였어요")).toBeInTheDocument();
+    expect(screen.getByText("3 / 3명 · 모두 모였어요")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "게임 시작" })).not.toBeDisabled();
   });
 

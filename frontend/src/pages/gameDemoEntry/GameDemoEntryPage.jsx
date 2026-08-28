@@ -1,14 +1,11 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { createDemoRoom, getDemoRoom, joinDemoRoom } from '../../api/demoRooms'
-import Button from '../../components/common/Button'
-import Card from '../../components/common/Card'
-import GameDemoRoomHero from '../../components/common/GameDemoRoomHero'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
+import RoomEntryLayout from '../../components/room/RoomEntryLayout'
 import { useRoomFlow } from '../../context/RoomFlowContext'
 import { normalizeDemoNickname, normalizeDemoRoomCode } from '../../data/gameDemo/gameDemoModels'
-import './GameDemoEntryPage.css'
 
 export default function GameDemoEntryPage() {
   const navigate = useNavigate()
@@ -68,37 +65,21 @@ export default function GameDemoEntryPage() {
   return (
     <PhoneFrame>
       <TopBar title="게임 데모" onBack={() => navigate('/games')} />
-      <GameDemoRoomHero eyebrow="MINWOO GAME LAB" title={<>닉네임만 정하고<br />같이 시작해요</>}>
-        2명부터 10명까지 초대코드로 모일 수 있어요.
-      </GameDemoRoomHero>
-
-      <Card className="game-room-entry-card">
-        <label htmlFor="demo-nickname">닉네임</label>
-        <input
-          id="demo-nickname"
-          value={nicknameDraft}
-          onChange={(event) => setNicknameDraft(event.target.value)}
-          placeholder="닉네임을 입력하세요"
-          maxLength={12}
-          autoComplete="nickname"
-        />
-
-        <Button onClick={handleCreate} disabled={busy}>새 방 만들기</Button>
-
-        <div className="game-room-divider"><span>또는 초대코드로 참가</span></div>
-
-        <label htmlFor="demo-room-code">초대코드</label>
-        <input
-          id="demo-room-code"
-          value={codeDraft}
-          onChange={(event) => setCodeDraft(event.target.value.toUpperCase())}
-          placeholder="예: AB12CD"
-          maxLength={6}
-          disabled={Boolean(invitedCode)}
-        />
-        <Button variant="secondary" onClick={handleJoin} disabled={busy}>방 참가하기</Button>
-        {error && <p className="game-room-error" role="alert">{error}</p>}
-      </Card>
+      <RoomEntryLayout
+        idPrefix="demo"
+        eyebrow="MINWOO GAME LAB"
+        title={<>닉네임만 정하고<br />같이 시작해요</>}
+        lead="2명부터 10명까지 초대코드로 모일 수 있어요."
+        nickname={nicknameDraft}
+        onNicknameChange={setNicknameDraft}
+        roomCode={codeDraft}
+        onRoomCodeChange={setCodeDraft}
+        codeLocked={Boolean(invitedCode)}
+        onCreate={handleCreate}
+        onJoin={handleJoin}
+        busy={busy}
+        error={error}
+      />
     </PhoneFrame>
   )
 }

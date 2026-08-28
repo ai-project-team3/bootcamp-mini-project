@@ -12,6 +12,15 @@ import { useRoomState } from "./hooks/useRoomState";
 import { getMyView } from "./api/client";
 import type { GamePhase, MyView } from "./api/types";
 
+/** Someone who followed an invite link arrives with the room code in the URL. */
+function readInviteCode(): string {
+  try {
+    return new URLSearchParams(window.location.search).get("room")?.toUpperCase() ?? "";
+  } catch {
+    return "";
+  }
+}
+
 const ROLE_REVEALED_PHASES: GamePhase[] = [
   "ROLE_ASSIGNMENT",
   "DAY_DISCUSSION",
@@ -26,6 +35,7 @@ export function MafiaApp() {
   const { state, error } = useRoomState(session?.roomId ?? null);
   const [myView, setMyView] = useState<MyView | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [inviteCode] = useState(readInviteCode);
 
   useEffect(() => {
     if (!session || !state) return;
@@ -41,7 +51,7 @@ export function MafiaApp() {
 
   const renderPage = () => {
     if (!session) {
-      return <HomePage onJoined={setSession} notice={notice} />;
+      return <HomePage onJoined={setSession} notice={notice} initialRoomCode={inviteCode} />;
     }
 
     if (!state) {

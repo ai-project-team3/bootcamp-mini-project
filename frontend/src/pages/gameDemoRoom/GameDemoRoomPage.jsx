@@ -1,20 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { QRCodeSVG } from 'qrcode.react'
 import { getDemoPlayers, getDemoRoom, startDemoRoom } from '../../api/demoRooms'
 import Button from '../../components/common/Button'
-import Card from '../../components/common/Card'
 import GameDemoRoomHero from '../../components/common/GameDemoRoomHero'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
+import RoomWaitingLayout from '../../components/room/RoomWaitingLayout'
 import { useRoomFlow } from '../../context/RoomFlowContext'
-import { copyText } from '../../shared/clipboard'
 import {
   canStartDemoRoom,
   DEMO_ROOM_MAX_PLAYERS,
   DEMO_ROOM_MIN_PLAYERS,
 } from '../../data/gameDemo/gameDemoModels'
-import './GameDemoRoom.css'
 
 const POLL_INTERVAL_MS = 1500
 
@@ -25,13 +22,6 @@ export default function GameDemoRoomPage() {
   const [players, setPlayers] = useState([])
   const [error, setError] = useState('')
   const [starting, setStarting] = useState(false)
-  const [copied, setCopied] = useState(null)
-
-  const handleCopyInvite = async () => {
-    const ok = await copyText(inviteUrl)
-    setCopied(ok)
-    window.setTimeout(() => setCopied(null), 2600)
-  }
 
   useEffect(() => {
     if (!playerId || roomCode !== code) return
@@ -87,44 +77,26 @@ export default function GameDemoRoomPage() {
   return (
     <PhoneFrame>
       <TopBar title={`게임방 · ${code}`} onBack={() => navigate('/games/demo')} />
-      <GameDemoRoomHero eyebrow="WAITING ROOM" title={<>같이 놀 사람을<br />기다리고 있어요</>} compact>
-        {players.length}/{DEMO_ROOM_MAX_PLAYERS}명 참여 · {DEMO_ROOM_MIN_PLAYERS}명부터 시작
-      </GameDemoRoomHero>
-
-      <Card className="game-room-invite-card">
-        <QRCodeSVG value={inviteUrl} size={120} bgColor="transparent" fgColor="var(--ink)" />
-        <div>
-          <small>초대코드</small>
-          <strong>{code}</strong>
-          <button type="button" onClick={handleCopyInvite}>
-            {copied === true ? '복사됐어요!' : copied === false ? '복사 실패 — 아래 주소를 길게 눌러 복사하세요' : '초대 링크 복사'}
-          </button>
-          <small className="game-room-invite-url">{inviteUrl}</small>
-        </div>
-      </Card>
-
-      <section className="game-room-player-section">
-        <h2>참가자</h2>
-        <ul className="game-room-player-list">
-          {players.map((player) => (
-            <li key={player.id}>
-              <span aria-hidden>👤</span>
-              <b>{player.nickname}</b>
-              {player.is_host && <em>방장</em>}
-              {player.id === playerId && <small>나</small>}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {error && <p className="game-room-error" role="alert">{error}</p>}
-      {isHost ? (
-        <Button onClick={handleStart} disabled={!canStart || starting}>
-          {starting ? '시작하는 중...' : players.length < DEMO_ROOM_MIN_PLAYERS ? '한 명 더 기다려주세요' : '게임 선택 시작'}
-        </Button>
-      ) : (
-        <Button variant="ghost" disabled>방장이 시작하기를 기다리는 중</Button>
-      )}
+      <RoomWaitingLayout
+        title={<>같이 놀 사람을<br />기다리고 있어요</>}
+        lead={`${players.length}/${DEMO_ROOM_MAX_PLAYERS}명 참여 · ${DEMO_ROOM_MIN_PLAYERS}명부터 시작`}
+        code={code}
+        inviteUrl={inviteUrl}
+        players={players.map((player) => ({
+          id: player.id,
+          nickname: player.nickname,
+          isHost: player.is_host,
+          isMe: player.id === playerId,
+        }))}
+        error={error}
+        footer={isHost ? (
+          <Button onClick={handleStart} disabled={!canStart || starting}>
+            {starting ? '시작하는 중...' : players.length < DEMO_ROOM_MIN_PLAYERS ? '한 명 더 기다려주세요' : '게임 선택 시작'}
+          </Button>
+        ) : (
+          <Button variant="ghost" disabled>방장이 시작하기를 기다리는 중</Button>
+        )}
+      />
     </PhoneFrame>
   )
 }

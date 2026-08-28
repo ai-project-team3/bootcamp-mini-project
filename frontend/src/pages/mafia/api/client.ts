@@ -89,6 +89,19 @@ export function updatePlayerCount(roomId: string, playerCount: number) {
   });
 }
 
+/**
+ * Leave the room, closing it if you are the host.
+ *
+ * Backs '게임 선택으로 돌아가기': the room is released server-side so nobody can
+ * rejoin the abandoned game, and the players still in it see it disappear.
+ */
+export function leaveRoom(roomId: string, playerId: string) {
+  return request<{ status: string }>(`/mafia/rooms/${roomId}/leave`, {
+    method: "POST",
+    body: JSON.stringify({ player_id: playerId }),
+  });
+}
+
 export function getRoomState(roomId: string) {
   return request<RoomState>(`/mafia/rooms/${roomId}/state`);
 }

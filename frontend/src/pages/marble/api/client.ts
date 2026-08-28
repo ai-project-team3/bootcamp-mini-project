@@ -36,6 +36,19 @@ export function joinRoom(roomId: string, nickname: string) {
   });
 }
 
+/**
+ * Leave the room, closing it if you are the host.
+ *
+ * Backs '게임 선택으로 돌아가기': the room is released server-side so the next
+ * game starts from an empty room with a fresh invite.
+ */
+export function leaveRoom(roomId: string, playerId: string) {
+  return request<{ status: string }>(`/marble/rooms/${roomId}/leave`, {
+    method: "POST",
+    body: JSON.stringify({ player_id: playerId }),
+  });
+}
+
 export function getRoomState(roomId: string) {
   return request<RoomState>(`/marble/rooms/${roomId}/state`);
 }

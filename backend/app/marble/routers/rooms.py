@@ -7,6 +7,7 @@ from app.marble.persona.provider import MockPersonaProvider
 from app.marble.schemas.room import (
     CreateRoomRequest,
     JoinRoomRequest,
+    LeaveRoomRequest,
     UpdateMaxPlayersRequest,
 )
 from app.marble.store import store
@@ -137,6 +138,35 @@ def update_max_players(room_id: str, req: UpdateMaxPlayersRequest):
         raise HTTPException(400, "이미 참가한 인원보다 적게 설정할 수 없습니다")
     room.max_players = req.max_players
     return {"max_players": room.max_players}
+
+
+@router.post("/{room_id}/leave")
+def leave_room(room_id: str, req: LeaveRoomRequest):
+    """Leave, and take the room with you if you are the host.
+
+    A player who goes back to the game list starts over from nothing, so no
+    part of the old game may survive. The host closing the room is what makes
+    that true for everyone else too: their next poll 404s, their client drops
+    its session, and they land back on room creation needing a fresh invite.
+    Leaving twice is not an error — a player pressing the button on a room the
+    host already closed should still get out."""
+    if not store.exists(room_id):
+        return {"status": "already_closed"}
+    room = store.get(room_id)
+    if req.player_id not in room.players:
+        # An id that is not in this room cannot close someone else's room.
+        return {"status": "not_in_room"}
+    if room.host_player_id == req.player_id:
+        store.remove(room_id)
+        return {"status": "room_closed"}
+    room.players.pop(req.player_id, None)
+    if req.player_id in room.turn_order:
+        room.turn_order.remove(req.player_id)
+    # The last player out closes the room behind them.
+    if not room.players:
+        store.remove(room_id)
+        return {"status": "room_closed"}
+    return {"status": "left"}
 
 
 @router.get("/{room_id}/state")
