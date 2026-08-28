@@ -124,28 +124,17 @@ export default function StartPage() {
         {error && <p className="start-error">{error}</p>}
 
         <div className="start-minigames">
-          <span className="start-label">부가 미니게임</span>
-          <p className="start-minigames-note">각자 방을 따로 만들어 바로 플레이합니다.</p>
-          <div className="start-minigames-row">
-            <button
-              type="button"
-              className="start-minigame-btn"
-              onClick={() => navigate('/games/mafia')}
-            >
-              <span aria-hidden>🕵️</span>
-              마피아
-              <b>4~8인</b>
-            </button>
-            <button
-              type="button"
-              className="start-minigame-btn"
-              onClick={() => navigate('/games/marble')}
-            >
-              <span aria-hidden>💞</span>
-              커플 브루마블
-              <b>2~8인</b>
-            </button>
-          </div>
+          <span className="start-label">게임 바로가기</span>
+          <p className="start-minigames-note">얼음땡을 하지 않고 게임만 골라서 할 수도 있어요.</p>
+          <button
+            type="button"
+            className="start-minigame-btn start-minigame-btn--wide"
+            onClick={() => navigate('/games')}
+          >
+            <span aria-hidden>🎮</span>
+            게임 목록 보기
+            <b>미니게임 · 페르소나 · 파티 게임</b>
+          </button>
         </div>
       </div>
       <Button onClick={handleCreate} disabled={busy}>

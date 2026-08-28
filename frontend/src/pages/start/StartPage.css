@@ -141,12 +141,6 @@
   color: var(--ink-soft);
 }
 
-.start-minigames-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
 .start-minigame-btn {
   display: flex;
   flex-direction: column;
@@ -175,4 +169,8 @@
 
 .start-minigame-btn:hover {
   border-color: var(--hot);
+}
+
+.start-minigame-btn--wide {
+  width: 100%;
 }
