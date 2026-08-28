@@ -3,6 +3,17 @@
   color: var(--hot);
 }
 
+.report-share-btn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
 .report-hint {
   flex: 1;
   display: flex;

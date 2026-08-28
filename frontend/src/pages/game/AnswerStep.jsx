@@ -84,7 +84,6 @@ export default function AnswerStep({ code, playerId, questions, onAdvance }) {
     // will be attributed changes what you pick, and then the abilities measure
     // the impression rather than the person.
     const { count_a: a, count_b: b } = status
-    const total = a + b || 1
     return (
       <div className="answer-results">
         <p className="answer-situation">{question.situation}</p>
@@ -95,8 +94,10 @@ export default function AnswerStep({ code, playerId, questions, onAdvance }) {
             <span className={`split-num b${myChoice === 'B' ? ' mine' : ''}`}>{b}</span>
           </div>
           <div className="split-bar">
-            <span className="split-fill a" style={{ flexGrow: a || 0.02 }} />
-            <span className="split-fill b" style={{ flexGrow: b || 0.02 }} />
+            {/* 만장일치일 때 진 쪽 색을 0.02만큼이라도 남기면 실제로는 표가
+                하나도 없는데 색이 섞여 보인다. 표가 있는 쪽만 그린다. */}
+            {a > 0 && <span className="split-fill a" style={{ flexGrow: a }} />}
+            {b > 0 && <span className="split-fill b" style={{ flexGrow: b }} />}
           </div>
           <div className="split-labels">
             <span className="split-label">{question.a}</span>
@@ -119,14 +120,16 @@ export default function AnswerStep({ code, playerId, questions, onAdvance }) {
   return (
     <div className="answer-step">
       <ProgressBar current={questionNo} total={questions.length} />
-      <p className="answer-situation">{question.situation}</p>
-      <div className="answer-choices">
-        <button className="answer-choice-btn choice-a" onClick={() => handleChoice('A')}>
-          {question.a}
-        </button>
-        <button className="answer-choice-btn choice-b" onClick={() => handleChoice('B')}>
-          {question.b}
-        </button>
+      <div className="step-body">
+        <p className="answer-situation">{question.situation}</p>
+        <div className="answer-choices">
+          <button className="answer-choice-btn choice-a" onClick={() => handleChoice('A')}>
+            {question.a}
+          </button>
+          <button className="answer-choice-btn choice-b" onClick={() => handleChoice('B')}>
+            {question.b}
+          </button>
+        </div>
       </div>
     </div>
   )

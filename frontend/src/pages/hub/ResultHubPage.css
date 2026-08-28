@@ -15,8 +15,9 @@
 }
 
 .hub-sub {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
   margin: 0 0 24px;
   text-align: center;
 }
