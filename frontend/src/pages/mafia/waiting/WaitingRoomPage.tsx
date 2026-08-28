@@ -2,9 +2,8 @@ import { useState } from "react";
 import { fillTestPlayers, startGame, submitMockPersona, updatePlayerCount } from "../api/client";
 import type { PlayerSession } from "../hooks/usePlayerSession";
 import type { RoomState } from "../api/types";
+import { PLAYER_COUNT_OPTIONS } from "../constants";
 import "./WaitingRoomPage.css";
-
-const PLAYER_COUNT_OPTIONS = [4, 5, 6] as const;
 
 interface WaitingRoomPageProps {
   session: PlayerSession;

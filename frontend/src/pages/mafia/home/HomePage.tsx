@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createRoom, joinRoom } from "../api/client";
 import type { PlayerSession } from "../hooks/usePlayerSession";
+import { PLAYER_COUNT_OPTIONS } from "../constants";
 
 interface HomePageProps {
   onJoined: (session: PlayerSession) => void;
@@ -61,9 +62,11 @@ export function HomePage({ onJoined, notice }: HomePageProps) {
             value={playerCount}
             onChange={(e) => setPlayerCount(Number(e.target.value))}
           >
-            <option value={4}>4인</option>
-            <option value={5}>5인</option>
-            <option value={6}>6인</option>
+            {PLAYER_COUNT_OPTIONS.map((count) => (
+              <option key={count} value={count}>
+                {count}인
+              </option>
+            ))}
           </select>
           <button className="btn btn-primary" onClick={handleCreate} disabled={!nickname}>
             방 만들기

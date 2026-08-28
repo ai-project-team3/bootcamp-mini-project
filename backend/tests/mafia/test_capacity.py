@@ -1,6 +1,6 @@
 import pytest
 
-from app.mafia.roles.capacity import get_role_capacity
+from app.mafia.roles.capacity import SUPPORTED_PLAYER_COUNTS, get_role_capacity
 
 
 def test_capacity_for_4_players():
@@ -15,14 +15,35 @@ def test_capacity_for_6_players():
     assert get_role_capacity(6) == {"mafia": 2, "police": 1, "doctor": 1, "citizen": 2}
 
 
+def test_capacity_for_7_players():
+    assert get_role_capacity(7) == {"mafia": 3, "police": 1, "doctor": 1, "citizen": 2}
+
+
+def test_capacity_for_8_players():
+    assert get_role_capacity(8) == {"mafia": 3, "police": 1, "doctor": 1, "citizen": 3}
+
+
+def test_supported_counts_are_four_through_eight():
+    assert SUPPORTED_PLAYER_COUNTS == (4, 5, 6, 7, 8)
+
+
 def test_capacity_totals_match_player_count():
-    for player_count in (4, 5, 6):
+    """A row that does not sum to its player count leaves someone unassigned."""
+    for player_count in SUPPORTED_PLAYER_COUNTS:
         assert sum(get_role_capacity(player_count).values()) == player_count
 
 
+def test_every_room_has_exactly_one_police_and_one_doctor():
+    for player_count in SUPPORTED_PLAYER_COUNTS:
+        capacity = get_role_capacity(player_count)
+        assert capacity["police"] == 1
+        assert capacity["doctor"] == 1
+
+
 def test_unsupported_player_count_raises():
-    with pytest.raises(ValueError):
-        get_role_capacity(7)
+    for bad in (3, 9, 0, -1):
+        with pytest.raises(ValueError):
+            get_role_capacity(bad)
 
 
 def test_returned_dict_is_a_copy_not_shared_mutable_state():

@@ -424,10 +424,10 @@ def test_player_count_update_rejects_invalid_values():
     client = TestClient(app)
     room_id = client.post("/mafia/rooms", json={"player_count": 4}).json()["room_id"]
 
-    resp = client.post(f"/mafia/rooms/{room_id}/player-count", json={"player_count": 7})
+    resp = client.post(f"/mafia/rooms/{room_id}/player-count", json={"player_count": 9})
 
     assert resp.status_code == 400
-    assert "4, 5, or 6" in resp.json()["detail"]
+    assert "4, 5, 6, 7, 8" in resp.json()["detail"]
 
 
 def test_player_count_update_rejects_shrinking_below_current_headcount():

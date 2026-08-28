@@ -19,6 +19,11 @@ router = APIRouter(prefix="/mafia/rooms", tags=["mafia-rooms"])
 MAX_NICKNAME_LENGTH = 12
 
 
+def _player_count_error() -> str:
+    allowed = ", ".join(str(n) for n in ALLOWED_PLAYER_COUNTS)
+    return f"player_count must be one of: {allowed}"
+
+
 def _new_room_id() -> str:
     """A short code players can read aloud. Retry on the rare collision."""
     for _ in range(20):
@@ -40,7 +45,7 @@ def _clean_nickname(raw: str) -> str:
 @router.post("")
 def create_room(req: CreateRoomRequest):
     if req.player_count not in ALLOWED_PLAYER_COUNTS:
-        raise HTTPException(400, "player_count must be 4, 5, or 6")
+        raise HTTPException(400, _player_count_error())
     room_id = _new_room_id()
     store.create(Room(room_id=room_id, player_count=req.player_count))
     return {"room_id": room_id}
@@ -67,7 +72,7 @@ def update_player_count(room_id: str, req: UpdatePlayerCountRequest):
     if room.phase != GamePhase.WAITING_ROOM:
         raise HTTPException(400, "대기실에서만 인원수를 변경할 수 있습니다")
     if req.player_count not in ALLOWED_PLAYER_COUNTS:
-        raise HTTPException(400, "player_count must be 4, 5, or 6")
+        raise HTTPException(400, _player_count_error())
     if req.player_count < len(room.players):
         raise HTTPException(400, "이미 참가한 인원보다 적게 설정할 수 없습니다")
     room.player_count = req.player_count

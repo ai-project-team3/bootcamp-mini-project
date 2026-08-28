@@ -1,7 +1,10 @@
 """Domain constants shared across routers and game logic."""
 
-# Room sizes the role-assignment table supports (docs/mafia_game_design.md).
-ALLOWED_PLAYER_COUNTS = (4, 5, 6)
+from app.mafia.roles.capacity import SUPPORTED_PLAYER_COUNTS
+
+# Room sizes the role-assignment table supports. Derived from the table itself
+# so adding a row there is the only edit needed to allow a new room size.
+ALLOWED_PLAYER_COUNTS = SUPPORTED_PLAYER_COUNTS
 
 # Nickname prefix for the demo-only "fill test players" endpoint.
 TEST_BOT_NICKNAME_PREFIX = "테스트봇"

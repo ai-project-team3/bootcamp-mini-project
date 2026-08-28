@@ -3,7 +3,7 @@ from collections import Counter
 
 from app.mafia.persona.provider import MockPersonaProvider
 from app.mafia.roles.assignment import assign_roles
-from app.mafia.roles.capacity import get_role_capacity
+from app.mafia.roles.capacity import SUPPORTED_PLAYER_COUNTS, get_role_capacity
 
 
 def run_simulation(player_count: int, trials: int, seed: int = 42) -> dict:
@@ -35,5 +35,5 @@ def run_simulation(player_count: int, trials: int, seed: int = 42) -> dict:
 
 
 if __name__ == "__main__":
-    for player_count in (4, 5, 6):
+    for player_count in SUPPORTED_PLAYER_COUNTS:
         print(run_simulation(player_count, trials=1000))
