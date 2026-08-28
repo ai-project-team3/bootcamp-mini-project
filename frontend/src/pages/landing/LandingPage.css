@@ -1,0 +1,18 @@
+/* The 얼음땡 flow still has to be reachable from the landing, but it is not
+   part of the screen this page mirrors — so it is a quiet text link under the
+   buttons rather than a fourth button that would change the layout. */
+.landing-start-link {
+  margin-top: 18px;
+  padding: 8px;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.landing-start-link:hover {
+  color: var(--hot);
+}
