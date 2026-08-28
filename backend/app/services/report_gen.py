@@ -18,7 +18,9 @@ from ..config import settings
 
 logger = logging.getLogger(__name__)
 
-COMMENT_MAX_LEN = 150
+PARAGRAPH_MAX_LEN = 280
+PARAGRAPH_MIN_COUNT = 2
+PARAGRAPH_MAX_COUNT = 3
 SUMMARY_MAX_LEN = 60
 REASON_MAX_LEN = 100
 HIGHLIGHT_MAX_LEN = 110
@@ -36,9 +38,9 @@ BANNED = (
 
 class PlayerCommentOut(BaseModel):
     nickname: str
-    line1: str = Field(max_length=COMMENT_MAX_LEN)  # 돌려까기
-    line2: str = Field(max_length=COMMENT_MAX_LEN)  # 오늘의 장면
-    line3: str = Field(max_length=COMMENT_MAX_LEN)  # 뒤집어 칭찬
+    # 짧은 3줄이 아니라 자연스럽게 이어지는 2~3개 문단. 각 문단 안의 문장들이
+    # 서로 이어지는 하나의 글이어야 한다 — 끊어 붙인 코멘트 세 줄이 아니다.
+    paragraphs: list[str] = Field(min_length=PARAGRAPH_MIN_COUNT, max_length=PARAGRAPH_MAX_COUNT)
 
 
 class GeneratedReport(BaseModel):
@@ -52,34 +54,38 @@ PROMPT_RULES = """문구 규칙(§12) — 하나라도 어기면 안 된다.
 1. 숫자를 문장에 쓰지 않는다. "6초 만에 골랐다" ✕ → "손이 먼저 나갑니다" ○
 2. 까는 대상은 오늘 한 행동이지 사람이 아니다. "게으르다" ✕ → "본인 차례에만
    성실했다" ○ 같은 식으로, 행동을 과장해서 놀리되 인신공격은 하지 않는다.
-3. line1·line2는 봐줄 필요 없이 익살스럽게 비꼰다 — 순화하지 않고 세게
-   찌른다. line3은 line1에서 깐 바로 그 행동을 뒤집어 반드시 진심 어린
+3. 첫 문단은 봐줄 필요 없이 익살스럽게 비꼰다 — 순화하지 않고 세게 찌른다.
+   마지막 문단은 첫 문단에서 깐 바로 그 행동을 뒤집어 반드시 진심 어린
    칭찬으로 마무리한다. 다른 장점을 새로 꺼내지 않는다. 이게 있어야
    돌려까기가 되고, 없으면 그냥 욕이 된다 — 놀리기만 하고 안 띄워주면 실패다.
+   문단이 3개면 가운데 문단이 앞뒤를 자연스럽게 이어주는 다리 역할을 한다.
 4. 외모·성별·나이·직업은 소재로 쓰지 않는다.
 5. 첫인상 득표는 놀리되 사실로 확정하지 않는다.
 6. team_summary와 team_reasons에는 비꼼을 넣지 않는다. 개인은 놀려도 되지만
    팀 전체를 까면 자리 분위기가 죽는다.
 7. 각 사람의 MBTI가 흔히 갖는 성향(계획적/즉흥적, 논리적/감정적, 사교적/
-   내향적 등)을 line1·line2·line3의 소재로 적극 활용해서 그 사람다운 글로
-   만든다. 단 성격유형 검사 이름이나 네 글자 코드, 그 부분 글자(I/E/N/S/T/
-   F/J/P 각각), "내향", "외향", "성향검사" 같은 단어는 절대 쓰지 않는다 —
-   성향만 녹이고 이름표는 붙이지 않는다.
+   내향적 등)을 문단 전체의 소재로 적극 활용해서 그 사람다운 글로 만든다.
+   단 성격유형 검사 이름이나 네 글자 코드, 그 부분 글자(I/E/N/S/T/F/J/P
+   각각), "내향", "외향", "성향검사" 같은 단어는 절대 쓰지 않는다 — 성향만
+   녹이고 이름표는 붙이지 않는다.
 8. 칭호(badges)와 궁합(compat)이 주어지면 최소 하나씩은 코멘트 소재로
-   쓴다 — 칭호는 line2(오늘의 장면)에서 "왜 그 칭호를 받았는지"가 그림처럼
-   보이게 풀어 쓰고, 궁합은 line3(뒤집어 칭찬)에서 등급이 제일 좋은 상대나
-   제일 안 맞는 상대를 이름으로 콕 짚어 언급한다. 궁합 note 문구를 그대로
-   베끼지 말고 이 사람 얘기로 다시 풀어 쓴다.
-9. 길이를 채우려고 같은 말을 늘리지 않는다 — 늘어난 글자 수는 전부 이
+   쓴다 — 칭호는 첫 문단(또는 가운데 문단)에서 "왜 그 칭호를 받았는지"가
+   그림처럼 보이게 풀어 쓰고, 궁합은 마지막 문단에서 등급이 제일 좋은
+   상대나 제일 안 맞는 상대를 이름으로 콕 짚어 언급한다. 궁합 note 문구를
+   그대로 베끼지 말고 이 사람 얘기로 다시 풀어 쓴다.
+9. 길이를 채우려고 같은 말을 늘리지 않는다 — 늘어난 분량은 전부 이
    사람한테만 해당하는 구체적인 장면·디테일에 쓴다. 다른 사람한테 복사해
    붙여도 말이 되는 문장이면 다시 쓴다.
+10. 문단 하나는 짧은 한두 문장이 아니라 여러 문장이 자연스럽게 이어지는
+    글이어야 한다. 문단과 문단 사이도 갑자기 주제가 바뀌지 않고 하나의
+    글처럼 흘러가야 한다 — 독립된 코멘트 세 줄을 나열하는 게 아니다.
 모든 문장은 '~습니다'체로 끝낸다."""
 
 
 def _clean(result: GeneratedReport, expected_nicknames: set[str]) -> bool:
     texts: list[str] = [result.team_summary, *result.team_reasons, *result.highlights]
     for p in result.players:
-        texts += [p.line1, p.line2, p.line3]
+        texts += p.paragraphs
     for t in texts:
         if any(word in t for word in BANNED):
             logger.warning("report generation: banned word in %r", t)
@@ -109,10 +115,13 @@ def generate(context: str, expected_nicknames: set[str]) -> Optional[GeneratedRe
         "톤: 익살스럽게 비꼬다가 마지막에 칭찬 한 줌. 진지한 성격 검사가 아니라 "
         "서로 보여주며 웃는 물건이다.\n\n"
         f"{PROMPT_RULES}\n\n"
-        "players: 각 사람마다 line1(찌르는 관찰) · line2(오늘 실제로 있었던 장면 —"
-        " 칭호를 받은 이유가 드러나야 함) · line3(line1을 뒤집어 칭찬하면서 궁합"
-        f" 상대 이름도 짚기) 세 줄. 각 {COMMENT_MAX_LEN}자 이내, 짧게 끝내지 말고"
-        " 여유를 채워 구체적으로 쓴다.\n"
+        f"players: 각 사람마다 paragraphs {PARAGRAPH_MIN_COUNT}~{PARAGRAPH_MAX_COUNT}개."
+        " 문단끼리 뚝뚝 끊어지는 코멘트 나열이 아니라, 한 편의 짧은 글처럼"
+        " 자연스럽게 이어져야 한다. 첫 문단은 익살스러운 관찰로 시작해서 칭호를"
+        " 받은 이유(오늘 실제로 있었던 장면)로 자연스럽게 이어지고, 마지막 문단은"
+        " 그 관찰을 뒤집어 진심으로 칭찬하면서 궁합 상대 이름도 자연스럽게"
+        f" 등장시킨다. 문단 하나당 {PARAGRAPH_MAX_LEN}자 이내, 짧게 끝내지 말고"
+        " 여러 문장으로 채워 구체적으로 쓴다.\n"
         f"team_summary: 이 팀을 한 줄로. {SUMMARY_MAX_LEN}자 이내.\n"
         f"team_reasons: 등급이 그렇게 나온 이유 4개. 각 {REASON_MAX_LEN}자 이내.\n"
         f"highlights: 오늘의 장면 3개. 각 {HIGHLIGHT_MAX_LEN}자 이내.\n"

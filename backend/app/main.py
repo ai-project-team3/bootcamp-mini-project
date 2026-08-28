@@ -1,7 +1,14 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
+
+# Nothing else configures logging, so app.* loggers (report_gen, question_gen) had
+# no handler and every logger.info/logger.exception call was silently dropped —
+# made it impossible to tell an LLM success from a fallback while testing.
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
 from .routers import (
     answers,
     health,

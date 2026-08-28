@@ -291,7 +291,7 @@ def _write_report_text(
     if result is None:
         return None
 
-    by_nick = {c.nickname: [c.line1, c.line2, c.line3] for c in result.players}
+    by_nick = {c.nickname: c.paragraphs for c in result.players}
     for pr in player_reports:
         if pr.nickname in by_nick:
             pr.comment_lines = by_nick[pr.nickname]
