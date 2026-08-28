@@ -221,6 +221,19 @@ def claim_launched_game(
     )
 
 
+@router.post('/{code}/game/back', response_model=DemoRoomResponse)
+def return_to_room_hub(
+    code: str,
+    payload: DemoRoomStartRequest,
+    store: DemoRoomStore = Depends(get_demo_room_store),
+) -> DemoRoomResponse:
+    """End the current game and reopen the game list, keeping the room."""
+    try:
+        return _room_response(store.return_to_hub(code.upper(), payload.player_id))
+    except Exception as error:
+        _raise_http(error)
+
+
 @router.post('/{code}/leave', response_model=DemoRoomLeaveResponse)
 def leave_demo_room(
     code: str,

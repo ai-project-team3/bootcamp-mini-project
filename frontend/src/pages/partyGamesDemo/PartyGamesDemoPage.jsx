@@ -1,7 +1,7 @@
 import { Navigate, useSearchParams } from 'react-router-dom'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
-import GameDemoExitControl from '../../components/common/GameDemoExitControl'
+import BackToRoomGamesControl from '../../components/common/BackToRoomGamesControl'
 import { useGameDemo } from '../../context/GameDemoContext'
 import { PARTY_CATALOG } from '../../data/gameDemo/gameDemoData'
 import { getDemoHubPath, resolvePartyGameId } from '../../data/gameDemo/gameDemoModels'
@@ -31,5 +31,5 @@ export default function PartyGamesDemoPage() {
 
   if (!SelectedGame) return <Navigate to={hubPath} replace />
 
-  return <PhoneFrame><TopBar title="Party Games" showBack={false} action={<GameDemoExitControl />} /><SelectedGame players={players} /></PhoneFrame>
+  return <PhoneFrame><TopBar title="Party Games" showBack={false} action={<BackToRoomGamesControl />} /><SelectedGame players={players} /></PhoneFrame>
 }

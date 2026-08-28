@@ -15,6 +15,7 @@ from app.routers import demo_rooms
 from app.schemas.demo_room import (
     DemoRoomFillRequest,
     DemoRoomGameLaunchRequest,
+    DemoRoomGameSelectRequest,
     DemoRoomNicknameRequest,
     DemoRoomStartRequest,
 )
@@ -292,3 +293,80 @@ class DemoRoomTestPlayersTest(unittest.TestCase):
         room = mafia_store.get(launched.launch.room_id)
         self.assertEqual(sorted(p.is_bot for p in room.players.values()), [False, True, True, True])
         self.assertFalse(room.players[room.host_player_id].is_bot)
+
+
+class DemoRoomReturnToHubTest(unittest.TestCase):
+    """'게임 목록' ends the game, not the room."""
+
+    def setUp(self):
+        self.store = DemoRoomStore(code_factory=lambda: 'ABC123')
+        mafia_store.clear()
+        marble_store.clear()
+
+    def tearDown(self):
+        mafia_store.clear()
+        marble_store.clear()
+
+    def _started_room(self):
+        host = demo_rooms.create_demo_room(
+            DemoRoomNicknameRequest(nickname='방장'), self.store
+        ).player
+        guest = demo_rooms.join_demo_room(
+            'ABC123', DemoRoomNicknameRequest(nickname='참가자'), self.store
+        )
+        demo_rooms.start_demo_room('ABC123', DemoRoomStartRequest(player_id=host.id), self.store)
+        return host, guest
+
+    def test_the_room_and_everyone_in_it_survive(self):
+        host, guest = self._started_room()
+        demo_rooms.select_demo_game(
+            'ABC123', DemoRoomGameSelectRequest(player_id=host.id, game_id='liar'), self.store
+        )
+
+        room = demo_rooms.return_to_room_hub(
+            'ABC123', DemoRoomStartRequest(player_id=host.id), self.store
+        )
+
+        self.assertEqual(room.status, 'IN_PROGRESS')
+        self.assertEqual(room.player_count, 2)
+        self.assertEqual(room.game_phase, 'HUB')
+        self.assertIsNone(room.selected_game_id)
+
+    def test_anyone_in_the_room_can_end_the_game(self):
+        host, guest = self._started_room()
+        demo_rooms.select_demo_game(
+            'ABC123', DemoRoomGameSelectRequest(player_id=host.id, game_id='liar'), self.store
+        )
+
+        room = demo_rooms.return_to_room_hub(
+            'ABC123', DemoRoomStartRequest(player_id=guest.id), self.store
+        )
+
+        self.assertEqual(room.game_phase, 'HUB')
+
+    def test_a_launched_game_is_forgotten_so_nobody_is_pulled_back_in(self):
+        host, _ = self._started_room()
+        demo_rooms.launch_room_game(
+            'ABC123',
+            DemoRoomGameLaunchRequest(player_id=host.id, game_id='marble'),
+            self.store,
+        )
+
+        room = demo_rooms.return_to_room_hub(
+            'ABC123', DemoRoomStartRequest(player_id=host.id), self.store
+        )
+
+        self.assertIsNone(room.launch)
+
+    def test_a_stranger_cannot_end_someone_elses_game(self):
+        host, _ = self._started_room()
+        demo_rooms.select_demo_game(
+            'ABC123', DemoRoomGameSelectRequest(player_id=host.id, game_id='liar'), self.store
+        )
+
+        with self.assertRaises(HTTPException) as error:
+            demo_rooms.return_to_room_hub(
+                'ABC123', DemoRoomStartRequest(player_id='nobody'), self.store
+            )
+
+        self.assertEqual(error.exception.status_code, 403)

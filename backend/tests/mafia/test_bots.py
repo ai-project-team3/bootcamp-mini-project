@@ -6,8 +6,9 @@ with nothing decided, which tells the tester nothing.
 """
 
 import random
+import time
 
-from app.mafia.game import bots
+from app.mafia.game import bots, timing
 from app.mafia.models.room import GamePhase, Player, Room
 
 
@@ -104,3 +105,62 @@ def test_nothing_happens_in_a_phase_with_no_bot_action():
 
     assert room.votes == {}
     assert room.night_actions == {}
+
+
+def test_bots_wait_before_acting_so_the_phase_is_not_skipped():
+    """The bug this guards: a citizen never saw the night.
+
+    Every actor the night needs — mafia, doctor, police — can be a bot, and the
+    state machine ends a phase as soon as everyone who can act has. Acting on
+    the first poll therefore ended the night before the screen had drawn.
+    """
+    room = _room(
+        GamePhase.NIGHT_ACTION,
+        ["mafia", "police", "doctor", "citizen"],
+        [True, True, True, False],
+    )
+    room.phase_deadline = time.time() + timing.NIGHT_ACTION_SECONDS
+
+    bots.act(room, random.Random(0))
+
+    assert room.night_actions == {}
+
+
+def test_they_act_once_most_of_the_phase_has_run():
+    room = _room(
+        GamePhase.NIGHT_ACTION,
+        ["mafia", "police", "doctor", "citizen"],
+        [True, True, True, False],
+    )
+    now = time.time()
+    room.phase_deadline = now + timing.NIGHT_ACTION_SECONDS * 0.2
+
+    bots.act(room, random.Random(0), now=now)
+
+    assert set(room.night_actions) == {"p0", "p1", "p2"}
+
+
+def test_a_phase_with_no_deadline_is_acted_on_immediately():
+    room = _room(GamePhase.DAY_VOTE, ["citizen"] * 4, [False, True, True, True])
+
+    bots.act(room, random.Random(0))
+
+    assert room.votes_confirmed == {"p1", "p2", "p3"}
+
+
+def test_skipping_a_phase_still_gets_the_bots_moves():
+    """The host's 건너뛰기 must not skip past the bots.
+
+    Before this, a skipped vote accused nobody and a skipped night attacked
+    nobody, so day and night cycled forever with nothing ever happening.
+    """
+    room = _room(
+        GamePhase.NIGHT_ACTION,
+        ["mafia", "police", "doctor", "citizen"],
+        [True, True, True, False],
+    )
+    room.phase_deadline = time.time() + timing.NIGHT_ACTION_SECONDS
+
+    bots.act(room, random.Random(0), force=True)
+
+    assert set(room.night_actions) == {"p0", "p1", "p2"}

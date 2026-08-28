@@ -7,7 +7,7 @@ import { DemoActionRow, DemoNotice, DemoOptionList } from '../../components/comm
 import ProgressBar from '../../components/common/ProgressBar'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
-import GameDemoExitControl from '../../components/common/GameDemoExitControl'
+import BackToRoomGamesControl from '../../components/common/BackToRoomGamesControl'
 import { useGameDemo } from '../../context/GameDemoContext'
 import { useRoomFlow } from '../../context/RoomFlowContext'
 import { FLAVORED_GAME_CONTENT } from '../../data/gameDemo/gameDemoData'
@@ -49,7 +49,7 @@ export default function PersonaPredictionDemoPage() {
 
   return (
     <PhoneFrame>
-      <TopBar title="너라면?" showBack={false} action={<GameDemoExitControl />} />
+      <TopBar title="너라면?" showBack={false} action={<BackToRoomGamesControl />} />
       <FlavorToggle value={mode} onChange={changeMode} />
       <ProgressBar current={phase + 1} total={PHASES.length} label={PHASES[phase]} />
 

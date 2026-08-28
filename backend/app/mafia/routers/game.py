@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from app.mafia.constants import ROLE_NIGHT_ACTION
-from app.mafia.game import state_machine
+from app.mafia.game import bots, state_machine
 from app.mafia.models.room import GamePhase
 from app.mafia.schemas.game import (
     ExecutionVoteRequest,
@@ -33,6 +33,10 @@ def advance(room_id: str):
     실제 프론트엔드는 GET /state 호출마다 실행되는 tick()에 의존하며 이
     엔드포인트를 호출하지 않는다."""
     room = get_room_or_404(room_id)
+    # Skipping ends the phase now, so the bots have to take their turn now too.
+    # Otherwise a skipped vote accuses nobody and a skipped night attacks
+    # nobody, and the game cycles day to night forever with nothing happening.
+    bots.act(room, force=True)
     transitions = {
         GamePhase.ROLE_ASSIGNMENT: state_machine.begin_discussion,
         GamePhase.DAY_DISCUSSION: state_machine.open_vote,

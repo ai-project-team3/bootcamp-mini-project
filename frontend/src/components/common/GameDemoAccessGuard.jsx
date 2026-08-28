@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { claimLaunchedGame, getDemoPlayers, getDemoRoom } from '../../api/demoRooms'
 import { useRoomFlow } from '../../context/RoomFlowContext'
@@ -22,26 +22,31 @@ export default function GameDemoAccessGuard({ children }) {
   const [session, setSession] = useState(null)
   const [failed, setFailed] = useState(false)
 
+  const read = useCallback(
+    () => Promise.all([getDemoRoom(requestedRoomCode), getDemoPlayers(requestedRoomCode)])
+      .then(([nextRoom, roomPlayers]) => {
+        setRoom(nextRoom)
+        setSession(adaptRoomPlayersForPersonaGames(roomPlayers, DEMO_PERSONA_TEMPLATES))
+        return nextRoom
+      }),
+    [requestedRoomCode],
+  )
+
   useEffect(() => {
     if (!playerId || contextRoomCode !== requestedRoomCode) return
     let cancelled = false
-    const poll = () => Promise.all([getDemoRoom(requestedRoomCode), getDemoPlayers(requestedRoomCode)])
-      .then(([nextRoom, roomPlayers]) => {
-        if (!cancelled) {
-          setRoom(nextRoom)
-          setSession(adaptRoomPlayersForPersonaGames(roomPlayers, DEMO_PERSONA_TEMPLATES))
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setFailed(true)
-      })
+    const poll = () => read().catch(() => {
+      if (!cancelled) setFailed(true)
+    })
     poll()
-    const timer = window.setInterval(poll, 1500)
+    const timer = window.setInterval(() => {
+      if (!cancelled) poll()
+    }, 1500)
     return () => {
       cancelled = true
       window.clearInterval(timer)
     }
-  }, [contextRoomCode, playerId, requestedRoomCode])
+  }, [contextRoomCode, playerId, read, requestedRoomCode])
 
   // A game that runs its own rooms was started for the whole group. Everyone
   // polling the room finds out at the same time, claims their own id in the new
@@ -87,7 +92,12 @@ export default function GameDemoAccessGuard({ children }) {
   }
   if (access === 'waiting') return <Navigate to={`/games/demo/room/${requestedRoomCode}`} replace />
   return (
-    <GameDemoSessionProvider room={room} players={session.players} personas={session.personas}>
+    <GameDemoSessionProvider
+      room={room}
+      players={session.players}
+      personas={session.personas}
+      refresh={read}
+    >
       {children}
     </GameDemoSessionProvider>
   )
