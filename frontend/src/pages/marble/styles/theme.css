@@ -1,0 +1,163 @@
+/* ===== Persona Marble design tokens =====
+   Light theme (일반 모드 기본) — "정원의 오후" (Garden Afternoon)
+   Dark theme (19금 모드 기본) — "월광 서약" (Moonlit Vow), see [data-pm-theme="dark"] below */
+.pm-app {
+  --pm-bg: #faf6ef;
+  --pm-bg-vignette: #f2e9d8;
+  --pm-surface: #ffffff;
+  --pm-surface-raised: #fdf8ef;
+  --pm-border: #e6dcc8;
+  --pm-border-strong: #d8c9a8;
+
+  --pm-text: #2c2416;
+  --pm-text-muted: #6b6250;
+  --pm-text-faint: #a89d84;
+
+  --pm-accent: #d97757;
+  --pm-accent-strong: #c65f3f;
+  --pm-accent-ink: #fffaf5;
+
+  --pm-gold: #b8860b;
+  --pm-heart: #d64550;
+  --pm-heart-empty: #ded2bd;
+
+  --pm-player-a: #d97757;
+  --pm-player-b: #3f7a8c;
+
+  --pm-logic-fg: #3f6fb0;
+  --pm-logic-bg: #dce8f7;
+  --pm-logic-bg-deep: #c6dbf2;
+  --pm-logic-edge: #a9c4e4;
+  --pm-empathy-fg: #c14f74;
+  --pm-empathy-bg: #fbdfe8;
+  --pm-empathy-bg-deep: #f6c9d8;
+  --pm-empathy-edge: #eaadc2;
+  --pm-drive-fg: #c1652c;
+  --pm-drive-bg: #fbe4d0;
+  --pm-drive-bg-deep: #f7d0b0;
+  --pm-drive-edge: #ecb890;
+  --pm-caution-fg: #3f8f68;
+  --pm-caution-bg: #dcf0e4;
+  --pm-caution-bg-deep: #c3e5d1;
+  --pm-caution-edge: #a5d3ba;
+  --pm-chance-fg: #b8860b;
+  --pm-chance-bg: #faf0d0;
+  --pm-chance-bg-deep: #f4e3ac;
+  --pm-chance-edge: #e6d089;
+  --pm-start-fg: #a85a2e;
+  --pm-start-bg: #f6e6d3;
+  --pm-start-bg-deep: #eed6ba;
+  --pm-start-edge: #dcc0a0;
+
+  --pm-tile-gloss: rgba(255, 255, 255, 0.6);
+  --pm-tile-drop: rgba(44, 36, 22, 0.24);
+
+  --pm-bg-texture: url("./assets/bg-light.jpg");
+  --pm-bg-texture-opacity: 0.4;
+
+  --pm-hub-bg: #f1e6d5;
+  --pm-hub-glow: #fdf7ee;
+  --pm-hub-edge: #ddcbb2;
+  --pm-hub-inset: rgba(120, 96, 62, 0.22);
+
+  --pm-frame: #fbf5ea;
+  --pm-frame-deep: #f2e7d4;
+  --pm-frame-edge: #e2d3b8;
+
+  --pm-dice-pip: #d9614f;
+
+  --pm-success: #3f8f68;
+  --pm-danger: #c1483f;
+
+  --pm-font-display: "Playfair Display", "Noto Serif KR", ui-serif, serif;
+  --pm-font-body: "Manrope", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+
+  --pm-space-1: 4px;
+  --pm-space-2: 8px;
+  --pm-space-3: 12px;
+  --pm-space-4: 16px;
+  --pm-space-5: 24px;
+  --pm-space-6: 32px;
+  --pm-space-7: 48px;
+
+  --pm-radius: 16px;
+  --pm-radius-sm: 10px;
+  --pm-radius-pill: 999px;
+
+  --pm-shadow-card: 0 24px 60px -24px rgba(44, 36, 22, 0.22), 0 2px 0 rgba(255, 255, 255, 0.6) inset;
+  --pm-shadow-pop: 0 16px 40px -16px rgba(44, 36, 22, 0.28);
+
+  --pm-transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pm-app[data-pm-theme="dark"] {
+  --pm-bg: #1f0f1c;
+  --pm-bg-vignette: #140a12;
+  --pm-surface: #2c1528;
+  --pm-surface-raised: #3a1d35;
+  --pm-border: #4a2843;
+  --pm-border-strong: #6b3a61;
+
+  --pm-text: #f7ecf3;
+  --pm-text-muted: #c9a8c0;
+  --pm-text-faint: #8f6b87;
+
+  --pm-accent: #e0a08a;
+  --pm-accent-strong: #eab596;
+  --pm-accent-ink: #2b1109;
+
+  --pm-gold: #e8c468;
+  --pm-heart: #e85d75;
+  --pm-heart-empty: #4a2843;
+
+  --pm-player-a: #e0a08a;
+  --pm-player-b: #7fb3e8;
+
+  --pm-logic-fg: #6f9ceb;
+  --pm-logic-bg: #1b2c47;
+  --pm-logic-bg-deep: #121d31;
+  --pm-logic-edge: #0c1526;
+  --pm-empathy-fg: #e87fa0;
+  --pm-empathy-bg: #452230;
+  --pm-empathy-bg-deep: #2f1621;
+  --pm-empathy-edge: #230f19;
+  --pm-drive-fg: #f0965a;
+  --pm-drive-bg: #452c1b;
+  --pm-drive-bg-deep: #2f1d11;
+  --pm-drive-edge: #23150b;
+  --pm-caution-fg: #6bbf9a;
+  --pm-caution-bg: #1a3d32;
+  --pm-caution-bg-deep: #112a22;
+  --pm-caution-edge: #0b1e18;
+  --pm-chance-fg: #e8c468;
+  --pm-chance-bg: #45391b;
+  --pm-chance-bg-deep: #2f2711;
+  --pm-chance-edge: #231d0b;
+  --pm-start-fg: #eab596;
+  --pm-start-bg: #453239;
+  --pm-start-bg-deep: #2f2127;
+  --pm-start-edge: #23181d;
+
+  --pm-tile-gloss: rgba(255, 255, 255, 0.1);
+  --pm-tile-drop: rgba(0, 0, 0, 0.5);
+
+  --pm-bg-texture: url("./assets/bg-dark.jpg");
+  --pm-bg-texture-opacity: 0.28;
+
+  --pm-hub-bg: #241326;
+  --pm-hub-glow: #3a1f38;
+  --pm-hub-edge: #553050;
+  --pm-hub-inset: rgba(0, 0, 0, 0.6);
+
+  --pm-frame: #35192f;
+  --pm-frame-deep: #261122;
+  --pm-frame-edge: #5b3354;
+
+  --pm-dice-pip: #d9614f;
+
+  --pm-success: #6fbf85;
+  --pm-danger: #d9695c;
+
+  --pm-shadow-card: 0 24px 60px -24px rgba(0, 0, 0, 0.65), 0 2px 0 rgba(255, 255, 255, 0.03) inset;
+  --pm-shadow-pop: 0 16px 40px -16px rgba(0, 0, 0, 0.55);
+}

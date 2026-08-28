@@ -1,0 +1,57 @@
+/* Standalone dev shell only — imported by the dev entrypoints, which the host
+   app replaces when these features are mounted inside CrewVerse. Each game's
+   own styles live under pages/<game>/styles/. */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #0b0e16;
+}
+
+/* Dev-only game picker. */
+.dev-picker {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #edeff4;
+  font-family: system-ui, sans-serif;
+  text-align: center;
+}
+
+.dev-picker h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.dev-picker p {
+  margin: 0;
+  color: #8d96ac;
+}
+
+.dev-picker-links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.dev-picker-links a {
+  padding: 14px 22px;
+  border: 1px solid #3a4560;
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+  background: #141a26;
+}
+
+.dev-picker-links a:hover {
+  border-color: #e3b04b;
+}

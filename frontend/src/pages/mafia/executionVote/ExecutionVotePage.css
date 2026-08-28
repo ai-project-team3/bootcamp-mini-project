@@ -1,0 +1,22 @@
+/* ===== Verdict buttons (ExecutionVotePage) ===== */
+.mafia-app .verdict-buttons {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.mafia-app .verdict-buttons .btn {
+  flex: 1;
+}
+
+.mafia-app .verdict-btn--guilty.is-selected {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(217, 105, 92, 0.12);
+}
+
+.mafia-app .verdict-btn--innocent.is-selected {
+  border-color: var(--success);
+  color: var(--success);
+  background: rgba(111, 191, 133, 0.12);
+}
+

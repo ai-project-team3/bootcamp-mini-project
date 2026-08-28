@@ -1,0 +1,282 @@
+@import "./theme.css";
+
+/* ===== Feature root =====
+   `.mafia-app` is the wrapper this feature owns. It never styles html/body, so
+   mounting it inside CrewVerse cannot disturb the host page. */
+.mafia-app,
+.mafia-app * {
+  box-sizing: border-box;
+}
+
+.mafia-app {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mafia-app .card {
+    animation: mafia-card-rise 0.35s ease-out;
+  }
+}
+
+@keyframes mafia-card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mafia-app h1,
+.mafia-app h2,
+.mafia-app h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-wrap: balance;
+  margin: 0;
+}
+
+.mafia-app h1 {
+  font-size: 1.75rem;
+  letter-spacing: -0.01em;
+}
+
+.mafia-app h2 {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: var(--font-body);
+}
+
+.mafia-app h3 {
+  font-size: 1.05rem;
+}
+
+.mafia-app p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* ===== App shell ===== */
+.mafia-app .app-shell {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-4);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(227, 176, 75, 0.08), transparent),
+    radial-gradient(ellipse 120% 100% at 50% 110%, var(--bg-vignette), var(--bg));
+}
+
+.mafia-app .card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.mafia-app .card--wide {
+  max-width: 640px;
+}
+
+.mafia-app .stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.mafia-app .stack-lg {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.mafia-app .row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.mafia-app .row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* ===== Form controls ===== */
+.mafia-app .field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.mafia-app .input,
+.mafia-app .select {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mafia-app .input::placeholder {
+  color: var(--text-faint);
+}
+
+.mafia-app .input:focus,
+.mafia-app .select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(227, 176, 75, 0.18);
+}
+
+/* ===== Buttons ===== */
+.mafia-app .btn {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.15s ease, background 0.15s ease;
+}
+
+.mafia-app .btn:active {
+  transform: translateY(1px);
+}
+
+.mafia-app .btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  filter: none;
+  transform: none;
+}
+
+.mafia-app .btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.mafia-app .btn-primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+.mafia-app .btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.mafia-app .btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.mafia-app .btn-block {
+  width: 100%;
+}
+
+/* ===== Player name (shared: waiting list + vote/night target rows) ===== */
+.mafia-app .player-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+/* ===== Target list (vote / night action) ===== */
+.mafia-app .target-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mafia-app .target-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+}
+
+.mafia-app .target-row.is-selected {
+  border-color: var(--accent);
+  background: rgba(227, 176, 75, 0.12);
+}
+
+.mafia-app .countdown {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-strong);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* ===== Fate / fallback note ===== */
+.mafia-app .fate-note {
+  font-style: italic;
+  color: var(--text-faint);
+  border-left: 2px solid var(--accent);
+  padding-left: var(--space-3);
+}
+
+/* ===== Alerts ===== */
+.mafia-app .alert-notice {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  margin: 0;
+}
+
+.mafia-app .alert-error {
+  color: var(--danger);
+  font-size: 0.9rem;
+  background: rgba(217, 105, 92, 0.1);
+  border: 1px solid rgba(217, 105, 92, 0.35);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  margin: 0;
+}
+
+/* ===== Scene illustration (day / final defense) ===== */
+
+.mafia-app .scene-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+}
+

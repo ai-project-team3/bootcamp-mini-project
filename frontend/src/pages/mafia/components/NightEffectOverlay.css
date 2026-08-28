@@ -1,0 +1,154 @@
+/* ===== Night action effect overlay ===== */
+.mafia-app .night-effect-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.mafia-app .night-effect-overlay img {
+  max-width: 60vw;
+  max-height: 60vh;
+  /* 생성된 이미지는 순수 검정 배경이라, 실제 알파 투명도 대신
+     screen 블렌드로 검정을 지워 어두운 배경 위에 자연스럽게 겹치게 한다. */
+  mix-blend-mode: screen;
+}
+
+@keyframes mafia-knife-slash {
+  0% {
+    transform: translate(-60vw, -40vh) rotate(-35deg) scale(0.6);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  55% {
+    transform: translate(10vw, 5vh) rotate(10deg) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(60vw, 40vh) rotate(35deg) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.mafia-app .night-effect-overlay--knife img {
+  animation: mafia-knife-slash 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes mafia-screen-shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-10px, 6px);
+  }
+  40% {
+    transform: translate(8px, -8px);
+  }
+  60% {
+    transform: translate(-6px, 4px);
+  }
+  80% {
+    transform: translate(6px, -4px);
+  }
+}
+
+.mafia-app .screen-shake {
+  animation: mafia-screen-shake 0.5s ease-in-out;
+}
+
+@keyframes mafia-angel-appear {
+  0% {
+    transform: scale(0.6) translateY(30px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) translateY(-10px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 0;
+  }
+}
+
+.mafia-app .night-effect-overlay--angel {
+  background: radial-gradient(circle, rgba(111, 191, 133, 0.25), transparent 60%);
+}
+
+.mafia-app .night-effect-overlay--angel img {
+  animation: mafia-angel-appear 1.4s ease-out forwards;
+}
+
+@keyframes mafia-detective-reveal {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+    filter: brightness(3) blur(4px);
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+    filter: brightness(1.4) blur(0);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+    filter: brightness(1) blur(0);
+  }
+}
+
+.mafia-app .night-effect-overlay--detective img {
+  animation: mafia-detective-reveal 1.3s ease-out forwards;
+}
+
+@keyframes mafia-verdict-reveal {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  15% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.05);
+    opacity: 0;
+  }
+}
+
+/* execution-scene.png / release-scene.png are full illustrations (not a
+   plain-black cutout like the other overlay art), so they render normally
+   instead of screen-blending. */
+.mafia-app .night-effect-overlay--executed img,
+.mafia-app .night-effect-overlay--spared img {
+  mix-blend-mode: normal;
+  border-radius: var(--radius);
+  animation: mafia-verdict-reveal 1.8s ease-in-out forwards;
+  /* box-shadow은 뺐다 — scale() 애니메이션과 겹치면 일부 브라우저에서
+     오버레이가 사라진 뒤에도 그림자 영역이 잠깐 남는 잔상을 만든다.
+     will-change로 별도 컴포지팅 레이어를 강제해 제거 시점에 화면이
+     깔끔하게 갱신되게 한다. */
+  will-change: transform, opacity;
+}
+
+.mafia-app .night-effect-overlay--executed {
+  background: radial-gradient(circle, rgba(193, 71, 58, 0.35), transparent 60%);
+}
+
+.mafia-app .night-effect-overlay--spared {
+  background: radial-gradient(circle, rgba(227, 176, 75, 0.3), transparent 60%);
+}
