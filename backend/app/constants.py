@@ -17,47 +17,54 @@ ABILITY_LABELS = {
     "OBS": "관찰력",
 }
 
-# 기획안 §6 — 8유형. O1(색+심볼) 미확정이라 테마 팔레트 기반 임시값으로 채움.
+# 기획안 §7 유형 8종. 주도력 × 표현력 × 관찰력을 2.5 기준으로 갈라 여덟 가지.
+#
+# 이름은 전부 "아무도 안 시켰는데 본인이 차지한 자리"라는 한 축으로 묶여 있다.
+# 이름은 고정이고 부제만 프로젝트 맥락으로 매번 생성된다(§7) — 카드 이미지가
+# 이름에 1:1로 붙어 있어서 이름이 바뀌면 이미지를 다시 만들어야 한다.
+#
+# image는 frontend/public/types/ 아래 파일명. 파일이 없으면 화면이 symbol로
+# 대신 그린다(frontend/src/data/types.js).
 TYPES = {
     "T1": {
         "dom": "H", "exp": "H", "obs": "H",
-        "name": "판 짜는 사람", "subtitle": "다 보고 다 말하고 다 정한다",
-        "color": "#E85D4E", "symbol": "🧭",
+        "name": "셀프 사회자", "subtitle": "아무도 안 시켰는데 진행도 발언도 판단도 본인이",
+        "color": "#FF2E88", "symbol": "🎤", "image": "/types/T1.png",
     },
     "T2": {
         "dom": "H", "exp": "H", "obs": "L",
-        "name": "확성기", "subtitle": "말은 제일 많은데 남 얘긴 안 들림",
-        "color": "#F2A93B", "symbol": "📢",
+        "name": "직구 마스터", "subtitle": "할 말은 다 하는데 남 표정은 안 봅니다",
+        "color": "#FF6B35", "symbol": "⚾", "image": "/types/T2.png",
     },
     "T3": {
         "dom": "H", "exp": "L", "obs": "H",
-        "name": "뒷자리 판사", "subtitle": "본인은 안 나서는데 판결은 다 내림",
-        "color": "#4E6FE8", "symbol": "⚖️",
+        "name": "뒷자리 미어캣", "subtitle": "조용히 보다가 결정은 제일 먼저 냅니다",
+        "color": "#FFC531", "symbol": "👀", "image": "/types/T3.png",
     },
     "T4": {
         "dom": "H", "exp": "L", "obs": "L",
-        "name": "직진", "subtitle": "말은 아끼고 결정은 안 아낀다",
-        "color": "#C24EE8", "symbol": "🚀",
+        "name": "무면허 라이더", "subtitle": "앞은 안 보고 액셀만 밟습니다",
+        "color": "#FF4757", "symbol": "🏍️", "image": "/types/T4.png",
     },
     "T5": {
         "dom": "L", "exp": "H", "obs": "H",
-        "name": "해설위원", "subtitle": "다 알면서 정작 자기 패는 안 냄",
-        "color": "#2FB6A3", "symbol": "🎙️",
+        "name": "방구석 박사", "subtitle": "다 알고 다 말하는데 정작 본인은 안 나섭니다",
+        "color": "#7B61FF", "symbol": "🎓", "image": "/types/T5.png",
     },
     "T6": {
         "dom": "L", "exp": "H", "obs": "L",
-        "name": "분위기 담당", "subtitle": "무슨 말인지는 몰라도 재밌음",
-        "color": "#F2586B", "symbol": "🎉",
+        "name": "MZ 응원단장", "subtitle": "판은 못 읽는데 텐션은 제일 높습니다",
+        "color": "#C6FF4E", "symbol": "📣", "image": "/types/T6.png",
     },
     "T7": {
         "dom": "L", "exp": "L", "obs": "H",
-        "name": "CCTV", "subtitle": "말은 없는데 다 보고 있었음",
-        "color": "#5B5FC7", "symbol": "📹",
+        "name": "은둔형 명탐정", "subtitle": "말 한마디 없이 다 맞혔습니다",
+        "color": "#2E86FF", "symbol": "🔍", "image": "/types/T7.png",
     },
     "T8": {
         "dom": "L", "exp": "L", "obs": "L",
-        "name": "정직한 무임승차", "subtitle": "오늘은 그냥 앉아 있었음",
-        "color": "#8A8F98", "symbol": "🛋️",
+        "name": "평화성애자", "subtitle": "아무하고도 안 부딪혔습니다. 아무것도 안 해서요",
+        "color": "#7FD8C9", "symbol": "🕊️", "image": "/types/T8.png",
     },
 }
 
