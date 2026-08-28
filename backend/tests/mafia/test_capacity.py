@@ -12,15 +12,15 @@ def test_capacity_for_5_players():
 
 
 def test_capacity_for_6_players():
-    assert get_role_capacity(6) == {"mafia": 2, "police": 1, "doctor": 1, "citizen": 2}
+    assert get_role_capacity(6) == {"mafia": 1, "police": 1, "doctor": 1, "citizen": 3}
 
 
 def test_capacity_for_7_players():
-    assert get_role_capacity(7) == {"mafia": 3, "police": 1, "doctor": 1, "citizen": 2}
+    assert get_role_capacity(7) == {"mafia": 1, "police": 1, "doctor": 1, "citizen": 4}
 
 
 def test_capacity_for_8_players():
-    assert get_role_capacity(8) == {"mafia": 3, "police": 1, "doctor": 1, "citizen": 3}
+    assert get_role_capacity(8) == {"mafia": 1, "police": 1, "doctor": 1, "citizen": 5}
 
 
 def test_supported_counts_are_four_through_eight():
@@ -44,6 +44,13 @@ def test_unsupported_player_count_raises():
     for bad in (3, 9, 0, -1):
         with pytest.raises(ValueError):
             get_role_capacity(bad)
+
+
+def test_every_room_has_exactly_one_mafia():
+    """The split was tuned for an even win rate; a second mafia swings it to
+    85~96%. See the note in capacity.py before changing this."""
+    for player_count in SUPPORTED_PLAYER_COUNTS:
+        assert get_role_capacity(player_count)["mafia"] == 1
 
 
 def test_returned_dict_is_a_copy_not_shared_mutable_state():
