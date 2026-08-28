@@ -171,7 +171,17 @@ def _assign_status(room: Room, db: Session, players: list[Player]) -> TypeGuessS
     by_guesser: dict[str, int] = {}
     for g in guesses:
         by_guesser[g.guesser_id] = by_guesser.get(g.guesser_id, 0) + 1
-    submitted = sum(1 for count in by_guesser.values() if count == len(players) - 1)
+    others_count = len(players) - 1
+    if others_count <= 0:
+        # 혼자면 배정할 카드가 없어 by_guesser가 영영 비어 있다. 자기 유형
+        # 예측을 낸 것으로 이 단계가 끝난 것으로 본다.
+        submitted = (
+            db.query(Guess)
+            .filter(Guess.room_id == room.id, Guess.kind == "TYPE", Guess.round_no.is_(None))
+            .count()
+        )
+    else:
+        submitted = sum(1 for count in by_guesser.values() if count == others_count)
     revealed = submitted >= room.player_limit
 
     results = []

@@ -7,6 +7,7 @@ from ..models.guess import Guess
 from ..models.player import Player
 from ..models.room import Room
 from ..models.statement import Statement
+from ..services.flow import next_phase
 from ..schemas.statement import (
     GuessOut,
     LieGuessRequest,
@@ -177,7 +178,7 @@ def submit_lie_guess(
         # 전체 진행 상황을 확인해 마지막 대상자였다면 다음 단계로 자동 전이.
         total_lie_guesses = db.query(Guess).filter(Guess.room_id == room.id, Guess.kind == "LIE").count()
         if total_lie_guesses == room.player_limit * others_count and room.phase == "STATEMENT":
-            room.phase = "IMPRESSION_POST"
+            room.phase = next_phase("STATEMENT", room.player_limit)
             db.commit()
         return _revealed_turn(room, target, statements, db, done=False)
 

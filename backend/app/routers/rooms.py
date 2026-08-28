@@ -2,6 +2,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..constants import MAX_PLAYERS, MIN_PLAYERS
+from ..services.flow import first_phase
 from ..database import get_db
 from ..models.player import Player
 from ..models.room import Room
@@ -66,7 +67,7 @@ def start_room(code: str, payload: RoomStartRequest, db: Session = Depends(get_d
         raise HTTPException(status_code=400, detail=f"{room.player_limit}명이 모여야 시작할 수 있습니다")
 
     room.status = "IN_PROGRESS"
-    room.phase = "IMPRESSION_PRE"
+    room.phase = first_phase(player_count)
     db.commit()
     db.refresh(room)
     return room
