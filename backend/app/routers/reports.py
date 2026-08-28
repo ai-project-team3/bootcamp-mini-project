@@ -280,6 +280,10 @@ def _write_report_text(
                 "hits": got,
                 "tries": tried,
                 "badges": pr.badges,
+                "compat": [
+                    {"nickname": c.nickname, "grade": c.grade, "tag": c.tag, "note": c.note}
+                    for c in pr.compat
+                ],
             }
         )
     context = report_gen.build_context(room.context_line, payload, team["rank"])
