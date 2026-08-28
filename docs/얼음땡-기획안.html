@@ -253,6 +253,7 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
   <div class="fact"><dt>기기</dt><dd>각자 폰 + 공용 화면</dd></div>
   <div class="fact"><dt>장소</dt><dd>대면 · 비대면</dd></div>
   <div class="fact"><dt>카테고리</dt><dd>팀 프로젝트</dd></div>
+  <div class="fact"><dt>LLM 호출</dt><dd>세션당 1회</dd></div>
 </dl>
 
 <nav aria-label="목차">
@@ -260,17 +261,18 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
     <li><a href="#s1"><span class="n">01</span>서비스 정의</a></li>
     <li><a href="#s2"><span class="n">02</span>설계 원칙</a></li>
     <li><a href="#s3"><span class="n">03</span>진행 구성</a></li>
-    <li><a href="#s4"><span class="n">04</span>능력치</a></li>
-    <li><a href="#s5"><span class="n">05</span>유형 8종</a></li>
-    <li><a href="#s6"><span class="n">06</span>칭호</a></li>
-    <li><a href="#s7"><span class="n">07</span>궁합</a></li>
-    <li><a href="#s8"><span class="n">08</span>팀 등급</a></li>
-    <li><a href="#s9"><span class="n">09</span>결과 화면</a></li>
-    <li><a href="#s10"><span class="n">10</span>문구 규칙</a></li>
-    <li><a href="#s11"><span class="n">11</span>MBTI</a></li>
-    <li><a href="#s12"><span class="n">12</span>데이터·화면</a></li>
-    <li><a href="#s13"><span class="n">13</span>역할 분담</a></li>
-    <li><a href="#s14"><span class="n">14</span>범위·확정</a></li>
+    <li><a href="#s4"><span class="n">04</span>문항 생성</a></li>
+    <li><a href="#s5"><span class="n">05</span>능력치</a></li>
+    <li><a href="#s6"><span class="n">06</span>유형 8종</a></li>
+    <li><a href="#s7"><span class="n">07</span>칭호</a></li>
+    <li><a href="#s8"><span class="n">08</span>궁합</a></li>
+    <li><a href="#s9"><span class="n">09</span>팀 등급</a></li>
+    <li><a href="#s10"><span class="n">10</span>결과 화면</a></li>
+    <li><a href="#s11"><span class="n">11</span>문구 규칙</a></li>
+    <li><a href="#s12"><span class="n">12</span>MBTI</a></li>
+    <li><a href="#s13"><span class="n">13</span>데이터·화면</a></li>
+    <li><a href="#s14"><span class="n">14</span>역할 분담</a></li>
+    <li><a href="#s15"><span class="n">15</span>범위·확정</a></li>
   </ol>
 </nav>
 
@@ -279,6 +281,7 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
 <section id="s1">
   <h2><span class="n">01</span>서비스 정의</h2>
   <p>팀 프로젝트를 막 시작한 사람들이 서로를 빠르게 파악하는 데 쓰는 도구입니다. 게임을 하는 동안 각자의 선택과 서로에 대한 추측이 쌓이고, 끝나면 그 기록이 <b>개인 캐릭터 카드</b>와 <b>팀 리포트</b>로 정리됩니다.</p>
+  <p><mark>문항은 고정돼 있지 않습니다.</mark> 호스트가 방을 만들 때 <b>지금 무슨 프로젝트를 하고 있는지 두세 문장으로</b> 적으면, 그 팀에 맞는 문항이 생성되어 나갑니다. 같은 서비스를 써도 팀마다 다른 게임을 하게 됩니다. (§04)</p>
   <p>리포트는 진지한 성격 검사가 아닙니다. <mark>익살스럽게 비꼬다가 마지막에 칭찬 한 줌</mark>을 던지는 톤으로, 팀원끼리 서로 보여주며 웃는 것이 목적입니다.</p>
   <div class="note"><b>공용 화면</b>은 호스트 폰이거나 노트북 화면 공유입니다. 진행과 공개만 담당하며 <b>호스트가 눌러야 넘어가는 단계는 없습니다.</b> 전원이 제출하면 자동으로 공개되므로 호스트도 다른 참가자와 똑같이 게임에 참여합니다.</div>
 </section>
@@ -289,7 +292,9 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
     <li><b>혼자 폰을 들여다보는 시간을 최소로.</b> 한 번에 3~5초짜리 선택만 요구합니다.</li>
     <li><b>모든 입력은 동시에, 공개도 동시에.</b> 전원이 제출하면 공용 화면이 한꺼번에 펼칩니다. 이 공개 순간이 대화를 만듭니다.</li>
     <li><b>자기 이야기를 내고, 남의 이야기를 추측한다.</b> 이 둘이 데이터원이자 재미의 축입니다.</li>
+    <li><b>문항은 팀마다 다르게, 채점은 언제나 같게.</b> 생성이 바꾸는 것은 문장뿐이고 어느 문항이 어느 능력치인지는 코드가 고정합니다.</li>
     <li><b>결과는 언제나 좋게 나온다.</b> 등급의 최하가 <code>S</code>, 궁합의 최하가 <code>B</code>입니다. 나쁜 결론이 구조적으로 나오지 않습니다.</li>
+    <li><b>LLM이 죽어도 서비스는 돈다.</b> 생성이 실패하면 기본 문항으로 그대로 진행합니다.</li>
     <li><b>한 화면으로 여러 단계를 돌린다.</b> 문제 → 제출 → 동시 공개라는 껍데기 하나가 여섯 단계 중 넷을 담당합니다.</li>
   </ol>
 </section>
@@ -306,6 +311,14 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
   </div>
 
   <div class="stages">
+    <div class="stage"><div class="s-n">0</div><div class="s-b">
+      <div class="s-h"><span class="t">방 만들기</span><span class="chip">진행 시간 밖</span></div>
+      <p class="small">호스트가 <b>지금 무슨 프로젝트를 하고 있는지</b> 두세 문장으로 적습니다. 입력창에 예시 문구를 깔아두어 무엇을 써야 할지 헤매지 않게 합니다.</p>
+      <p class="quote">교내 해커톤 참가 팀입니다. 48시간 안에 앱 하나를 만들어야 하고, 다섯 명 중 셋은 오늘 처음 봅니다.</p>
+      <p class="small">적고 나면 초대 코드가 나오고, <b>참가자들이 모이는 동안 문항이 백그라운드로 생성</b>됩니다. 참가자를 모으는 시간이 곧 생성 시간이라 <mark>게임 시작 전 대기 시간이 0</mark>입니다. 게임 직전에 만들면 다섯 명이 로딩 화면을 보고 앉아 있게 됩니다.</p>
+      <p class="out">→ 자세한 것은 <b>§04 문항 생성</b></p>
+    </div></div>
+
     <div class="stage"><div class="s-n">1</div><div class="s-b">
       <div class="s-h"><span class="t">입장</span><span class="chip">2:00</span></div>
       <p class="small">닉네임 · 성별 · MBTI를 받습니다. 성별은 <b>남 / 여</b> 두 가지입니다. MBTI는 리포트 서술을 두껍게 하는 데만 쓰이며, <b>능력치와 유형 판정에는 사용하지 않습니다.</b></p>
@@ -314,14 +327,15 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
     <div class="stage"><div class="s-n">2</div><div class="s-b">
       <div class="s-h"><span class="t">첫인상 투표 ①</span><span class="chip">2:00</span><span class="chip">5문항</span></div>
       <p class="small">아직 서로를 모르는 상태에서 다섯 문항에 한 명씩 지목합니다. 자기 자신은 고를 수 없습니다.</p>
+      <p class="small dim"><b>아래는 기본 문항</b> — 생성이 실패했을 때 나가는 세트입니다.</p>
       <div class="tw"><table>
-        <thead><tr><th class="num">#</th><th>질문</th><th>대응 능력치</th></tr></thead>
+        <thead><tr><th class="num">슬롯</th><th>질문</th><th>대응 능력치</th></tr></thead>
         <tbody>
-          <tr><td class="num">1</td><td>첫 회의에서 제일 먼저 말할 것 같은 사람은?</td><td>주도력</td></tr>
-          <tr><td class="num">2</td><td>결정을 제일 빨리 내릴 것 같은 사람은?</td><td>순발력</td></tr>
-          <tr><td class="num">3</td><td>발표를 제일 잘할 것 같은 사람은?</td><td>표현력</td></tr>
-          <tr><td class="num">4</td><td>힘들 때 제일 먼저 물어봐줄 것 같은 사람은?</td><td>공감력</td></tr>
-          <tr><td class="num">5</td><td>남의 거짓말을 제일 먼저 눈치챌 것 같은 사람은?</td><td>관찰력</td></tr>
+          <tr><td class="key">P1</td><td>첫 회의에서 제일 먼저 말할 것 같은 사람은?</td><td>주도력</td></tr>
+          <tr><td class="key">P2</td><td>결정을 제일 빨리 내릴 것 같은 사람은?</td><td>순발력</td></tr>
+          <tr><td class="key">P3</td><td>발표를 제일 잘할 것 같은 사람은?</td><td>표현력</td></tr>
+          <tr><td class="key">P4</td><td>힘들 때 제일 먼저 물어봐줄 것 같은 사람은?</td><td>공감력</td></tr>
+          <tr><td class="key">P5</td><td>남의 거짓말을 제일 먼저 눈치챌 것 같은 사람은?</td><td>관찰력</td></tr>
         </tbody>
       </table></div>
       <p class="out">→ 득표수가 그대로 <b>점선 레이더</b>가 됩니다. 한 문항 최대 4표이므로 <code>득표 ÷ 4 × 5</code>로 환산합니다.</p>
@@ -330,20 +344,21 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
     <div class="stage"><div class="s-n">3</div><div class="s-b">
       <div class="s-h"><span class="t">동시에 답하기</span><span class="chip">5:00</span><span class="chip">이지선다 8문항</span></div>
       <p class="small">각자 폰에 A/B가 뜹니다. 전원이 고르면 공용 화면이 <b>누가 어느 쪽을 골랐는지</b> 한꺼번에 펼칩니다. 편이 갈리는 순간이 대화를 만듭니다.</p>
+      <p class="small dim"><b>아래는 기본 문항</b> — 생성이 실패했을 때 나가는 세트입니다.</p>
       <div class="tw"><table>
-        <thead><tr><th class="num">#</th><th>상황</th><th>A</th><th>B</th><th>능력치</th></tr></thead>
+        <thead><tr><th class="num">슬롯</th><th>상황</th><th>A</th><th>B</th><th>능력치</th></tr></thead>
         <tbody>
-          <tr><td class="num">1</td><td>첫 회의, 아무도 말이 없다</td><td>내가 먼저 시작한다</td><td>누가 말할 때까지 기다린다</td><td>주도력</td></tr>
-          <tr><td class="num">2</td><td>역할을 정한다</td><td>하고 싶은 걸 먼저 말한다</td><td>남는 걸 맡는다</td><td>주도력</td></tr>
-          <tr><td class="num">3</td><td>방향이 틀린 것 같다</td><td>지금 말한다</td><td>일단 해보고 말한다</td><td>주도력</td></tr>
-          <tr><td class="num">4</td><td>단톡방에 할 말이 생겼다</td><td>생각나면 바로 쓴다</td><td>정리해서 한 번에 쓴다</td><td>표현력</td></tr>
-          <tr><td class="num">5</td><td>발표자를 정한다</td><td>내가 한다</td><td>남이 하면 좋겠다</td><td>표현력</td></tr>
-          <tr><td class="num">6</td><td>아이디어가 떠올랐다</td><td>다듬기 전에 던진다</td><td>확신이 들 때만 꺼낸다</td><td>표현력</td></tr>
-          <tr><td class="num">7</td><td>팀원이 마감을 놓쳤다</td><td>무슨 일 있냐고 먼저 묻는다</td><td>언제까지 되냐고 먼저 묻는다</td><td>공감력</td></tr>
-          <tr><td class="num">8</td><td>의견이 갈렸다</td><td>소수 의견을 한 번 더 듣는다</td><td>다수로 빨리 정한다</td><td>공감력</td></tr>
+          <tr><td class="key">Q1</td><td>첫 회의, 아무도 말이 없다</td><td>내가 먼저 시작한다</td><td>누가 말할 때까지 기다린다</td><td>주도력</td></tr>
+          <tr><td class="key">Q2</td><td>역할을 정한다</td><td>하고 싶은 걸 먼저 말한다</td><td>남는 걸 맡는다</td><td>주도력</td></tr>
+          <tr><td class="key">Q3</td><td>방향이 틀린 것 같다</td><td>지금 말한다</td><td>일단 해보고 말한다</td><td>주도력</td></tr>
+          <tr><td class="key">Q4</td><td>단톡방에 할 말이 생겼다</td><td>생각나면 바로 쓴다</td><td>정리해서 한 번에 쓴다</td><td>표현력</td></tr>
+          <tr><td class="key">Q5</td><td>발표자를 정한다</td><td>내가 한다</td><td>남이 하면 좋겠다</td><td>표현력</td></tr>
+          <tr><td class="key">Q6</td><td>아이디어가 떠올랐다</td><td>다듬기 전에 던진다</td><td>확신이 들 때만 꺼낸다</td><td>표현력</td></tr>
+          <tr><td class="key">Q7</td><td>팀원이 마감을 놓쳤다</td><td>무슨 일 있냐고 먼저 묻는다</td><td>언제까지 되냐고 먼저 묻는다</td><td>공감력</td></tr>
+          <tr><td class="key">Q8</td><td>의견이 갈렸다</td><td>소수 의견을 한 번 더 듣는다</td><td>다수로 빨리 정한다</td><td>공감력</td></tr>
         </tbody>
       </table></div>
-      <p class="out">A가 해당 능력치의 높은 쪽입니다. <b>응답에 걸린 시간</b>도 함께 기록되어 순발력의 재료가 됩니다.</p>
+      <p class="out"><b>A가 언제나 해당 능력치의 높은 쪽입니다.</b> 이 규칙은 생성된 문항에서도 같습니다. <b>응답에 걸린 시간</b>도 함께 기록되어 순발력의 재료가 됩니다.</p>
     </div></div>
 
     <div class="stage"><div class="s-n">4</div><div class="s-b">
@@ -359,7 +374,8 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
 
     <div class="stage"><div class="s-n">5</div><div class="s-b">
       <div class="s-h"><span class="t">첫인상 투표 ②</span><span class="chip">2:00</span><span class="chip">같은 5문항</span></div>
-      <p class="small">2단계와 <b>완전히 같은 다섯 문항</b>을 다시 묻습니다. 전후 득표 차이가 곧 "게임이 실제로 먹혔는가"의 증거이며, 개인 카드의 <b>인상 변화</b> 항목과 <code>첫인상 배신자</code> 칭호의 근거가 됩니다.</p>
+      <p class="small">2단계와 <b>완전히 같은 다섯 문항</b>을 다시 묻습니다. 생성된 문항을 썼다면 생성된 그대로를 다시 씁니다. 전후 득표 차이가 곧 "게임이 실제로 먹혔는가"의 증거이며, 개인 카드의 <b>인상 변화</b> 항목과 <code>첫인상 배신자</code> 칭호의 근거가 됩니다.</p>
+      <div class="note hot">여기서 문항이 하나라도 달라지면 전후 비교가 무의미해지고, <code>첫인상 배신자</code> 칭호와 팀 등급의 인상 변화량 지표가 같이 무너집니다.</div>
     </div></div>
 
     <div class="stage"><div class="s-n">6</div><div class="s-b">
@@ -370,14 +386,118 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
 </section>
 
 <section id="s4">
-  <h2><span class="n">04</span>능력치 5개</h2>
+  <h2><span class="n">04</span>문항 생성</h2>
+  <div class="note hot"><b>LLM은 문장만 씁니다. 채점값은 코드가 정합니다.</b> 어느 문항이 어느 능력치인지, A가 높은 쪽인지가 슬롯에 미리 박혀 있어서 <b>산출식 · 유형 판정 · 궁합 · 등급이 한 줄도 바뀌지 않습니다.</b> 문항이 매번 달라져도 리포트는 언제나 같은 양식, 같은 눈금으로 나옵니다.</div>
+
+  <h3>슬롯은 고정, 문장만 생성</h3>
+<pre>이지선다 8슬롯                      첫인상 5슬롯
+  Q1  주도력   A가 높은 쪽            P1  주도력
+  Q2  주도력   A가 높은 쪽            P2  순발력
+  Q3  주도력   A가 높은 쪽            P3  표현력
+  Q4  표현력   A가 높은 쪽            P4  공감력
+  Q5  표현력   A가 높은 쪽            P5  관찰력
+  Q6  표현력   A가 높은 쪽
+  Q7  공감력   A가 높은 쪽
+  Q8  공감력   A가 높은 쪽</pre>
+
+  <h3>출력 스키마 — 한 번의 호출로 분류와 문항을 함께</h3>
+<pre>{
+  <span class="k">"team_kind"</span>: "개발",
+  <span class="k">"context_line"</span>: "48시간 해커톤, 다섯 중 셋은 오늘 처음 봄",
+  <span class="k">"usable"</span>: true,
+  <span class="k">"questions"</span>: {
+    <span class="k">"Q1"</span>: { "situation": "첫 두 시간, 아직 뭘 만들지 안 정했다",
+            "a": "일단 내 아이디어부터 꺼낸다",
+            "b": "남들이 뭘 말하는지 먼저 듣는다" },
+    <span class="k">"P1"</span>: { "text": "첫 두 시간 안에 제일 먼저 아이디어를 던질 것 같은 사람은?" }
+    <span class="c">// Q1~Q8, P1~P5 총 13슬롯</span>
+  }
+}</pre>
+  <div class="tw"><table>
+    <thead><tr><th>필드</th><th>쓰임</th></tr></thead>
+    <tbody>
+      <tr><td class="key">team_kind</td><td><code>개발</code> · <code>기획</code> · <code>디자인</code> · <code>마케팅</code> · <code>학교 과제</code> · <code>기타</code>. 대기실에 "개발팀으로 잡았습니다" 한 줄로 표시</td></tr>
+      <tr><td class="key">context_line</td><td>리포트를 쓸 때 컨텍스트로 넘어감</td></tr>
+      <tr><td class="key">usable</td><td>호스트가 쓴 글이 문항을 만들 만한지. <code>false</code>면 기본 세트</td></tr>
+      <tr><td class="key">questions</td><td><code>Q1</code>~<code>Q8</code>, <code>P1</code>~<code>P5</code> 총 13슬롯</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small dim"><code>team_kind</code>가 <code>기타</code>여도 원문이 멀쩡하면 그대로 씁니다. 동아리 공연 준비 같은 것이 여기 걸립니다. <b>폴백 여부는 <code>team_kind</code>가 아니라 <code>usable</code>이 정합니다.</b></p>
+
+  <h3>생성 규칙 넷</h3>
+  <ol class="plain">
+    <li><b>상황만 프로젝트에서 가져오고, 갈림은 항상 성향으로 낸다</b></li>
+    <li><b>어느 쪽도 정답이 아니어야 한다</b> — 한쪽이 명백히 나으면 다들 그쪽을 고르고 값이 안 갈립니다</li>
+    <li><b>지식 · 기술 · 도구 이름을 쓰지 않는다</b></li>
+    <li><b>그 팀이 아닌 사람이 읽어도 이해되는 문장이어야 한다</b> — 리포트는 나중에 남에게 보여주게 됩니다</li>
+  </ol>
+  <div class="tw"><table>
+    <thead><tr><th>✕ 이런 문항</th><th>왜 안 되나</th></tr></thead>
+    <tbody>
+      <tr><td>백엔드가 안 붙었다 → 목 데이터로 갈까 / API를 기다릴까</td><td>개발 지식이 필요해 비개발 팀원이 못 고릅니다</td></tr>
+      <tr><td>피그마로 먼저 그릴까 / 코드부터 짤까</td><td>도구를 아는지를 묻고 있습니다</td></tr>
+      <tr><td>심사 기준 중 창의성 / 완성도 중 뭘 노릴까</td><td>성향이 아니라 전략 판단입니다</td></tr>
+      <tr><td>리액트로 갈까 / 바닐라로 갈까</td><td>능력치와 아무 관계가 없습니다</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">전부 <b>성향이 아니라 지식을 묻고 있어서</b> 능력치가 오염됩니다. 호스트가 쓴 글은 <b>지시가 아니라 자료</b>로만 프롬프트에 들어갑니다. 무엇을 썼든 출력은 위 스키마를 벗어날 수 없고, 벗어나면 검증에서 걸립니다.</p>
+
+  <h3>검증과 폴백</h3>
+  <div class="tw"><table>
+    <thead><tr><th>검사</th><th>기준</th></tr></thead>
+    <tbody>
+      <tr><td>슬롯</td><td><code>Q1</code>~<code>Q8</code>, <code>P1</code>~<code>P5</code> 13개가 모두 있는가</td></tr>
+      <tr><td>길이</td><td>상황 40자, 선택지 25자, 첫인상 질문 40자 이내</td></tr>
+      <tr><td>선택지</td><td>A와 B가 서로 다른가</td></tr>
+      <tr><td>금지어</td><td>기술 용어 · 도구 이름 · 고유명사가 섞였는가</td></tr>
+      <tr><td>시간</td><td>5초 안에 응답이 왔는가</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><b>하나라도 어긋나면 부분 채택 없이 전체를 기본 세트로</b> 돌립니다. 섞이면 어느 문항이 생성된 것인지 추적할 수 없습니다. 기본 세트는 §03의 표 그대로입니다 — <mark>LLM이 죽어도 서비스는 돕니다.</mark></div>
+
+  <h3>사후 점검</h3>
+  <div class="note cut"><b>이지선다 8문항 중 5개 이상에서 전원이 같은 답을 골랐다면 생성이 실패한 것입니다.</b> 값이 안 갈렸다는 뜻이라 능력치가 다섯 명 모두 비슷하게 나옵니다. 오류로 처리하지 않고 팀 리포트에서 <b>"이례적으로 합이 맞은 팀"</b>으로 서술합니다. 사용자에게는 실패가 보이지 않고 로그에만 남습니다.</div>
+
+  <h3>호스트가 문항을 미리 볼 수 있나</h3>
+  <p class="small"><b>볼 수 없습니다.</b> 호스트도 참가자라 미리 보면 게임이 불공정해집니다. 대신 대기실에 <b>"문항 다시 만들기"</b> 버튼을 둡니다 — 내용은 안 보고 다시 돌리는 것만 가능합니다. 개발 모드에서만 미리보기가 열립니다 (시연 리허설용).</p>
+
+  <h3>생성 예시</h3>
+  <p class="quote">교내 해커톤 참가 팀입니다. 48시간 안에 앱 하나를 만들어야 하고, 다섯 명 중 셋은 오늘 처음 봅니다.</p>
+  <div class="tw"><table>
+    <thead><tr><th class="num">슬롯</th><th>상황</th><th>A</th><th>B</th><th>능력치</th></tr></thead>
+    <tbody>
+      <tr><td class="key">Q1</td><td>첫 두 시간, 아직 뭘 만들지 안 정했다</td><td>일단 내 아이디어부터 꺼낸다</td><td>남들이 뭘 말하는지 먼저 듣는다</td><td>주도력</td></tr>
+      <tr><td class="key">Q2</td><td>역할을 나눈다</td><td>하고 싶은 걸 먼저 찜한다</td><td>남는 자리를 맡는다</td><td>주도력</td></tr>
+      <tr><td class="key">Q3</td><td>열두 시간쯤 지나서 방향이 틀린 것 같다</td><td>지금 멈추고 말한다</td><td>일단 끝까지 만들어보고 말한다</td><td>주도력</td></tr>
+      <tr><td class="key">Q4</td><td>새벽 두 시, 팀 단톡에 할 말이 생겼다</td><td>떠오르는 대로 바로 쓴다</td><td>정리해서 한 번에 쓴다</td><td>표현력</td></tr>
+      <tr><td class="key">Q5</td><td>심사 발표자를 정한다</td><td>내가 한다</td><td>남이 해주면 좋겠다</td><td>표현력</td></tr>
+      <tr><td class="key">Q6</td><td>확신 없는 아이디어가 떠올랐다</td><td>설익어도 일단 던진다</td><td>되는지 확인하고 꺼낸다</td><td>표현력</td></tr>
+      <tr><td class="key">Q7</td><td>새벽 세 시, 한 명이 계속 조용하다</td><td>괜찮냐고 먼저 묻는다</td><td>어디까지 됐는지 먼저 묻는다</td><td>공감력</td></tr>
+      <tr><td class="key">Q8</td><td>시간이 없는데 한 명만 다른 의견이다</td><td>그 이유를 한 번 더 듣는다</td><td>다수로 빨리 정하고 간다</td><td>공감력</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tw"><table>
+    <thead><tr><th class="num">슬롯</th><th>질문</th><th>능력치</th></tr></thead>
+    <tbody>
+      <tr><td class="key">P1</td><td>첫 두 시간 안에 제일 먼저 아이디어를 던질 것 같은 사람은?</td><td>주도력</td></tr>
+      <tr><td class="key">P2</td><td>막혔을 때 제일 빨리 다음 수를 낼 것 같은 사람은?</td><td>순발력</td></tr>
+      <tr><td class="key">P3</td><td>심사 발표를 맡기고 싶은 사람은?</td><td>표현력</td></tr>
+      <tr><td class="key">P4</td><td>새벽에 지쳤을 때 제일 먼저 챙겨줄 것 같은 사람은?</td><td>공감력</td></tr>
+      <tr><td class="key">P5</td><td>남이 슬쩍 넘어가려는 걸 제일 먼저 알아챌 것 같은 사람은?</td><td>관찰력</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small dim">상황만 해커톤에서 빌려왔고 <b>고르는 것은 여전히 성향</b>입니다. 해커톤을 안 해본 사람도 전부 고를 수 있습니다.</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">05</span>능력치 5개</h2>
   <div class="tw"><table>
     <thead><tr><th>표기</th><th class="num">코드</th><th>무엇을 재나</th><th>출처</th></tr></thead>
     <tbody>
-      <tr><td><b>주도력</b></td><td class="key">DOM</td><td>판을 먼저 벌리나</td><td>이지선다 1·2·3</td></tr>
+      <tr><td><b>주도력</b></td><td class="key">DOM</td><td>판을 먼저 벌리나</td><td>이지선다 <code>Q1</code> <code>Q2</code> <code>Q3</code></td></tr>
       <tr><td><b>순발력</b></td><td class="key">SPD</td><td>얼마나 빨리 결정하나</td><td>이지선다 8문항 평균 응답 시간</td></tr>
-      <tr><td><b>표현력</b></td><td class="key">EXP</td><td>자기를 얼마나 드러내나</td><td>이지선다 4·5·6</td></tr>
-      <tr><td><b>공감력</b></td><td class="key">EMP</td><td>남을 얼마나 살피나</td><td>이지선다 7·8</td></tr>
+      <tr><td><b>표현력</b></td><td class="key">EXP</td><td>자기를 얼마나 드러내나</td><td>이지선다 <code>Q4</code> <code>Q5</code> <code>Q6</code></td></tr>
+      <tr><td><b>공감력</b></td><td class="key">EMP</td><td>남을 얼마나 살피나</td><td>이지선다 <code>Q7</code> <code>Q8</code></td></tr>
       <tr><td><b>관찰력</b></td><td class="key">OBS</td><td>남을 얼마나 맞히나</td><td>거짓 찾기 + 유형 맞히기 정답률</td></tr>
     </tbody>
   </table></div>
@@ -417,19 +537,20 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
     </div>
   </div>
 
-<pre>주도력 = (문항 1·2·3 중 A 개수 / 3) × 5
-표현력 = (문항 4·5·6 중 A 개수 / 3) × 5
-공감력 = (문항 7·8   중 A 개수 / 2) × 5
+<pre>주도력 = (Q1·Q2·Q3 중 A 개수 / 3) × 5
+표현력 = (Q4·Q5·Q6 중 A 개수 / 3) × 5
+공감력 = (Q7·Q8   중 A 개수 / 2) × 5
 
 순발력 = 평균 응답 시간을 절대 기준으로 환산
          3초 이하 → 5.0 / 12초 이상 → 0.0 / 사이는 선형
 
 관찰력 = (거짓 찾기 정답 + 유형 맞히기 정답) / (4 + 4) × 5</pre>
+  <div class="note hot">문항이 생성된 것이든 기본 세트든 <b>이 식은 그대로입니다.</b> 슬롯이 고정이라 어느 문항이 어느 능력치인지가 바뀌지 않기 때문입니다.</div>
   <div class="note">순발력을 팀 내 순위가 아니라 <b>절대 기준</b>으로 잡는 이유는, 팀이 바뀌어도 같은 사람의 값이 흔들리지 않게 하기 위해서입니다.</div>
 </section>
 
-<section id="s5">
-  <h2><span class="n">05</span>유형 8종</h2>
+<section id="s6">
+  <h2><span class="n">06</span>유형 8종</h2>
   <p class="small dim"><code>주도력 × 표현력 × 관찰력</code>을 2.5 기준으로 갈라 여덟 가지. 동점(±0.3)이면 <b>순발력</b>이 높은 쪽으로 기웁니다.</p>
   <div class="types">
     <div class="ty"><span class="sym" style="color:var(--t1)">◆</span><div class="b"><span class="cd">T1 · H H H</span><span class="nm">판 짜는 사람</span><span class="ds">다 보고 다 말하고 다 정한다</span></div></div>
@@ -441,12 +562,13 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
     <div class="ty"><span class="sym" style="color:var(--t7)">◇</span><div class="b"><span class="cd">T7 · L L H</span><span class="nm">CCTV</span><span class="ds">말은 없는데 다 보고 있었음</span></div></div>
     <div class="ty"><span class="sym" style="color:var(--t8)">○</span><div class="b"><span class="cd">T8 · L L L</span><span class="nm">정직한 무임승차</span><span class="ds">오늘은 그냥 앉아 있었음</span></div></div>
   </div>
-  <div class="note hot">유형 이름과 부제는 세게 갑니다. 순화는 코멘트 마지막 줄의 칭찬이 받습니다.</div>
+  <div class="note hot"><b>유형 이름은 고정입니다.</b> 카드 이미지가 유형에 1:1로 붙어 있어서 이름이 바뀌면 이미지를 만들 수 없습니다. 대신 <b>부제와 코멘트가 프로젝트 맥락을 탑니다</b> — “뒷자리 판사”는 그대로 두고 부제가 “본인은 커밋 안 하는데 리뷰는 다 함”으로 나가는 식입니다.</div>
+  <p class="small dim">유형 이름과 부제는 세게 갑니다. 순화는 코멘트 마지막 줄의 칭찬이 받습니다.</p>
   <p class="small dim"><b>카드 이미지</b>는 8종 각각 하나씩 필요합니다. 초기 구현에서는 위와 같이 유형별 <b>색 + 심볼</b>로 구분하고, 일러스트는 같은 레이아웃 위에 교체합니다.</p>
 </section>
 
-<section id="s6">
-  <h2><span class="n">06</span>칭호</h2>
+<section id="s7">
+  <h2><span class="n">07</span>칭호</h2>
   <p class="small dim">유형은 <b>절대 평가</b>(본인 기록만), 칭호는 <b>상대 평가</b>(팀 안에서의 순위·조건). 팀이 바뀌면 칭호도 바뀝니다.</p>
   <div class="tw"><table>
     <thead><tr><th>칭호</th><th>조건</th></tr></thead>
@@ -466,8 +588,8 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
   <div class="note"><b>모든 참가자는 최소 하나를 받습니다.</b> 아무 조건에도 안 걸리면 <code>예측대로</code>가 기본값입니다.</div>
 </section>
 
-<section id="s7">
-  <h2><span class="n">07</span>궁합 — S / A / B</h2>
+<section id="s8">
+  <h2><span class="n">08</span>궁합 — S / A / B</h2>
   <div class="grades">
     <div class="gr"><span class="g">S</span><span class="x">아주 잘 맞음</span></div>
     <div class="gr"><span class="g a">A</span><span class="x">잘 맞음</span></div>
@@ -484,8 +606,8 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
   <p class="small dim">팀 등급(<code>SSS</code>~<code>S</code>)과는 눈금이 다르므로, 화면에서 팀 쪽은 <b>등급</b>, 두 사람 사이는 <b>궁합</b>으로 라벨을 구분합니다.</p>
 </section>
 
-<section id="s8">
-  <h2><span class="n">08</span>팀 등급</h2>
+<section id="s9">
+  <h2><span class="n">09</span>팀 등급</h2>
   <div class="rankrow">
     <div class="rk"><span class="g">SSS</span><span class="x">네 지표<br>모두 상위</span></div>
     <div class="rk"><span class="g">SS+</span><span class="x">셋 상위</span></div>
@@ -505,8 +627,8 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
   <div class="note hot">네 지표 모두 <b>"높을수록 좋다"</b>이고 최하 등급이 <code>S</code>입니다. 등급이 낮아도 문장은 좋게 나갑니다 — 능력치가 몰렸으면 "성향이 비슷해 말이 잘 통한다", 의견이 안 갈렸으면 "이미 합이 맞는다"로 받습니다. <b>등급은 크게, 근거는 네 줄로</b> 보여줍니다.</div>
 </section>
 
-<section id="s9">
-  <h2><span class="n">09</span>결과 화면 — 세 메뉴</h2>
+<section id="s10">
+  <h2><span class="n">10</span>결과 화면 — 세 메뉴</h2>
   <p class="small">게임이 끝나면 허브 화면에서 <b>개인 리포트 · 팀 리포트 · 게임으로 가기</b> 세 갈래로 나뉩니다.</p>
 
   <p class="mocklabel">개인 리포트</p>
@@ -560,8 +682,8 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
   <div class="note"><b>게임으로 가기</b> — 만들어진 페르소나를 넘겨받아 이어서 진행하는 게임의 입구입니다. 아이스브레이킹 쪽에서는 <b>페르소나 데이터를 넘기는 것까지</b>를 담당합니다.</div>
 </section>
 
-<section id="s10">
-  <h2><span class="n">10</span>문구 규칙</h2>
+<section id="s11">
+  <h2><span class="n">11</span>문구 규칙</h2>
   <ol class="plain">
     <li><b>숫자를 문장에 쓰지 않는다.</b> “6초 만에 골랐다” ✕ → “손이 먼저 나갑니다” ○ <span class="dim">숫자는 레이더가 이미 보여줍니다</span></li>
     <li><b>까는 대상은 오늘 한 행동이지 사람이 아니다.</b> “게으르다” ✕ → “본인 차례에만 성실했다” ○</li>
@@ -605,10 +727,11 @@ closing_dict[opening_id]              = [뒤집는 문장 2~3개]
   </table></div>
 </section>
 
-<section id="s11">
-  <h2><span class="n">11</span>MBTI 활용</h2>
+<section id="s12">
+  <h2><span class="n">12</span>MBTI 활용</h2>
   <div class="note hot">MBTI는 <b>능력치 산출과 유형 판정에 관여하지 않습니다.</b> 리포트 문장을 쓸 때 <b>컨텍스트</b>로만 들어가 서술을 두껍게 합니다.</div>
 <pre>컨텍스트 : MBTI=INTJ
+           프로젝트=48시간 해커톤, 다섯 중 셋은 오늘 처음 봄
            능력치=[2.1, 3.8, 1.9, 3.2, 4.1]
            거짓말="고등학교 때 전국대회 나간 적 있음" (3명 속임)
            첫인상 전=잠수 3표 / 후=눈치 4표
@@ -617,13 +740,20 @@ closing_dict[opening_id]              = [뒤집는 문장 2~3개]
   <p class="small dim">리포트 본문에 MBTI가 언급되는 곳은 <b>개인 카드 헤더의 닉네임 옆 한 곳뿐</b>입니다.</p>
 </section>
 
-<section id="s12">
-  <h2><span class="n">12</span>데이터 모델과 화면</h2>
-<pre>Session(id, code, status, created_at)
+<section id="s13">
+  <h2><span class="n">13</span>데이터 모델과 화면</h2>
+<pre>Session(id, code, status, created_at,
+        project_text, team_kind, context_line, question_source)
+        <span class="c">-- question_source ∈ {GENERATED, DEFAULT}
+        -- project_text는 호스트가 쓴 원문 그대로</span>
+
+Question(id, session_id, slot, kind, situation, choice_a, choice_b, text)
+         <span class="c">-- slot ∈ {Q1..Q8, P1..P5}   kind ∈ {BINARY, IMPRESSION}
+         -- 능력치는 slot이 정한다. 생성 결과가 바꿀 수 없다</span>
 
 Player(id, session_id, nickname, gender, mbti, seat_no, is_host)
 
-Answer(id, session_id, player_id, question_no, choice, elapsed_ms)
+Answer(id, session_id, player_id, slot, choice, elapsed_ms)
        <span class="c">-- 이지선다 8문항. elapsed_ms가 순발력의 재료</span>
 
 Statement(id, session_id, player_id, slot, text, is_lie)
@@ -640,6 +770,8 @@ Ability(session_id, player_id, code, value, source)
 Report(session_id, player_id, type_code, comment_lines, badges, quote)</pre>
   <div class="note hot"><b>지켜야 할 것</b>
     <ul style="margin-top:.5rem">
+      <li><b>능력치 매핑을 <code>Question</code>에 저장하지 않습니다.</b> 슬롯 이름이 곧 매핑이고 그 표는 코드에 상수로 있습니다. 저장하면 생성 결과가 채점을 바꿀 수 있게 됩니다</li>
+      <li><b>첫인상 문항(<code>P1</code>~<code>P5</code>)은 세션당 한 벌만 만듭니다.</b> 투표 ①과 ②가 같은 행을 참조합니다. 두 벌을 만들면 전후 비교가 무너집니다</li>
       <li><code>Guess</code> 하나로 네 종류의 추측을 커버합니다. 테이블을 늘리지 않습니다</li>
       <li><code>IMPRESSION_PRE</code> / <code>IMPRESSION_POST</code> 소스는 <b>점선 레이더와 인상 변화 전용</b>입니다. 능력치 본값이나 유형 판정에 섞지 않습니다</li>
       <li><code>Player</code>(방 참가 기록)와 사용자 식별자를 혼동하지 않습니다</li>
@@ -652,31 +784,33 @@ Report(session_id, player_id, type_code, comment_lines, badges, quote)</pre>
     <thead><tr><th class="num">#</th><th>화면</th><th>내용</th></tr></thead>
     <tbody>
       <tr><td class="num">1</td><td>시작</td><td>닉네임 · 성별 · MBTI 입력, 방 만들기 / 코드로 참여</td></tr>
-      <tr><td class="num">2</td><td>대기실</td><td>참가자 목록, 호스트가 시작</td></tr>
-      <tr><td class="num">3</td><td><b>공통 게임 화면</b></td><td>문제 → 제출 → 전원 완료 시 동시 공개. <mark>단계 2·3·5·6이 전부 이 화면</mark></td></tr>
-      <tr><td class="num">4</td><td>문장 입력</td><td>둘은 진실 하나는 거짓 — 세 줄 입력 전용</td></tr>
-      <tr><td class="num">5</td><td>결과 허브</td><td>세 메뉴</td></tr>
-      <tr><td class="num">6</td><td>개인 리포트</td><td>캐릭터 카드</td></tr>
-      <tr><td class="num">7</td><td>팀 리포트</td><td>등급 · 근거 · 추천 역할 · 하이라이트</td></tr>
+      <tr><td class="num">2</td><td><b>방 만들기</b></td><td>프로젝트 서술 입력 → 초대 코드. 문항 생성은 백그라운드</td></tr>
+      <tr><td class="num">3</td><td>대기실</td><td>참가자 목록, <code>team_kind</code> 한 줄, <b>문항 다시 만들기</b>, 호스트가 시작</td></tr>
+      <tr><td class="num">4</td><td><b>공통 게임 화면</b></td><td>문제 → 제출 → 전원 완료 시 동시 공개. <mark>단계 2·3·5·6이 전부 이 화면</mark></td></tr>
+      <tr><td class="num">5</td><td>문장 입력</td><td>둘은 진실 하나는 거짓 — 세 줄 입력 전용</td></tr>
+      <tr><td class="num">6</td><td>결과 허브</td><td>세 메뉴</td></tr>
+      <tr><td class="num">7</td><td>개인 리포트</td><td>캐릭터 카드</td></tr>
+      <tr><td class="num">8</td><td>팀 리포트</td><td>등급 · 근거 · 추천 역할 · 하이라이트</td></tr>
     </tbody>
   </table></div>
-  <div class="note"><b>3번 화면 하나가 네 단계를 담당합니다.</b> 단계마다 화면을 따로 만들면 일정 안에 끝나지 않습니다.</div>
+  <div class="note"><b>4번 화면 하나가 네 단계를 담당합니다.</b> 단계마다 화면을 따로 만들면 일정 안에 끝나지 않습니다.</div>
 </section>
 
-<section id="s13">
-  <h2><span class="n">13</span>역할 분담</h2>
+<section id="s14">
+  <h2><span class="n">14</span>역할 분담</h2>
   <div class="tw"><table>
     <thead><tr><th>담당</th><th class="c">인원</th><th>할 일</th></tr></thead>
     <tbody>
-      <tr><td><b>기획</b></td><td class="c">1인</td><td>문항·질문 확정, 문구 사전, 화면 스케치, 발표 각본</td></tr>
-      <tr><td><b>뼈대</b></td><td class="c">2인</td><td>화면 1·2·3·4, 방 생성·참여·동시 공개, 능력치 산출. 1명은 병합·실행 확인 전담</td></tr>
-      <tr><td><b>리포트</b></td><td class="c">2인</td><td>화면 5·6·7, 유형 판정, 궁합·등급 계산, 카드 렌더링</td></tr>
+      <tr><td><b>기획</b></td><td class="c">1인</td><td>기본 문항 세트, 생성 프롬프트, 문구 사전, 화면 스케치, 발표 각본</td></tr>
+      <tr><td><b>뼈대</b></td><td class="c">2인</td><td>화면 1~5, 방 생성·참여·동시 공개, 문항 생성 호출과 폴백, 능력치 산출. 1명은 병합·실행 확인 전담</td></tr>
+      <tr><td><b>리포트</b></td><td class="c">2인</td><td>화면 6·7·8, 유형 판정, 궁합·등급 계산, 카드 렌더링</td></tr>
     </tbody>
   </table></div>
 
   <h3>두 팀이 먼저 맞출 계약</h3>
 <pre>{
   <span class="k">"session_id"</span>: "...",
+  <span class="k">"context_line"</span>: "48시간 해커톤, 다섯 중 셋은 오늘 처음 봄",
   <span class="k">"players"</span>: [{
     <span class="k">"nickname"</span>: "종훈", <span class="k">"gender"</span>: "M", <span class="k">"mbti"</span>: "INTJ",
     <span class="k">"abilities"</span>:       { "DOM":2.1, "SPD":3.8, "EXP":1.9, "EMP":3.2, "OBS":4.1 },
@@ -699,14 +833,15 @@ Report(session_id, player_id, type_code, comment_lines, badges, quote)</pre>
   <div class="note">리포트 팀은 이 JSON을 임시 값으로 채워 먼저 시작합니다. 뼈대를 기다리지 않습니다.</div>
 </section>
 
-<section id="s14">
-  <h2><span class="n">14</span>범위와 확정 사항</h2>
+<section id="s15">
+  <h2><span class="n">15</span>범위와 확정 사항</h2>
   <h3>이번 범위 밖</h3>
   <div class="tw"><table>
     <thead><tr><th>항목</th><th>사유</th></tr></thead>
     <tbody>
       <tr><td>팀 프로젝트 외 카테고리</td><td>이번 판은 한 종류만 다룹니다</td></tr>
       <tr><td>음성 인식 기반 분석</td><td>정확도가 요구 수준에 못 미칩니다</td></tr>
+      <tr><td>리포트 문장 생성</td><td>문구 사전으로 갑니다. LLM은 문항 생성에만 씁니다</td></tr>
       <tr><td>6명 이상</td><td>첫인상 득표 계산과 진행 시간이 5명 기준입니다</td></tr>
       <tr><td>유형별 일러스트</td><td>초기에는 색 + 심볼로 구분합니다</td></tr>
       <tr><td>페르소나 이후 게임</td><td>별도 파트에서 진행합니다</td></tr>
@@ -718,9 +853,10 @@ Report(session_id, player_id, type_code, comment_lines, badges, quote)</pre>
     <thead><tr><th class="num">#</th><th>항목</th></tr></thead>
     <tbody>
       <tr><td class="num">O1</td><td>유형 8종의 색과 심볼</td></tr>
-      <tr><td class="num">O2</td><td>문장 입력의 글자 수 상한</td></tr>
-      <tr><td class="num">O3</td><td>LLM으로 코멘트를 다듬을지, 사전 문장을 그대로 쓸지</td></tr>
-      <tr><td class="num">O4</td><td>결과 링크의 유효 기간</td></tr>
+      <tr><td class="num">O2</td><td>문항 생성에 쓸 모델과 응답 시간 실측</td></tr>
+      <tr><td class="num">O3</td><td>금지어 목록의 초기 항목</td></tr>
+      <tr><td class="num">O4</td><td>문장 입력의 글자 수 상한</td></tr>
+      <tr><td class="num">O5</td><td>결과 링크의 유효 기간</td></tr>
     </tbody>
   </table></div>
 </section>
