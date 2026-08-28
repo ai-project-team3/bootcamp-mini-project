@@ -2,11 +2,10 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import Badge from '../../components/common/Badge'
 import GameDemoExitControl from '../../components/common/GameDemoExitControl'
-import ContentModeChoice from '../../components/room/ContentModeChoice'
 import Card from '../../components/common/Card'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
-import { launchDemoGame, selectDemoGame } from '../../api/demoRooms'
+import { selectDemoGame } from '../../api/demoRooms'
 import Button from '../../components/common/Button'
 import { useGameDemo } from '../../context/GameDemoContext'
 import { useRoomFlow } from '../../context/RoomFlowContext'
@@ -22,13 +21,12 @@ import './GameDemoHubPage.css'
  * live in the same list and start differently:
  * - games that play inside this room are *selected*, which moves everyone to
  *   the shared guide screen;
- * - 마피아 and 커플 브루마블 keep rooms of their own, so they are *launched*:
- *   the server builds their room around this roster and each player is sent in
- *   holding their own id (see `components/common/GameDemoAccessGuard`).
- *
- * A launched game may need a setting its own entry screen used to ask for, and
- * a group coming from here never sees that screen. 커플 브루마블's 일반/19금
- * mode is the one such setting, so the confirm dialog asks for it.
+ * Picking a game moves the whole room to that game's guide, whichever kind it
+ * is. What happens when the host starts it there differs: a game played inside
+ * this room just begins, while 마피아 and 커플 브루마블 keep rooms of their own
+ * and are *launched* — the server builds their room around this roster and
+ * each player is sent in holding their own id (see `pages/gameGuide` and
+ * `components/common/GameDemoAccessGuard`).
  */
 export default function GameDemoHubPage() {
   const { code: roomCode = '' } = useParams()
@@ -36,18 +34,13 @@ export default function GameDemoHubPage() {
   const { playerId } = useRoomFlow()
   const [openGroups, setOpenGroups] = useState({ 'Persona Games': true, 'Party Games': true })
   const [pendingGame, setPendingGame] = useState(null)
-  const [contentMode, setContentMode] = useState('general')
   const [selecting, setSelecting] = useState(false)
   const [error, setError] = useState('')
   const me = players.find((player) => player.id === playerId)
   const isHost = Boolean(me?.isHost)
   const toggleGroup = (group) => setOpenGroups((current) => ({ ...current, [group]: !current[group] }))
 
-  // What a game needs asked before it starts. Only 커플 브루마블 has one.
-  const optionsFor = (game) => (game.id === 'marble' ? { content_mode: contentMode } : {})
-
   const openGame = (game) => {
-    setContentMode('general')
     setError('')
     setPendingGame(game)
   }
@@ -57,13 +50,9 @@ export default function GameDemoHubPage() {
     setSelecting(true)
     setError('')
     try {
-      if (pendingGame.standalone) {
-        // The guard is watching the room and will take everyone in, this
-        // player included, as soon as the launch lands.
-        await launchDemoGame(roomCode, playerId, pendingGame.id, optionsFor(pendingGame))
-      } else {
-        await selectDemoGame(roomCode, playerId, pendingGame.id)
-      }
+      // The guard is watching the room and moves everyone, this player
+      // included, to the game's guide.
+      await selectDemoGame(roomCode, playerId, pendingGame.id)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -131,12 +120,7 @@ export default function GameDemoHubPage() {
           <Card className="demo-game-confirm" role="dialog" aria-modal="true" aria-labelledby="game-confirm-title">
             <span>{pendingGame.emoji}</span>
             <h2 id="game-confirm-title">{pendingGame.title} 게임으로<br />시작할까요?</h2>
-            <p>{`지금 모여 있는 ${players.length}명 그대로 함께 이동해요.`}</p>
-            {pendingGame.id === 'marble' && (
-              <div className="demo-game-confirm-options">
-                <ContentModeChoice value={contentMode} onChange={setContentMode} />
-              </div>
-            )}
+            <p>{`지금 모여 있는 ${players.length}명 그대로 설명서로 이동해요.`}</p>
             {error && <p className="game-room-error" role="alert">{error}</p>}
             <div className="demo-game-confirm-actions">
               <Button variant="secondary" onClick={() => setPendingGame(null)} disabled={selecting}>취소</Button>

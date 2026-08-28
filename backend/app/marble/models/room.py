@@ -138,6 +138,9 @@ class Room:
     skipped_player_id: str | None = None
     #: Room size chosen when the room was created, 2 through 8.
     max_players: int = MIN_PLAYERS
+    #: When a test bot last moved, so the next bot move waits long enough for
+    #: a watcher to read what happened. See `game/bots.py`.
+    last_bot_action_at: float = 0.0
 
     def is_full(self) -> bool:
         return len(self.players) >= self.max_players

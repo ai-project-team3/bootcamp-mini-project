@@ -215,6 +215,24 @@ class DemoRoomStore:
                 raise DemoRoomLaunchError('게임이 시작된 뒤에 들어온 참가자입니다')
             return room.launch, player
 
+    def return_to_hub(self, code: str, player_id: str) -> DemoRoom:
+        """Put the room back on its game list without breaking it up.
+
+        '게임 목록' means "we are done with this game", not "we are done": the
+        room, its code and everyone in it stay exactly as they are, and the
+        chooser opens again. Anyone in the room may do it — a game nobody is
+        enjoying should not need the host to end it.
+        """
+        with self._lock:
+            room = self._require_room(code)
+            player = next((item for item in room.players if item.id == player_id), None)
+            if player is None:
+                raise DemoRoomAuthorizationError('방 참가자만 게임을 끝낼 수 있습니다')
+            room.selected_game_id = None
+            room.game_phase = 'HUB'
+            room.launch = None
+            return room
+
     def leave_room(self, code: str, player_id: str) -> bool:
         with self._lock:
             room = self._require_room(code)

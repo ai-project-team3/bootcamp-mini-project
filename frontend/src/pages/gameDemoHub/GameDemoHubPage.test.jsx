@@ -59,66 +59,17 @@ describe('the room chooses a game', () => {
     expect(screen.getByText(/5명이 모여 있어요/)).toBeInTheDocument()
   })
 
-  it('launches a game with its own room for everyone already gathered', async () => {
-    const launch = vi.spyOn(demoRooms, 'launchDemoGame').mockResolvedValue({})
+  it('sends the room to the guide for a game with its own room', async () => {
+    const select = vi.spyOn(demoRooms, 'selectDemoGame').mockResolvedValue({})
     renderHub()
 
     fireEvent.click(cardButton('마피아'))
     fireEvent.click(screen.getByRole('button', { name: '확인' }))
 
-    await waitFor(() => expect(launch).toHaveBeenCalledWith('AB12CD', 'p1', 'mafia', {}))
+    await waitFor(() => expect(select).toHaveBeenCalledWith('AB12CD', 'p1', 'mafia'))
   })
 
-  it('asks 커플 브루마블 which mode to play, since its own lobby is skipped', async () => {
-    const launch = vi.spyOn(demoRooms, 'launchDemoGame').mockResolvedValue({})
-    renderHub({ playerCount: 3 })
-
-    fireEvent.click(cardButton('커플 브루마블'))
-    fireEvent.click(screen.getByTestId('pm-mode-adult'))
-    fireEvent.click(screen.getByRole('button', { name: '확인' }))
-
-    await waitFor(() => expect(launch).toHaveBeenCalledWith('AB12CD', 'p1', 'marble', {
-      content_mode: 'adult',
-    }))
-  })
-
-  it('plays 커플 브루마블 in 일반 모드 unless the host says otherwise', async () => {
-    const launch = vi.spyOn(demoRooms, 'launchDemoGame').mockResolvedValue({})
-    renderHub({ playerCount: 3 })
-
-    fireEvent.click(cardButton('커플 브루마블'))
-    expect(screen.getByTestId('pm-mode-general')).toHaveAttribute('aria-pressed', 'true')
-    fireEvent.click(screen.getByRole('button', { name: '확인' }))
-
-    await waitFor(() => expect(launch).toHaveBeenCalledWith('AB12CD', 'p1', 'marble', {
-      content_mode: 'general',
-    }))
-  })
-
-  it('does not offer a mode for games that have none', () => {
-    renderHub()
-
-    fireEvent.click(cardButton('마피아'))
-
-    expect(screen.queryByTestId('pm-mode-adult')).toBeNull()
-  })
-
-  it('forgets a mode picked for a game the host backed out of', async () => {
-    const launch = vi.spyOn(demoRooms, 'launchDemoGame').mockResolvedValue({})
-    renderHub({ playerCount: 3 })
-
-    fireEvent.click(cardButton('커플 브루마블'))
-    fireEvent.click(screen.getByTestId('pm-mode-adult'))
-    fireEvent.click(screen.getByRole('button', { name: '취소' }))
-    fireEvent.click(cardButton('커플 브루마블'))
-    fireEvent.click(screen.getByRole('button', { name: '확인' }))
-
-    await waitFor(() => expect(launch).toHaveBeenCalledWith('AB12CD', 'p1', 'marble', {
-      content_mode: 'general',
-    }))
-  })
-
-  it('selects a game that plays inside this room the way it always did', async () => {
+  it('sends the room to the guide for a game played in this room too', async () => {
     const select = vi.spyOn(demoRooms, 'selectDemoGame').mockResolvedValue({})
     renderHub()
 
@@ -126,6 +77,24 @@ describe('the room chooses a game', () => {
     fireEvent.click(screen.getByRole('button', { name: '확인' }))
 
     await waitFor(() => expect(select).toHaveBeenCalledWith('AB12CD', 'p1', 'liar'))
+  })
+
+  it('leaves per-game settings to the guide, where the rules are', () => {
+    renderHub({ playerCount: 3 })
+
+    fireEvent.click(cardButton('커플 브루마블'))
+
+    expect(screen.queryByTestId('pm-mode-adult')).toBeNull()
+  })
+
+  it('shows the failure instead of pretending the game started', async () => {
+    vi.spyOn(demoRooms, 'selectDemoGame').mockRejectedValue(new Error('방장만 게임을 선택할 수 있습니다'))
+    renderHub()
+
+    fireEvent.click(cardButton('마피아'))
+    fireEvent.click(screen.getByRole('button', { name: '확인' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('방장만 게임을 선택할 수 있습니다')
   })
 
   it('explains on the card when the group is the wrong size for a game', () => {
@@ -144,13 +113,4 @@ describe('the room chooses a game', () => {
     expect(screen.getByText('방장이 게임을 선택하면 모두 함께 이동해요.')).toBeInTheDocument()
   })
 
-  it('shows the failure instead of pretending the game started', async () => {
-    vi.spyOn(demoRooms, 'launchDemoGame').mockRejectedValue(new Error('마피아는 4, 5, 6, 7, 8명일 때만 시작할 수 있어요'))
-    renderHub()
-
-    fireEvent.click(cardButton('마피아'))
-    fireEvent.click(screen.getByRole('button', { name: '확인' }))
-
-    expect(await screen.findByRole('alert')).toHaveTextContent('마피아는 4, 5, 6, 7, 8명일 때만')
-  })
 })

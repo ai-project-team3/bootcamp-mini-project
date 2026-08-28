@@ -11,16 +11,55 @@ read.
 """
 
 import random
+import time
 
+from app.mafia.game import timing
 from app.mafia.models.room import GamePhase, Player, Room
 
+#: How long each phase the bots take part in runs for.
+_PHASE_SECONDS = {
+    GamePhase.DAY_VOTE: timing.DAY_VOTE_SECONDS,
+    GamePhase.EXECUTION_VOTE: timing.EXECUTION_VOTE_SECONDS,
+    GamePhase.NIGHT_ACTION: timing.NIGHT_ACTION_SECONDS,
+}
 
-def act(room: Room, rng: random.Random | None = None) -> None:
+#: How much of a phase the bots let pass before acting.
+#:
+#: Without this the game skips: the state machine ends a phase the moment
+#: everyone who *can* act has, and a phase's required actors are often bots
+#: alone. A citizen watching the night sees mafia, doctor and police all move
+#: on the first poll and the night is over before the screen has drawn; the
+#: same happens in the execution vote to whoever is on trial. Waiting most of
+#: the phase out gives the human time to read what is happening, while still
+#: ending early once they have taken their own turn.
+THINKING_FRACTION = 0.55
+
+
+def _still_thinking(room: Room, now: float) -> bool:
+    length = _PHASE_SECONDS.get(room.phase)
+    if length is None or room.phase_deadline is None:
+        return False
+    return (room.phase_deadline - now) > length * (1 - THINKING_FRACTION)
+
+
+def act(
+    room: Room,
+    rng: random.Random | None = None,
+    now: float | None = None,
+    force: bool = False,
+) -> None:
     """Submit whatever the bots owe in the current phase.
 
     Safe to call on every state poll: each bot acts once per phase, because
     every branch checks the record it is about to write.
+
+    `force` skips the thinking pause. The host's 건너뛰기 ends a phase early,
+    and without this the phase would resolve before the bots had voted or acted
+    — nobody accused, nobody attacked — so day and night cycled forever with
+    nothing ever happening.
     """
+    if not force and _still_thinking(room, time.time() if now is None else now):
+        return
     chooser = rng or random
     if room.phase is GamePhase.DAY_VOTE:
         _vote(room, chooser)

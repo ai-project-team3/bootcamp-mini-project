@@ -79,6 +79,19 @@ export function claimLaunchedGame(code, playerId) {
   })
 }
 
+/**
+ * End the current game and reopen the room's game list, keeping the room.
+ *
+ * '게임 목록' is not '나가기': the room, its code and everyone in it stay, so
+ * the group can pick something else without being invited all over again.
+ */
+export function returnToRoomHub(code, playerId) {
+  return apiFetch(`/demo/rooms/${code}/game/back`, {
+    method: 'POST',
+    body: JSON.stringify({ player_id: playerId }),
+  })
+}
+
 export function leaveDemoRoom(code, playerId) {
   return apiFetch(`/demo/rooms/${code}/leave`, {
     method: 'POST',

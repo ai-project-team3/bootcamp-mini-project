@@ -24,6 +24,15 @@ def clean_store():
     store.clear()
 
 
+_clock = [0.0]
+
+
+def _t() -> float:
+    """A clock that always says enough time has passed for the next bot move."""
+    _clock[0] += bots.BOT_MOVE_INTERVAL_SECONDS
+    return _clock[0]
+
+
 def _started_room(bot_flags: list[bool]):
     names = [f"p{i}" for i in range(len(bot_flags))]
     room_id, player_ids = create_room_for(names, 0, None, bot_flags)
@@ -37,7 +46,7 @@ def test_a_bot_takes_its_turn_instead_of_stopping_the_board():
     engine.advance_turn(room)
     assert room.current_player_id == player_ids[1]
 
-    acted = bots.take_pending_turn(room, random.Random(0))
+    acted = bots.take_pending_turn(room, random.Random(0), now=_t())
 
     assert acted is True
     assert room.phase is not GamePhase.ROLL_DICE
@@ -47,7 +56,7 @@ def test_a_persons_turn_is_left_alone():
     room, player_ids = _started_room([False, True])
     assert room.current_player_id == player_ids[0]
 
-    assert bots.take_pending_turn(room, random.Random(0)) is False
+    assert bots.take_pending_turn(room, random.Random(0), now=_t()) is False
     assert room.phase is GamePhase.ROLL_DICE
 
 
@@ -55,7 +64,7 @@ def test_one_move_per_call_so_a_watcher_sees_it_happen():
     room, player_ids = _started_room([False, True])
     engine.advance_turn(room)
 
-    bots.take_pending_turn(room, random.Random(0))
+    bots.take_pending_turn(room, random.Random(0), now=_t())
 
     # Rolled, and now stopped on whatever the roll opened — not played through.
     assert room.phase in (GamePhase.SHOW_QUIZ, GamePhase.SUBMIT_ANSWER)
@@ -69,7 +78,7 @@ def test_polling_carries_a_bot_turn_through_to_the_next_player():
     for _ in range(12):
         if room.current_player_id == player_ids[0] or room.phase is GamePhase.GAME_OVER:
             break
-        bots.take_pending_turn(room, random.Random(1))
+        bots.take_pending_turn(room, random.Random(1), now=_t())
 
     assert room.current_player_id == player_ids[0] or room.phase is GamePhase.GAME_OVER
 
@@ -80,7 +89,7 @@ def test_an_all_bot_room_plays_itself_to_the_end():
     for _ in range(400):
         if room.phase is GamePhase.GAME_OVER:
             break
-        assert bots.take_pending_turn(room, random.Random(7)) is True
+        assert bots.take_pending_turn(room, random.Random(7), now=_t()) is True
 
     assert room.phase is GamePhase.GAME_OVER
     assert room.winner_id is not None
@@ -94,3 +103,15 @@ def test_the_state_poll_is_what_moves_them():
     state = client.get(f"/marble/rooms/{room.room_id}/state").json()
 
     assert state["phase"] != GamePhase.ROLL_DICE.value
+
+
+def test_a_bot_move_waits_long_enough_to_be_watched():
+    room, player_ids = _started_room([False, True])
+    engine.advance_turn(room)
+    now = 1000.0
+
+    assert bots.take_pending_turn(room, random.Random(0), now=now) is True
+    assert bots.take_pending_turn(room, random.Random(0), now=now + 0.5) is False
+    assert bots.take_pending_turn(
+        room, random.Random(0), now=now + bots.BOT_MOVE_INTERVAL_SECONDS
+    ) is True

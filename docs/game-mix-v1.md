@@ -22,11 +22,21 @@ list, and the list is inside the room:
 /games/party/:gameId       the four games that need no room at all
 ```
 
-From the room's list the host picks anything. Games that play inside the room
-(너 누구야?, 너라면?, the party games) move everyone to the shared guide screen.
-마피아 and 커플 브루마블 keep rooms of their own, so they are *launched*: the
-server builds that game's room around the people already gathered, and each
-player walks in holding their own id. Nobody re-enters a nickname or a code.
+From the room's list the host picks anything, and every game passes through its
+guide first — 마피아 and 커플 브루마블 included, which used to drop the room
+straight into play, so the two games with the most rules were the two nobody
+was told the rules of. The guide is also where a game asks for anything its own
+entry screen would have: 커플 브루마블's 일반/19금 mode is chosen there.
+
+Starting from the guide differs by kind. Games that play inside the room (너
+누구야?, 너라면?, the party games) simply begin. 마피아 and 커플 브루마블 keep
+rooms of their own, so they are *launched*: the server builds that game's room
+around the people already gathered, and each player walks in holding their own
+id. Nobody re-enters a nickname or a code.
+
+'게임 목록' inside any of those games ends the game and reopens the chooser.
+The room, its code and everyone in it stay — leaving the room for good is a
+separate button, on the game list itself.
 
 Four party games — 이름 끝말잇기, 카테고리 시장에 가면, 몸으로 말해요, 통했나? —
 are played by passing one phone, so they open straight from the catalog. The
@@ -53,9 +63,9 @@ the same limits and answers with its own message.
 
 A launched game may need a setting its own entry screen used to collect, which a
 group coming from the shared room never sees. 커플 브루마블's 일반/19금 mode is
-the one such setting today, so the confirm dialog asks for it and it travels in
-`options` on the launch. `components/room/ContentModeChoice` is the single copy
-of that choice, used by both the game's own lobby and the room's chooser.
+the one such setting today, so the guide asks for it and it travels in `options`
+on the launch. `components/room/ContentModeChoice` is the single copy of that
+choice, used by both the game's own lobby and the guide.
 
 ## One room screen for every game
 
@@ -116,13 +126,37 @@ differently:
 `is_bot` travels with the player from the shared room into whichever game is
 launched, so the bots keep playing on the other side of the handoff.
 
-## One player, one tab
+## One player, one tab, and a refresh that keeps the room
 
-Both games keep their session in `sessionStorage`, not `localStorage`.
-`localStorage` is shared by every tab of a browser, so two people testing from
-two tabs on one laptop would share one seat: the second tab would find the first
-player's session and never claim its own. `sessionStorage` is per tab, which is
-what a player is, and it still survives a reload.
+The room flow (`context/RoomFlowContext`) and both games' sessions live in
+`sessionStorage`.
+
+Per tab, because `localStorage` is shared by every tab of a browser: two people
+testing from two tabs on one laptop would share one seat, and the second tab
+would find the first player's session and never claim its own.
+
+Stored at all, because a refresh used to throw the player out. The room lived
+only in React state, so reloading any room screen left the app not knowing who
+was asking, and it redirected to room creation — which read, from the outside,
+as the room having been destroyed. A reload now lands back on the same page,
+still in the room, mid-game included.
+
+## Bots and the clock
+
+The bots pace themselves, and both games needed it for the same reason from
+opposite directions.
+
+마피아 ends a phase as soon as everyone who *can* act has, and a phase's
+required actors are often bots alone — the night needs only mafia, doctor and
+police. Bots acting on the first poll meant a citizen never saw the night at
+all. They now wait out `THINKING_FRACTION` of the phase. The host's 건너뛰기
+takes their moves with it (`bots.act(force=True)`): without that a skipped vote
+accused nobody and a skipped night attacked nobody, and day and night cycled
+forever with nothing happening.
+
+커플 브루마블 has no clock at all, so the risk is the opposite — its bot moves
+are separated by `BOT_MOVE_INTERVAL_SECONDS` so the dice, the question and the
+answer can each be read.
 
 ## Running it
 
