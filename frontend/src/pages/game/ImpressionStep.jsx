@@ -4,12 +4,11 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import { getPlayers } from '../../api/players'
 import { getImpressionStatus, submitImpression } from '../../api/impressions'
-import { IMPRESSION_QUESTIONS } from '../../data/impressionQuestions'
 
 const REVEAL_DISPLAY_MS = 3000
 const STATUS_POLL_MS = 1200
 
-export default function ImpressionStep({ code, playerId, round, onAdvance }) {
+export default function ImpressionStep({ code, playerId, round, questions, onAdvance }) {
   const [players, setPlayers] = useState([])
   const [questionIndex, setQuestionIndex] = useState(0)
   const [picks, setPicks] = useState({})
@@ -45,17 +44,17 @@ export default function ImpressionStep({ code, playerId, round, onAdvance }) {
     }
   }, [submitted, code, round, onAdvance])
 
-  const question = IMPRESSION_QUESTIONS[questionIndex]
+  const question = questions[questionIndex]
   const others = players.filter((p) => p.id !== playerId)
 
   const handlePick = (targetId) => {
     const next = { ...picks, [question.questionNo]: targetId }
     setPicks(next)
-    if (questionIndex < IMPRESSION_QUESTIONS.length - 1) {
+    if (questionIndex < questions.length - 1) {
       setQuestionIndex(questionIndex + 1)
       return
     }
-    const votes = IMPRESSION_QUESTIONS.map((q) => ({ question_no: q.questionNo, target_player_id: next[q.questionNo] }))
+    const votes = questions.map((q) => ({ question_no: q.questionNo, target_player_id: next[q.questionNo] }))
     setSubmitted(true)
     submitImpression(code, round, playerId, votes).catch((err) => setError(err.message))
   }
@@ -76,7 +75,7 @@ export default function ImpressionStep({ code, playerId, round, onAdvance }) {
         {status.results.map((r) => (
           <Card key={r.question_no} className="impression-result-card">
             <p className="impression-result-q">
-              {IMPRESSION_QUESTIONS.find((q) => q.questionNo === r.question_no)?.text}
+              {questions.find((q) => q.questionNo === r.question_no)?.text}
             </p>
             <ul className="impression-tally">
               {r.tally.map((t) => (
@@ -94,7 +93,7 @@ export default function ImpressionStep({ code, playerId, round, onAdvance }) {
 
   return (
     <div className="impression-step">
-      <ProgressBar current={questionIndex + 1} total={IMPRESSION_QUESTIONS.length} />
+      <ProgressBar current={questionIndex + 1} total={questions.length} />
       <h2 className="impression-question">{question.text}</h2>
       <div className="impression-choices">
         {others.map((p) => (

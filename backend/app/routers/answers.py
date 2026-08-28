@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..constants import MAX_PLAYERS
 from ..content.questions import EITHER_OR_QUESTION_NOS
 from ..database import get_db
 from ..models.answer import Answer
@@ -47,30 +46,30 @@ def submit_answer(
         existing.elapsed_ms = payload.elapsed_ms
     db.commit()
 
-    # 8번 문항까지 전원(5명×8문항=40행) 제출되면 자동으로 다음 단계로 전이.
+    # 마지막 문항까지 전원(정원×8문항) 제출되면 자동으로 다음 단계로 전이.
     if question_no == max(EITHER_OR_QUESTION_NOS):
         total_answers = db.query(Answer).filter(Answer.room_id == room.id).count()
-        if total_answers == MAX_PLAYERS * len(EITHER_OR_QUESTION_NOS) and room.phase == "ANSWER":
+        if total_answers == room.player_limit * len(EITHER_OR_QUESTION_NOS) and room.phase == "ANSWER":
             room.phase = "STATEMENT"
             db.commit()
 
-    return _status(room.id, question_no, db)
+    return _status(room, question_no, db)
 
 
 @router.get("/{question_no}/status", response_model=AnswerStatusResponse)
 def get_answer_status(code: str, question_no: int, db: Session = Depends(get_db)) -> AnswerStatusResponse:
     room = _get_room(code, db)
-    return _status(room.id, question_no, db)
+    return _status(room, question_no, db)
 
 
-def _status(room_id: str, question_no: int, db: Session) -> AnswerStatusResponse:
-    answers = db.query(Answer).filter(Answer.room_id == room_id, Answer.question_no == question_no).all()
-    revealed = len(answers) >= MAX_PLAYERS
+def _status(room: Room, question_no: int, db: Session) -> AnswerStatusResponse:
+    answers = db.query(Answer).filter(Answer.room_id == room.id, Answer.question_no == question_no).all()
+    revealed = len(answers) >= room.player_limit
     results = []
     if revealed:
         for a in answers:
             player = db.get(Player, a.player_id)
             results.append(AnswerResult(player_id=a.player_id, nickname=player.nickname if player else "", choice=a.choice))
     return AnswerStatusResponse(
-        question_no=question_no, submitted=len(answers), total=MAX_PLAYERS, revealed=revealed, results=results
+        question_no=question_no, submitted=len(answers), total=room.player_limit, revealed=revealed, results=results
     )

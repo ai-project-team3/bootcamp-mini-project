@@ -8,6 +8,12 @@
 .wr-sub {
   font-size: 0.75rem;
   color: var(--ink-soft);
+  margin: 0 0 4px;
+}
+
+.wr-team-kind {
+  font-size: 0.72rem;
+  color: var(--deep);
   margin: 0 0 16px;
 }
 

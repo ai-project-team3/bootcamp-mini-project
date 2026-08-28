@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .routers import answers, health, impressions, players, reports, rooms, statements, type_guess
+from .routers import answers, health, impressions, players, questions, reports, rooms, statements, type_guess
 
 app = FastAPI(title="얼음땡 API")
 
@@ -16,6 +16,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(rooms.router)
 app.include_router(players.router)
+app.include_router(questions.router)
 app.include_router(answers.router)
 app.include_router(impressions.router)
 app.include_router(statements.router)
