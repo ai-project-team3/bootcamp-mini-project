@@ -3,104 +3,129 @@ import { useNavigate } from 'react-router-dom'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import Button from '../../components/common/Button'
-import { saveProfile } from '../../api/session'
 import { useRoomFlow } from '../../context/RoomFlowContext'
+import { getRoom } from '../../api/rooms'
+import { joinRoom } from '../../api/players'
 import './StartPage.css'
-
-const GENDERS = [
-  { key: 'FEMALE', label: '여성' },
-  { key: 'MALE', label: '남성' },
-  { key: 'UNSET', label: '선택 안 함' },
-]
 
 export default function StartPage() {
   const navigate = useNavigate()
-  const { user, userId, userError, setUser } = useRoomFlow()
-  const [saving, setSaving] = useState(false)
+  const { setNickname, setGender, setMbti, setRoomCode, setPlayerId, setIsHost } = useRoomFlow()
+  const [nicknameDraft, setNicknameDraft] = useState('')
+  const [genderDraft, setGenderDraft] = useState('M')
+  const [mbtiDraft, setMbtiDraft] = useState('')
+  const [codeDraft, setCodeDraft] = useState('')
   const [error, setError] = useState(null)
+  const [busy, setBusy] = useState(false)
 
-  // null means "not edited yet", so the saved profile shows through as soon as
-  // it loads without an effect having to copy it into state.
-  const [draftNick, setDraftNick] = useState(null)
-  const [draftGender, setDraftGender] = useState(null)
-  const draft = draftNick ?? user?.nickname ?? ''
-  const gender = draftGender ?? user?.gender ?? 'UNSET'
+  const commitProfile = () => {
+    const nickname = nicknameDraft.trim() || '플레이어'
+    setNickname(nickname)
+    setGender(genderDraft)
+    setMbti(mbtiDraft.trim().toUpperCase())
+    return { nickname, gender: genderDraft, mbti: mbtiDraft.trim().toUpperCase() }
+  }
 
-  // Both exits from this screen save first. Leaving straight for /join would
-  // drop the nickname that was just typed and put the person in the room as 익명.
-  const goWithProfile = async (to) => {
-    if (!userId) return
-    setSaving(true)
+  const handleCreate = () => {
+    commitProfile()
+    setRoomCode(null)
+    setIsHost(true)
+    navigate('/room/create')
+  }
+
+  const handleJoin = async () => {
+    const code = codeDraft.trim().toUpperCase()
+    if (!code) {
+      setError('초대코드를 입력해주세요')
+      return
+    }
+    const { nickname, gender, mbti } = commitProfile()
     setError(null)
+    setBusy(true)
     try {
-      const saved = await saveProfile(userId, { nickname: draft.trim() || '플레이어', gender })
-      setUser(saved)
-      navigate(to)
+      const room = await getRoom(code)
+      const player = await joinRoom(room.code, nickname, gender, mbti)
+      setIsHost(false)
+      setRoomCode(room.code)
+      setPlayerId(player.id)
+      navigate(`/room/${room.code}/waiting`)
     } catch (err) {
       setError(err.message)
     } finally {
-      setSaving(false)
+      setBusy(false)
     }
   }
 
-  const handleNext = () => goWithProfile('/category')
-
   return (
     <PhoneFrame>
-      <TopBar showBack={false} title="얼음땡" />
+      <TopBar showBack={false} />
       <div className="start-body">
-        <h1 className="start-title">
-          같이 놀고,
-          <br />
-          내 캐릭터로 남는다
-        </h1>
-        <div className="start-avatar" aria-hidden>
-          🧊
+        <div className="start-hero">
+          <span className="start-hero-glow" aria-hidden />
+          <span className="start-hero-flake start-hero-flake-1" aria-hidden>❄</span>
+          <span className="start-hero-flake start-hero-flake-2" aria-hidden>❄</span>
+          <span className="start-hero-flake start-hero-flake-3" aria-hidden>❄</span>
+          <h1 className="start-title">얼음땡</h1>
         </div>
 
-        <label className="start-label" htmlFor="nickname">
-          닉네임
-        </label>
+        <label className="start-label" htmlFor="nickname">닉네임</label>
         <input
           id="nickname"
           className="start-input"
           placeholder="닉네임을 입력하세요"
-          value={draft}
-          onChange={(e) => setDraftNick(e.target.value)}
+          value={nicknameDraft}
+          onChange={(e) => setNicknameDraft(e.target.value)}
           maxLength={12}
         />
 
-        <span className="start-label">성별</span>
-        <div className="start-seg" role="radiogroup" aria-label="성별">
-          {GENDERS.map((g) => (
-            <button
-              key={g.key}
-              type="button"
-              role="radio"
-              aria-checked={gender === g.key}
-              className={`start-seg-btn${gender === g.key ? ' is-on' : ''}`}
-              onClick={() => setDraftGender(g.key)}
-            >
-              {g.label}
-            </button>
-          ))}
+        <label className="start-label">성별</label>
+        <div className="start-gender-row">
+          <button
+            type="button"
+            className={`start-gender-btn ${genderDraft === 'M' ? 'start-gender-btn-active' : ''}`}
+            onClick={() => setGenderDraft('M')}
+          >
+            남
+          </button>
+          <button
+            type="button"
+            className={`start-gender-btn ${genderDraft === 'F' ? 'start-gender-btn-active' : ''}`}
+            onClick={() => setGenderDraft('F')}
+          >
+            여
+          </button>
         </div>
 
-        {(error || userError) && <p className="start-error">{error ?? userError}</p>}
-        <p className="start-hint">로그인 없이 바로 시작합니다</p>
-      </div>
+        <label className="start-label" htmlFor="mbti">MBTI (선택)</label>
+        <input
+          id="mbti"
+          className="start-input"
+          placeholder="예: INTJ"
+          value={mbtiDraft}
+          onChange={(e) => setMbtiDraft(e.target.value.toUpperCase())}
+          maxLength={4}
+        />
 
-      <Button onClick={handleNext} disabled={!userId || saving}>
-        {userId ? (saving ? '저장 중…' : '다음') : '준비 중…'}
+        <label className="start-label" htmlFor="join-code">초대코드로 참가 (선택)</label>
+        <div className="start-join-row">
+          <input
+            id="join-code"
+            className="start-input"
+            placeholder="예: AB12CD"
+            value={codeDraft}
+            onChange={(e) => setCodeDraft(e.target.value)}
+            maxLength={6}
+          />
+          <Button variant="secondary" onClick={handleJoin} disabled={busy}>
+            참가
+          </Button>
+        </div>
+
+        {error && <p className="start-error">{error}</p>}
+      </div>
+      <Button onClick={handleCreate} disabled={busy}>
+        {busy ? '만드는 중...' : '방 만들기'}
       </Button>
-      <button
-        type="button"
-        className="start-join"
-        onClick={() => goWithProfile('/join')}
-        disabled={!userId || saving}
-      >
-        초대코드로 참여하기
-      </button>
     </PhoneFrame>
   )
 }

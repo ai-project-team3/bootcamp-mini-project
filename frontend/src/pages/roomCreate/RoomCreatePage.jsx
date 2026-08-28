@@ -1,65 +1,77 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { QRCodeSVG } from 'qrcode.react'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import Button from '../../components/common/Button'
 import Card from '../../components/common/Card'
-import { createRoom } from '../../api/rooms'
 import { useRoomFlow } from '../../context/RoomFlowContext'
+import { createRoom } from '../../api/rooms'
+import { getPlayers } from '../../api/players'
 import './RoomCreatePage.css'
 
 export default function RoomCreatePage() {
   const navigate = useNavigate()
-  const { category, userId, roomCode, setRoomCode } = useRoomFlow()
+  const { nickname, gender, mbti, roomCode, setRoomCode, setPlayerId, setIsHost } = useRoomFlow()
   const [error, setError] = useState(null)
-  // A ref rather than state: this only has to fire once, and StrictMode mounts
-  // effects twice in development, which would otherwise create two rooms.
-  const requested = useRef(false)
 
-  // The room code comes from the server, never from the client. Two browsers
-  // generating locally would eventually collide. Plan doc §12.
-  //
-  // Deliberately no cancelled-on-unmount flag. StrictMode mounts, unmounts and
-  // remounts in development; a cleanup flag would throw away the code from the
-  // first mount while the ref — which survives the remount — blocks a retry, so
-  // the room exists on the server but never reaches the screen.
   useEffect(() => {
-    if (!userId || roomCode || requested.current) return
-    requested.current = true
-    createRoom({ category: category.code, userId })
-      .then((room) => setRoomCode(room.code))
-      .catch((err) => {
-        requested.current = false
-        setError(err.message)
+    if (roomCode) return
+    setError(null)
+    createRoom(nickname || '플레이어', gender, mbti)
+      .then(async (room) => {
+        setIsHost(true)
+        const players = await getPlayers(room.code)
+        setPlayerId(players[0]?.id ?? null)
+        setRoomCode(room.code)
       })
-  }, [userId, roomCode, category.code, setRoomCode])
+      .catch((err) => setError(err.message))
+  }, [nickname, gender, mbti, roomCode, setIsHost, setPlayerId, setRoomCode])
+
+  const joinUrl = roomCode ? `${window.location.origin}/join/${roomCode}` : null
+
+  const handleRetry = () => {
+    setRoomCode(null)
+  }
+
+  const handleNext = () => {
+    navigate(`/room/${roomCode}/waiting`)
+  }
 
   return (
     <PhoneFrame>
       <TopBar title="방 만들기" />
       <h1 className="rc-title">
-        {category.label} 방을
+        얼음땡 방을
         <br />
-        만들었어요
+        만들어요
       </h1>
 
       <Card className="rc-qr-card">
-        <div className="rc-qr" aria-hidden>
-          QR
-        </div>
+        {joinUrl ? (
+          <QRCodeSVG value={joinUrl} size={140} bgColor="transparent" fgColor="var(--ink)" />
+        ) : (
+          <div className="rc-qr" aria-hidden>
+            QR
+          </div>
+        )}
         <p className="rc-qr-hint">초대코드나 QR로 팀원을 부르세요</p>
       </Card>
 
       <Card>
         <span className="rc-code-label">초대코드</span>
-        <span className="rc-code">{roomCode ?? '- - - - - -'}</span>
+        <span className="rc-code">{roomCode ?? (error ? '오류' : '생성 중...')}</span>
       </Card>
 
       {error && <p className="rc-error">{error}</p>}
 
-      <Button onClick={() => navigate(`/room/${roomCode}/waiting`)} disabled={!roomCode}>
-        {roomCode ? '대기실로' : '방 만드는 중…'}
-      </Button>
+      {error ? (
+        <Button onClick={handleRetry}>다시 시도</Button>
+      ) : (
+        <Button onClick={handleNext} disabled={!roomCode}>
+          대기실로 이동
+        </Button>
+      )}
     </PhoneFrame>
   )
 }

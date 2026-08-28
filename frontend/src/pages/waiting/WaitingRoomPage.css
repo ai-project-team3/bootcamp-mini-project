@@ -34,6 +34,12 @@
   font-size: 1.1rem;
 }
 
+.wr-error {
+  font-size: 0.75rem;
+  color: var(--hot);
+  margin: 0 0 8px;
+}
+
 .wr-host-tag {
   margin-left: auto;
   font-family: var(--font-mono);
