@@ -105,32 +105,46 @@
 }
 
 .report-compat-card {
-  display: grid;
-  grid-template-columns: auto auto 1fr;
-  gap: 4px 10px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-compat-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .report-compat-nickname {
-  font-weight: 600;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.report-compat-gradetag {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .report-compat-grade {
   font-family: var(--font-mono);
   color: var(--hot);
   font-weight: 700;
+  font-size: 1rem;
 }
 
 .report-compat-tag {
-  grid-column: 2;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   color: var(--deep);
 }
 
 .report-compat-note {
-  grid-column: 1 / -1;
-  font-size: 0.78rem;
+  font-size: 0.86rem;
   color: var(--ink-soft);
+  line-height: 1.4;
 }
 
 .report-badges {

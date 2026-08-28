@@ -22,7 +22,13 @@ function polygonPoints(axes, key) {
 }
 
 // axes: [{ code, label, self, pre, post }] — self=실선(오늘의 나), pre/post=점선(첫인상 전/후)
+//
+// 그리는 순서가 곧 z-order다. self는 안이 꽉 찬 도형이라 맨 위에 그리면
+// pre/post 점선을 다 덮어버린다. 그래서 배경 오각형 → self(채움) → pre/post
+// (테두리만) 순으로 그려, 점선 두 개가 항상 self 위에 보이게 한다.
 export default function AxisRadar({ axes }) {
+  const bgPoints = axes.map((_, i) => pointFor(i, axes.length, MAX_VALUE).join(',')).join(' ')
+
   return (
     <div className="radar-wrap">
       <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
@@ -34,13 +40,20 @@ export default function AxisRadar({ axes }) {
             </text>
           )
         })}
+        <polygon points={bgPoints} className="radar-bg" />
+        <polygon
+          points={polygonPoints(axes, 'self')}
+          fill="var(--hot-soft)"
+          stroke="var(--hot)"
+          strokeWidth="2"
+          opacity="0.85"
+        />
         <polygon
           points={polygonPoints(axes, 'pre')}
           fill="none"
           stroke="var(--gold)"
           strokeWidth="1.3"
           strokeDasharray="3 3"
-          opacity="0.7"
         />
         <polygon
           points={polygonPoints(axes, 'post')}
@@ -49,7 +62,6 @@ export default function AxisRadar({ axes }) {
           strokeWidth="1.6"
           strokeDasharray="5 3"
         />
-        <polygon points={polygonPoints(axes, 'self')} fill="var(--hot-soft)" stroke="var(--hot)" strokeWidth="2" />
       </svg>
       <div className="radar-legend">
         <span><i className="radar-dot radar-dot-self" /> 오늘의 나</span>

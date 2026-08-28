@@ -41,6 +41,8 @@
   flex-direction: column;
   gap: 12px;
   flex: 1;
+  width: 100%;
+  align-self: stretch;
 }
 
 .answer-choice-btn {
@@ -65,6 +67,35 @@
 .answer-choice-btn.choice-a { background: var(--c1); border-left: none; }
 .answer-choice-btn.choice-b { background: var(--c2); border-left: none; }
 .answer-choice-btn:active { transform: scale(0.97); filter: brightness(1.12); }
+
+/* ── 이지선다 — 텔레파시와 같은 버튼을 쓰지만 나란히 둬서 "둘 중 하나를
+   투표한다"는 느낌을 준다. 텔레파시는 위아래로 쌓아 "순서대로 두 번 고른다"는
+   느낌을 유지한다. ── */
+.answer-step .answer-choices {
+  flex-direction: row;
+}
+
+.answer-step .answer-choice-btn {
+  position: relative;
+  min-height: 168px;
+  border-radius: var(--radius-lg);
+  border: 2px solid rgba(255, 255, 255, 0.14);
+}
+
+.answer-step .answer-choice-btn::before {
+  content: 'A';
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+.answer-step .answer-choice-btn.choice-b::before {
+  content: 'B';
+}
 
 /* ── 텔레파시 ── */
 .tele-step,
@@ -92,6 +123,8 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  width: 100%;
+  align-self: stretch;
 }
 
 .tele-pick {
@@ -166,18 +199,25 @@
 .trait-options {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
   gap: 10px;
   flex: 1;
   align-content: start;
 }
 
 .trait-option {
-  padding: 22px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 84px;
+  padding: 14px 8px;
   border-radius: var(--radius-md);
   border: none;
   color: #fff;
   font-size: 0.95rem;
   font-weight: 700;
+  line-height: 1.3;
   word-break: keep-all;
   transition: transform 0.12s ease, filter 0.12s ease;
 }

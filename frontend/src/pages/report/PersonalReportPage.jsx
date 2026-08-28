@@ -108,9 +108,13 @@ export default function PersonalReportPage() {
         <div className="report-compat-list">
           {me.compat.map((c) => (
             <Card key={c.nickname} className="report-compat-card">
-              <span className="report-compat-nickname">{c.nickname}</span>
-              <span className="report-compat-grade">{c.grade}</span>
-              <span className="report-compat-tag">{c.tag}</span>
+              <div className="report-compat-head">
+                <span className="report-compat-nickname">{c.nickname}</span>
+                <span className="report-compat-gradetag">
+                  <span className="report-compat-grade">{c.grade}</span>
+                  <span className="report-compat-tag">{c.tag}</span>
+                </span>
+              </div>
               <span className="report-compat-note">{c.note}</span>
             </Card>
           ))}

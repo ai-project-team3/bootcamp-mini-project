@@ -526,7 +526,7 @@ def build_highlights(db: Session, room: Room, players: list[Player], badges: dic
     if deltas and max(deltas.values()) > 0:
         top_pid = max(deltas, key=lambda pid: deltas[pid])
         player = next(p for p in players if p.id == top_pid)
-        highlights.append(f"인상이 제일 많이 바뀐 사람 — {player.nickname}")
+        highlights.append(f"오늘 인상이 제일 많이 뒤집힌 사람은 {player.nickname}, 처음 본 인상은 잊어도 됩니다.")
 
     survived = (
         db.query(GameResult)
@@ -541,7 +541,9 @@ def build_highlights(db: Session, room: Room, players: list[Player], badges: dic
             .first()
         )
         if player and rnd:
-            highlights.append(f'아무도 못 잡은 라이어 — {player.nickname}, 제시어는 "{rnd.major_word}"였습니다')
+            highlights.append(
+                f'{player.nickname}이(가) 라이어였는데 끝까지 아무도 못 잡았습니다. 제시어는 "{rnd.major_word}"였는데도요.'
+            )
 
     clashes = (
         db.query(GameResult)
@@ -552,7 +554,7 @@ def build_highlights(db: Session, room: Room, players: list[Player], badges: dic
         names = {r.player_id for r in clashes if r.round_no == clashes[0].round_no}
         who = [p.nickname for p in players if p.id in names]
         if len(who) >= 2:
-            highlights.append(f"동시에 눌러서 판을 깬 사람 — {' · '.join(who)}")
+            highlights.append(f"{' · '.join(who)}이(가) 동시에 눌러버리는 바람에 판이 그 자리에서 깨졌습니다.")
 
     answers = db.query(Answer).filter(Answer.room_id == room.id).all()
     by_q: dict[int, list[str]] = defaultdict(list)
@@ -565,7 +567,9 @@ def build_highlights(db: Session, room: Room, players: list[Player], badges: dic
         if a_count and b_count and abs(a_count - b_count) < best_margin:
             best_margin, best_q = abs(a_count - b_count), q
     if best_q:
-        highlights.append(f"제일 크게 갈린 문항 — {best_q}번, {by_q[best_q].count('A')} 대 {by_q[best_q].count('B')}")
+        highlights.append(
+            f"{best_q}번 문항에서 의견이 {by_q[best_q].count('A')} 대 {by_q[best_q].count('B')}로 팽팽하게 갈렸습니다."
+        )
 
     # 세 줄을 채운다. 위 후보가 다 비면 팀 카드에 장면이 하나도 안 남는다.
     if len(highlights) < 3:
@@ -576,7 +580,7 @@ def build_highlights(db: Session, room: Room, players: list[Player], badges: dic
         if best:
             who = next((p.nickname for p in players if p.id == best[0]), None)
             if who:
-                highlights.append(f"제일 잘 맞힌 사람 — {who}, {best[3]}번 중 {best[2]}번")
+                highlights.append(f"{who}이(가) {best[3]}번 중 {best[2]}번을 맞혀서 오늘 제일 눈치가 빨랐습니다.")
 
     if len(highlights) < 3:
         pre = compute_impression_totals(db, room.id, "IMPRESSION_PRE")
@@ -584,7 +588,7 @@ def build_highlights(db: Session, room: Room, players: list[Player], badges: dic
         if top:
             who = next((p.nickname for p in players if p.id == top), None)
             if who:
-                highlights.append(f"첫인상 최다 지목 — {who}, {pre[top]}표")
+                highlights.append(f"첫인상에서 {who}이(가) {pre[top]}표를 몰아 받으며 제일 먼저 눈에 띄었습니다.")
 
     return highlights[:3]
 
