@@ -1,0 +1,25 @@
+.ptabs {
+  display: flex;
+  gap: 6px;
+  background: var(--bg);
+  padding: 4px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.ptab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 4px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.ptab-active {
+  background: var(--surface);
+  color: var(--hot);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}

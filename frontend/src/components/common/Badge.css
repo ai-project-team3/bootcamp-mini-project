@@ -1,0 +1,23 @@
+.pbdg {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.pbdg-neutral {
+  background: var(--deep-soft);
+  color: var(--deep);
+}
+
+.pbdg-positive {
+  background: var(--hot-soft);
+  color: var(--hot);
+}
+
+.pbdg-fun {
+  background: var(--gold-soft);
+  color: var(--gold);
+}

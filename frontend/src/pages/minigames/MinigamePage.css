@@ -1,0 +1,12 @@
+/* The slot a minigame is mounted into. The games paint their own background
+   and manage their own scrolling, so the slot only has to get out of the way. */
+.minigame-slot {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.minigame-slot > * {
+  flex: 1;
+}

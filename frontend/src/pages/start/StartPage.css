@@ -1,0 +1,178 @@
+.start-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+.start-hero {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.start-hero-glow {
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(120, 210, 240, 0.55) 0%, rgba(120, 210, 240, 0.22) 45%, rgba(120, 210, 240, 0) 72%);
+  filter: blur(2px);
+}
+
+.start-hero-flake {
+  position: absolute;
+  color: #bfe8f7;
+  text-shadow: 0 0 8px rgba(120, 210, 240, 0.9);
+}
+
+.start-hero-flake-1 {
+  top: 14px;
+  left: 22%;
+  font-size: 1.4rem;
+}
+
+.start-hero-flake-2 {
+  bottom: 30px;
+  right: 18%;
+  font-size: 1rem;
+}
+
+.start-hero-flake-3 {
+  top: 44px;
+  right: 24%;
+  font-size: 0.75rem;
+}
+
+.start-title {
+  position: relative;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 4.8rem;
+  line-height: 1;
+  margin: 0;
+  background: linear-gradient(180deg, #2fa8d6 0%, #0d5c86 55%, #073a56 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.6), 0 8px 22px rgba(7, 58, 86, 0.45);
+  letter-spacing: 1px;
+}
+
+.start-label {
+  align-self: flex-start;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-top: 6px;
+}
+
+.start-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.start-gender-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.start-gender-btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.start-gender-btn-active {
+  border-color: var(--deep);
+  color: var(--deep);
+  background: var(--deep-soft);
+  font-weight: 600;
+}
+
+.start-join-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.start-join-row .start-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.start-join-row .btn {
+  width: auto;
+  flex-shrink: 0;
+}
+
+.start-error {
+  width: 100%;
+  font-size: 0.75rem;
+  color: var(--hot);
+  margin: 0;
+}
+
+/* Entry to the add-on minigames. They run their own rooms, so they sit apart
+   from the 얼음땡 join/create flow above rather than inside it. */
+.start-minigames {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.start-minigames-note {
+  margin: 2px 0 10px;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.start-minigames-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.start-minigame-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.start-minigame-btn span {
+  font-size: 1.4rem;
+}
+
+.start-minigame-btn b {
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.start-minigame-btn:hover {
+  border-color: var(--hot);
+}

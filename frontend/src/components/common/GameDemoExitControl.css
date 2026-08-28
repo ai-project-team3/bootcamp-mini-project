@@ -1,0 +1,6 @@
+.demo-exit-trigger { border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--hot); padding: 5px 10px; font: inherit; font-size: .72rem; }
+.demo-exit-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 24px; background: rgb(24 16 23 / 55%); }
+.demo-exit-dialog { width: min(100%, 340px); text-align: center; }
+.demo-exit-dialog h2 { margin: 4px 0 10px; }
+.demo-exit-dialog p { color: var(--ink-soft); line-height: 1.5; }
+.demo-exit-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }

@@ -3,14 +3,16 @@ import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 
 import { ForfeitSlot } from "./ForfeitSlot";
 
-/** Drive requestAnimationFrame off fake timers so the reel can be stepped. */
+/**
+ * Step the reel by hand.
+ *
+ * vitest's fake timers already stand in for requestAnimationFrame, so the only
+ * thing left to control is the clock the component reads — it drives the spin
+ * off `performance.now()`, not off the frame count.
+ */
 function installRafClock() {
   let now = 0;
   vi.spyOn(performance, "now").mockImplementation(() => now);
-  vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) =>
-    setTimeout(() => cb(now), 16) as unknown as number,
-  );
-  vi.stubGlobal("cancelAnimationFrame", (id: number) => clearTimeout(id));
   return {
     advance(ms: number) {
       const steps = Math.ceil(ms / 16);

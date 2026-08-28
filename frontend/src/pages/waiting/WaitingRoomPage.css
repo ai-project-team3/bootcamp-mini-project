@@ -1,0 +1,51 @@
+.wr-title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 1.3rem;
+  margin: 4px 0 4px;
+}
+
+.wr-sub {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  margin: 0 0 16px;
+}
+
+.wr-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wr-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+
+.wr-avatar {
+  font-size: 1.1rem;
+}
+
+.wr-error {
+  font-size: 0.75rem;
+  color: var(--hot);
+  margin: 0 0 8px;
+}
+
+.wr-host-tag {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--hot);
+  border: 1px solid var(--hot);
+  padding: 2px 6px;
+  border-radius: 999px;
+}

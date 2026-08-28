@@ -7,7 +7,7 @@ citizen kill someone, and let anyone learn another player's role.
 
 from fastapi.testclient import TestClient
 
-from app.standalone import app
+from app.main import app
 from app.mafia.store import store
 
 BASE = "/mafia/rooms"

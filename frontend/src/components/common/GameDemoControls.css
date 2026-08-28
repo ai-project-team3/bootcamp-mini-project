@@ -1,0 +1,82 @@
+.game-demo-player-tabs {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.game-demo-player-tabs button {
+  flex: 0 0 auto;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+}
+
+.game-demo-player-tabs button.on {
+  background: var(--card);
+  color: var(--hot-soft);
+}
+
+.game-demo-options {
+  display: grid;
+  gap: 8px;
+}
+
+.game-demo-options button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.78rem;
+  text-align: left;
+}
+
+.game-demo-options button b {
+  display: grid;
+  min-width: 23px;
+  height: 23px;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--hot-soft);
+  color: var(--hot);
+}
+
+.game-demo-options button.on {
+  border-color: var(--hot);
+  background: var(--hot-soft);
+}
+
+.game-demo-options button:disabled {
+  opacity: 0.65;
+}
+
+.game-demo-notice {
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: var(--deep-soft);
+  color: var(--deep);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.game-demo-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.game-demo-actions.balanced {
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-top: 0;
+  padding-top: 0;
+}

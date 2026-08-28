@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.standalone import app
+from app.main import app
 from app.marble.store import store
 
 
