@@ -1,0 +1,127 @@
+.impostor-public-personas {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  margin: 0 0 10px;
+  padding-bottom: 2px;
+}
+
+.impostor-public-personas > div {
+  display: grid;
+  flex: 0 0 145px;
+  gap: 3px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.impostor-public-personas b {
+  color: var(--hot);
+  font-size: 0.68rem;
+}
+
+.impostor-public-personas span {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.impostor-public-personas small {
+  color: var(--ink-soft);
+  font-size: 0.58rem;
+  line-height: 1.4;
+}
+
+.impostor-secret-card {
+  min-height: 360px;
+  margin-top: 8px;
+  background: var(--deep-soft);
+  color: var(--ink);
+}
+
+.impostor-secret-card p {
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.demo-center {
+  padding: 35px 4px;
+  text-align: center;
+}
+
+.demo-big-icon {
+  font-size: 3.4rem;
+}
+
+.stolen-persona {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.stolen-persona small {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.65rem;
+}
+
+.stolen-persona b {
+  display: block;
+  margin-top: 7px;
+}
+
+.demo-question {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.answer-group {
+  display: grid;
+  gap: 4px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.75rem;
+}
+
+.answer-group span {
+  color: var(--hot);
+}
+
+.demo-field {
+  display: grid;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+}
+
+.demo-field select,
+.demo-field input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.impostor-reveal {
+  padding-top: 35px;
+  background: var(--hot-soft);
+  color: var(--ink);
+  text-align: center;
+}
+
+.impostor-reveal > span {
+  color: var(--hot);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+}
+
+.impostor-reveal h1 {
+  color: var(--hot);
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 400;
+}
