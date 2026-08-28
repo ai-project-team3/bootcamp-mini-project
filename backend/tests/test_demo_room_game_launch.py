@@ -13,6 +13,7 @@ from app.mafia.store import store as mafia_store
 from app.marble.store import store as marble_store
 from app.routers import demo_rooms
 from app.schemas.demo_room import (
+    DemoRoomFillRequest,
     DemoRoomGameLaunchRequest,
     DemoRoomNicknameRequest,
     DemoRoomStartRequest,
@@ -207,3 +208,87 @@ class DemoRoomGameLaunchTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class DemoRoomTestPlayersTest(unittest.TestCase):
+    """Filling seats so one person can walk the whole flow alone."""
+
+    def setUp(self):
+        self.store = DemoRoomStore(code_factory=lambda: 'ABC123')
+        mafia_store.clear()
+        marble_store.clear()
+
+    def tearDown(self):
+        mafia_store.clear()
+        marble_store.clear()
+
+    def _host(self):
+        return demo_rooms.create_demo_room(
+            DemoRoomNicknameRequest(nickname='방장'), self.store
+        ).player
+
+    def _fill(self, player_id: str, count: int = 1):
+        return demo_rooms.fill_test_players(
+            'ABC123', DemoRoomFillRequest(player_id=player_id, count=count), self.store
+        )
+
+    def test_the_host_can_fill_seats_to_reach_a_games_minimum(self):
+        host = self._host()
+
+        self._fill(host.id, 3)
+
+        players = demo_rooms.list_demo_players('ABC123', self.store)
+        self.assertEqual(len(players), 4)
+        self.assertEqual([p.is_bot for p in players], [False, True, True, True])
+
+    def test_bots_are_named_so_nobody_mistakes_them_for_people(self):
+        host = self._host()
+
+        self._fill(host.id, 2)
+
+        names = [p.nickname for p in demo_rooms.list_demo_players('ABC123', self.store)]
+        self.assertEqual(names[1:], ['테스트봇1', '테스트봇2'])
+
+    def test_filling_stops_at_the_rooms_capacity(self):
+        host = self._host()
+
+        self._fill(host.id, 9)
+        self._fill(host.id, 9)
+
+        self.assertEqual(len(demo_rooms.list_demo_players('ABC123', self.store)), 10)
+
+    def test_only_the_host_fills_seats(self):
+        self._host()
+        guest = demo_rooms.join_demo_room(
+            'ABC123', DemoRoomNicknameRequest(nickname='참가자'), self.store
+        )
+
+        with self.assertRaises(HTTPException) as error:
+            self._fill(guest.id)
+
+        self.assertEqual(error.exception.status_code, 403)
+
+    def test_seats_cannot_be_filled_once_the_game_has_started(self):
+        host = self._host()
+        self._fill(host.id, 1)
+        demo_rooms.start_demo_room('ABC123', DemoRoomStartRequest(player_id=host.id), self.store)
+
+        with self.assertRaises(HTTPException) as error:
+            self._fill(host.id)
+
+        self.assertEqual(error.exception.status_code, 400)
+
+    def test_a_bot_stays_a_bot_inside_the_game_it_is_launched_into(self):
+        host = self._host()
+        self._fill(host.id, 3)
+        demo_rooms.start_demo_room('ABC123', DemoRoomStartRequest(player_id=host.id), self.store)
+
+        launched = demo_rooms.launch_room_game(
+            'ABC123',
+            DemoRoomGameLaunchRequest(player_id=host.id, game_id='mafia'),
+            self.store,
+        )
+
+        room = mafia_store.get(launched.launch.room_id)
+        self.assertEqual(sorted(p.is_bot for p in room.players.values()), [False, True, True, True])
+        self.assertFalse(room.players[room.host_player_id].is_bot)

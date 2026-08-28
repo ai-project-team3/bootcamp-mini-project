@@ -2,6 +2,7 @@ import uuid
 
 from fastapi import APIRouter, HTTPException
 
+from app.marble.game import bots
 from app.marble.models.room import MAX_PLAYERS, MIN_PLAYERS, ContentMode, GamePhase, Player, Room
 from app.marble.persona.provider import MockPersonaProvider
 from app.marble.schemas.room import (
@@ -171,4 +172,9 @@ def leave_room(room_id: str, req: LeaveRoomRequest):
 
 @router.get("/{room_id}/state")
 def get_state(room_id: str):
-    return serialize_room(get_room_or_404(room_id))
+    room = get_room_or_404(room_id)
+    # A bot's turn would otherwise sit here forever: this game waits on the
+    # current player rather than on a clock. One move per poll, so whoever is
+    # watching sees it happen instead of finding it already done.
+    bots.take_pending_turn(room)
+    return serialize_room(room)

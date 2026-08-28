@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, HTTPException
 
 from app.mafia.constants import ALLOWED_PLAYER_COUNTS, TEST_BOT_NICKNAME_PREFIX
-from app.mafia.game import state_machine
+from app.mafia.game import bots, state_machine
 from app.mafia.models.room import GamePhase, Player, Room
 from app.mafia.schemas.room import (
     CreateRoomRequest,
@@ -94,6 +94,7 @@ def fill_test_players(room_id: str):
         room.players[player_id] = Player(
             player_id=player_id,
             nickname=f"{TEST_BOT_NICKNAME_PREFIX}{bot_index}",
+            is_bot=True,
         )
         if room.host_player_id is None:
             room.host_player_id = player_id
@@ -131,6 +132,9 @@ def leave_room(room_id: str, req: LeaveRoomRequest):
 @router.get("/{room_id}/state")
 def get_state(room_id: str):
     room = get_room_or_404(room_id)
+    # Bots vote and act before the tick, so a phase they complete ends now
+    # rather than waiting out its timer.
+    bots.act(room)
     try:
         state_machine.tick(room)
     except state_machine.InvalidPhaseTransition:

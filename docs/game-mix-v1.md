@@ -92,6 +92,30 @@ shared room goes back to that room's game list, still gathered and free to pick
 something else — the game is torn down, the room is not. A player who opened
 마피아 directly lands on room creation, with nothing left of the old game.
 
+## Testing it alone
+
+Nobody has four phones, and 마피아 will not start below four players. The
+waiting room therefore has two host-only buttons — 테스트 인원 한 명 추가 and
+4명까지 채우기 — that fill seats with 테스트봇. Demo-only: a real group arrives
+through the invite code.
+
+The bots are not just placeholders, because a placeholder would break each game
+differently:
+
+- **커플 브루마블** waits on `current_player_id` and nothing else, so an
+  unplayed bot turn stops the board for good. `marble/game/bots.py` plays one
+  move per state poll — roll, answer, hand on — which is also why a watcher
+  sees the turn happen rather than finding it already over.
+- **마피아** has a clock, so it never deadlocks, but with silent bots every
+  phase burns its full timer and nobody is ever executed or attacked, which
+  tells a tester nothing. `mafia/game/bots.py` votes, votes on executions and
+  takes night actions, so the game actually resolves. Choices are random on
+  purpose: a bot that played well would make the human's own game harder to
+  read.
+
+`is_bot` travels with the player from the shared room into whichever game is
+launched, so the bots keep playing on the other side of the handoff.
+
 ## One player, one tab
 
 Both games keep their session in `sessionStorage`, not `localStorage`.

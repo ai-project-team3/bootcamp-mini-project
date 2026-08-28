@@ -76,6 +76,10 @@ class Persona:
 class Player:
     player_id: str
     nickname: str
+    #: A seat filled by the demo's "혼자 해보기" button rather than a person.
+    #: `game/bots.py` takes these turns, because this game has no clock: an
+    #: unplayed bot turn would stop the board for everyone.
+    is_bot: bool = False
     persona: Persona | None = None
     position: int = 0
     score: int = 0

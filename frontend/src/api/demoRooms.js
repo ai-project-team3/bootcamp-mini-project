@@ -22,6 +22,19 @@ export function joinDemoRoom(code, nickname) {
   })
 }
 
+/**
+ * Demo-only: fill empty seats with bots so one person can test the whole flow.
+ *
+ * The bots play themselves once a game starts, so 마피아 resolves its votes and
+ * 커플 브루마블's board keeps moving instead of stopping on an empty seat.
+ */
+export function fillDemoTestPlayers(code, playerId, count = 1) {
+  return apiFetch(`/demo/rooms/${code}/test-players`, {
+    method: 'POST',
+    body: JSON.stringify({ player_id: playerId, count }),
+  })
+}
+
 export function startDemoRoom(code, playerId) {
   return apiFetch(`/demo/rooms/${code}/start`, {
     method: 'POST',

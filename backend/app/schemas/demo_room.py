@@ -30,11 +30,18 @@ class DemoRoomGameLaunchRequest(DemoRoomGameSelectRequest):
     options: dict[str, str] = Field(default_factory=dict)
 
 
+class DemoRoomFillRequest(DemoRoomStartRequest):
+    """Add seats nobody has to hold, so one person can test the flow alone."""
+
+    count: int = Field(default=1, ge=1, le=9)
+
+
 class DemoPlayerResponse(BaseModel):
     id: str
     nickname: str
     seat_no: int
     is_host: bool
+    is_bot: bool = False
 
 
 class DemoRoomLaunchResponse(BaseModel):

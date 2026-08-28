@@ -35,6 +35,7 @@ def create_room_for(
     nicknames: list[str],
     host_index: int = 0,
     options: dict[str, str] | None = None,
+    bots: list[bool] | None = None,
 ) -> tuple[str, list[str]]:
     """Seat a whole group in a new marble room.
 
@@ -59,10 +60,11 @@ def create_room_for(
         content_mode=ContentMode(content_mode),
         max_players=len(nicknames),
     )
+    flags = bots or [False] * len(nicknames)
     player_ids: list[str] = []
-    for nickname in nicknames:
+    for nickname, is_bot in zip(nicknames, flags):
         player_id = str(uuid.uuid4())
-        player = Player(player_id=player_id, nickname=nickname)
+        player = Player(player_id=player_id, nickname=nickname, is_bot=is_bot)
         player.persona = persona_provider.get_persona(player_id, nickname)
         room.players[player_id] = player
         room.turn_order.append(player_id)

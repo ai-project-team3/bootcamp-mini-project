@@ -4,6 +4,7 @@ from ..schemas.demo_room import (
     DemoPlayerResponse,
     DemoRoomClaimResponse,
     DemoRoomCreateResponse,
+    DemoRoomFillRequest,
     DemoRoomGameLaunchRequest,
     DemoRoomGameSelectRequest,
     DemoRoomLaunchResponse,
@@ -57,6 +58,7 @@ def _player_response(player: DemoPlayer) -> DemoPlayerResponse:
         nickname=player.nickname,
         seat_no=player.seat_no,
         is_host=player.is_host,
+        is_bot=player.is_bot,
     )
 
 
@@ -118,6 +120,19 @@ def join_demo_room(
         _raise_http(error)
 
 
+@router.post('/{code}/test-players', response_model=DemoRoomResponse)
+def fill_test_players(
+    code: str,
+    payload: DemoRoomFillRequest,
+    store: DemoRoomStore = Depends(get_demo_room_store),
+) -> DemoRoomResponse:
+    """Demo-only: fill empty seats with bots that play themselves."""
+    try:
+        return _room_response(store.fill_test_players(code.upper(), payload.player_id, payload.count))
+    except Exception as error:
+        _raise_http(error)
+
+
 @router.post('/{code}/start', response_model=DemoRoomResponse)
 def start_demo_room(
     code: str,
@@ -168,7 +183,12 @@ def launch_room_game(
     def build(players: list[DemoPlayer]) -> DemoLaunch:
         launched = launch_game(
             payload.game_id,
-            [LaunchablePlayer(id=p.id, nickname=p.nickname, is_host=p.is_host) for p in players],
+            [
+                LaunchablePlayer(
+                    id=p.id, nickname=p.nickname, is_host=p.is_host, is_bot=p.is_bot
+                )
+                for p in players
+            ],
             payload.options,
         )
         return DemoLaunch(
