@@ -8,7 +8,11 @@ export async function apiFetch(path, options = {}) {
 
   if (!res.ok) {
     const body = await res.json().catch(() => null)
-    throw new Error(body?.detail ?? `요청에 실패했습니다 (${res.status})`)
+    const detail = body?.detail
+    const message = Array.isArray(detail)
+      ? detail.map((d) => d.msg ?? JSON.stringify(d)).join(', ')
+      : (detail ?? `요청에 실패했습니다 (${res.status})`)
+    throw new Error(message)
   }
 
   return res.json()

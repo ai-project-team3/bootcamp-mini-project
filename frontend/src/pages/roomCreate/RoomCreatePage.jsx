@@ -7,23 +7,26 @@ import Button from '../../components/common/Button'
 import Card from '../../components/common/Card'
 import { useRoomFlow } from '../../context/RoomFlowContext'
 import { createRoom } from '../../api/rooms'
+import { getPlayers } from '../../api/players'
 import './RoomCreatePage.css'
 
 export default function RoomCreatePage() {
   const navigate = useNavigate()
-  const { nickname, category, roomCode, setRoomCode, setIsHost } = useRoomFlow()
+  const { nickname, gender, mbti, roomCode, setRoomCode, setPlayerId, setIsHost } = useRoomFlow()
   const [error, setError] = useState(null)
 
   useEffect(() => {
     if (roomCode) return
     setError(null)
-    createRoom(category.code, nickname || '플레이어')
-      .then((room) => {
+    createRoom(nickname || '플레이어', gender, mbti)
+      .then(async (room) => {
         setIsHost(true)
+        const players = await getPlayers(room.code)
+        setPlayerId(players[0]?.id ?? null)
         setRoomCode(room.code)
       })
       .catch((err) => setError(err.message))
-  }, [category.code, nickname, roomCode, setIsHost, setRoomCode])
+  }, [nickname, gender, mbti, roomCode, setIsHost, setPlayerId, setRoomCode])
 
   const joinUrl = roomCode ? `${window.location.origin}/join/${roomCode}` : null
 
@@ -37,9 +40,9 @@ export default function RoomCreatePage() {
 
   return (
     <PhoneFrame>
-      <TopBar title="3단계 · 방 만들기" />
+      <TopBar title="방 만들기" />
       <h1 className="rc-title">
-        {category.label} 방을
+        얼음땡 방을
         <br />
         만들어요
       </h1>
@@ -66,7 +69,7 @@ export default function RoomCreatePage() {
         <Button onClick={handleRetry}>다시 시도</Button>
       ) : (
         <Button onClick={handleNext} disabled={!roomCode}>
-          방 만들기
+          대기실로 이동
         </Button>
       )}
     </PhoneFrame>

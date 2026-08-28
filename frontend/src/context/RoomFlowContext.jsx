@@ -1,26 +1,31 @@
 import { createContext, useContext, useMemo, useState } from 'react'
-import { DEFAULT_CATEGORY } from '../data/categories'
 
 const RoomFlowContext = createContext(null)
 
 export function RoomFlowProvider({ children }) {
   const [nickname, setNickname] = useState('')
-  const [category, setCategory] = useState(DEFAULT_CATEGORY)
+  const [gender, setGender] = useState('M')
+  const [mbti, setMbti] = useState('')
   const [roomCode, setRoomCode] = useState(null)
+  const [playerId, setPlayerId] = useState(null)
   const [isHost, setIsHost] = useState(true)
 
   const value = useMemo(
     () => ({
       nickname,
       setNickname,
-      category,
-      setCategory,
+      gender,
+      setGender,
+      mbti,
+      setMbti,
       roomCode,
       setRoomCode,
+      playerId,
+      setPlayerId,
       isHost,
       setIsHost,
     }),
-    [nickname, category, roomCode, isHost],
+    [nickname, gender, mbti, roomCode, playerId, isHost],
   )
 
   return <RoomFlowContext.Provider value={value}>{children}</RoomFlowContext.Provider>

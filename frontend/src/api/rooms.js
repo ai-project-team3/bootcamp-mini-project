@@ -1,9 +1,9 @@
 import { apiFetch } from './client'
 
-export function createRoom(category, hostNickname) {
+export function createRoom(nickname, gender, mbti) {
   return apiFetch('/rooms', {
     method: 'POST',
-    body: JSON.stringify({ category, host_nickname: hostNickname }),
+    body: JSON.stringify({ nickname, gender, mbti: mbti || null }),
   })
 }
 
@@ -11,13 +11,9 @@ export function getRoom(code) {
   return apiFetch(`/rooms/${code}`)
 }
 
-export function joinRoom(code, nickname) {
-  return apiFetch(`/rooms/${code}/participants`, {
+export function startRoom(code, playerId) {
+  return apiFetch(`/rooms/${code}/start`, {
     method: 'POST',
-    body: JSON.stringify({ nickname }),
+    body: JSON.stringify({ player_id: playerId }),
   })
-}
-
-export function getParticipants(code) {
-  return apiFetch(`/rooms/${code}/participants`)
 }

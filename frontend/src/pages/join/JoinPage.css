@@ -32,3 +32,25 @@
   color: var(--hot);
   margin: 0;
 }
+
+.join-gender-row {
+  display: flex;
+  gap: 8px;
+}
+
+.join-gender-btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.join-gender-btn-active {
+  border-color: var(--deep);
+  color: var(--deep);
+  background: var(--deep-soft);
+  font-weight: 600;
+}
