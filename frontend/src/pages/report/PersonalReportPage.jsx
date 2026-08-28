@@ -81,7 +81,11 @@ export default function PersonalReportPage() {
 
         {me.impression_shift && (
           <Card className="report-shift">
-            <p className="report-shift-title">첫인상이 이렇게 바뀌었습니다</p>
+            <p className="report-shift-title">
+              {me.impression_shift.pre_label === me.impression_shift.post_label
+                ? '첫인상 그대로였습니다'
+                : '첫인상이 이렇게 바뀌었습니다'}
+            </p>
             <p className="report-shift-row">
               <span className="report-shift-when">처음</span>
               {me.impression_shift.pre_label} <b>{me.impression_shift.pre_votes}표</b>
