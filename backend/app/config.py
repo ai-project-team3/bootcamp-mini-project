@@ -6,9 +6,9 @@ class Settings(BaseSettings):
 
     db_host: str = "localhost"
     db_port: int = 3306
-    db_user: str = "crewverse"
-    db_password: str = "crewverse"
-    db_name: str = "crewverse"
+    db_user: str = "iceddaeng"
+    db_password: str = "iceddaeng"
+    db_name: str = "iceddaeng"
     cors_origins: str = "http://localhost:5173"
 
     @property
