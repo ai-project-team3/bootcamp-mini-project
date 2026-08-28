@@ -1,18 +1,3 @@
-# Planning documents live in a separate repo — never commit these here.
-balance.text
-chiyoung.md
-CREWVERSE_FINAL_README.md
-jaehwan.md
-minwoo.md
-persona_report_service_plan.md
-personality_test_question_reference.md
-summary.md
-demo/
-
-# Claude Code local state
-.claude/
-.playwright-mcp/
-
 # Secrets
 .env
 *.env

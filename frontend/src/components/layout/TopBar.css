@@ -29,3 +29,5 @@
   color: var(--ink-soft);
   font-family: var(--font-mono);
 }
+
+.topbar-action { margin-left: auto; }

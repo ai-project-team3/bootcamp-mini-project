@@ -2,38 +2,35 @@ import { useState } from 'react'
 import Button from '../../../components/common/Button'
 import Card from '../../../components/common/Card'
 import FlavorToggle from '../../../components/common/FlavorToggle'
-import { DemoNotice, DemoPlayerTabs } from '../../../components/common/GameDemoControls'
-import { DEMO_PLAYERS, FLAVORED_GAME_CONTENT } from '../../../data/gameDemo/gameDemoData'
+import { DemoNotice } from '../../../components/common/GameDemoControls'
+import { FLAVORED_GAME_CONTENT } from '../../../data/gameDemo/gameDemoData'
 import { groupMatchingAnswers } from '../../../data/gameDemo/gameDemoModels'
+import { useRoomFlow } from '../../../context/RoomFlowContext'
+import { getPrivateDemoPlayerId } from '../../../data/gameDemo/gameDemoModels'
 
-export default function TelepathyGame() {
+export default function TelepathyGame({ players }) {
+  const { playerId } = useRoomFlow()
   const [mode, setMode] = useState('mild')
   const [questionIndex, setQuestionIndex] = useState(0)
-  const [activeId, setActiveId] = useState('seojun')
+  const activeId = getPrivateDemoPlayerId(players, playerId)
   const [answers, setAnswers] = useState({})
   const [draft, setDraft] = useState('')
   const [revealed, setRevealed] = useState(false)
   const questions = FLAVORED_GAME_CONTENT.telepathy[mode]
-  const locked = Object.keys(answers).length === DEMO_PLAYERS.length
+  const locked = Object.keys(answers).length === players.length
   const groups = groupMatchingAnswers(answers)
-  const active = DEMO_PLAYERS.find((player) => player.id === activeId)
+  const active = players.find((player) => player.id === activeId)
 
   const resetAnswers = () => {
     setAnswers({})
     setDraft('')
     setRevealed(false)
-    setActiveId('seojun')
   }
 
   const changeMode = (nextMode) => {
     setMode(nextMode)
     setQuestionIndex(0)
     resetAnswers()
-  }
-
-  const changePlayer = (playerId) => {
-    setActiveId(playerId)
-    setDraft('')
   }
 
   const lock = () => {
@@ -54,7 +51,6 @@ export default function TelepathyGame() {
         <small>이번 질문</small>
         <h2>{questions[questionIndex]}</h2>
       </Card>
-      <DemoPlayerTabs players={DEMO_PLAYERS} activeId={activeId} onChange={changePlayer} />
 
       {!revealed ? (
         <Card>
@@ -68,7 +64,7 @@ export default function TelepathyGame() {
             </label>
           )}
           <Button disabled={Boolean(answers[activeId])} onClick={lock}>🔒 LOCK</Button>
-          <DemoNotice>{Object.keys(answers).length} / 4명 LOCK</DemoNotice>
+          <DemoNotice>{Object.keys(answers).length} / {players.length}명 LOCK</DemoNotice>
           <Button variant="secondary" disabled={!locked} onClick={() => setRevealed(true)}>모든 답 REVEAL</Button>
         </Card>
       ) : (
@@ -77,7 +73,7 @@ export default function TelepathyGame() {
           {groups.map((group) => (
             <div className="telepathy-group" key={group.answer}>
               <h2>{group.answer}</h2>
-              <p>{group.players.map((id) => DEMO_PLAYERS.find((player) => player.id === id).name).join(' · ')} · {group.players.length}명</p>
+              <p>{group.players.map((id) => players.find((player) => player.id === id).name).join(' · ')} · {group.players.length}명</p>
             </div>
           ))}
           <p>결과를 본 뒤 휴대폰을 내려놓고 자유롭게 이야기해 보세요.</p>

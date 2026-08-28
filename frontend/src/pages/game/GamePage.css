@@ -1,0 +1,293 @@
+.game-hint {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.game-error {
+  font-size: 0.78rem;
+  color: var(--hot);
+  margin: 0 0 8px;
+}
+
+.game-waiting {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.game-waiting-count {
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  color: var(--deep);
+}
+
+/* 첫인상 투표 */
+.impression-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 10px;
+}
+
+.impression-question {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.impression-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.impression-results {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.impression-result-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.impression-result-q {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.impression-tally {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.impression-tally li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.impression-tally-votes {
+  font-family: var(--font-mono);
+  color: var(--hot);
+}
+
+/* 이지선다 */
+.answer-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 10px;
+}
+
+.answer-situation {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 1.2rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.answer-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.answer-choice-btn {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+.answer-choice-btn:active {
+  border-color: var(--deep);
+}
+
+.answer-results {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.answer-tally {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.answer-tally li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-size: 0.88rem;
+}
+
+.answer-tally-a {
+  border-left: 3px solid var(--hot);
+}
+
+.answer-tally-b {
+  border-left: 3px solid var(--deep);
+}
+
+.answer-tally-choice {
+  color: var(--ink-soft);
+}
+
+/* 유형 맞히기 */
+.typeguess-self,
+.typeguess-assign {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 6px;
+  overflow-y: auto;
+}
+
+.typeguess-hint {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.typeguess-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.typeguess-type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.typeguess-type-symbol {
+  font-size: 1.6rem;
+}
+
+.typeguess-type-name {
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.typeguess-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.typeguess-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.typeguess-card-symbol {
+  font-size: 1.8rem;
+}
+
+.typeguess-card-name {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 1.05rem;
+}
+
+.typeguess-card-subtitle {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.typeguess-select {
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.typeguess-results {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.typeguess-results-title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.typeguess-result-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.typeguess-result-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-size: 0.85rem;
+}
+
+.typeguess-correct span {
+  color: var(--deep);
+  font-weight: 600;
+}
+
+.typeguess-wrong span {
+  color: var(--ink-soft);
+}

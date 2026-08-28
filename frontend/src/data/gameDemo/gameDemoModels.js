@@ -1,3 +1,53 @@
+export const DEMO_ROOM_MIN_PLAYERS = 2
+export const DEMO_ROOM_MAX_PLAYERS = 10
+
+export function canStartDemoRoom({ isHost, playerCount }) {
+  return isHost && playerCount >= DEMO_ROOM_MIN_PLAYERS && playerCount <= DEMO_ROOM_MAX_PLAYERS
+}
+
+export function normalizeDemoNickname(value) {
+  return value.trim()
+}
+
+export function normalizeDemoRoomCode(value) {
+  return value.trim().toUpperCase()
+}
+
+export function withDemoRoomCode(path, roomCode) {
+  if (!roomCode) return path
+  const separator = path.includes('?') ? '&' : '?'
+  return `${path}${separator}room=${encodeURIComponent(roomCode)}`
+}
+
+export function getDemoHubPath(roomCode) {
+  return roomCode ? `/games/demo/room/${encodeURIComponent(roomCode)}/games` : '/games/demo'
+}
+
+export function getSharedDemoGamePath({ code, gameId, gamePhase, path }) {
+  if (!code || !gameId || gamePhase === 'HUB') return null
+  const guidePath = `/games/demo/room/${encodeURIComponent(code)}/guide/${encodeURIComponent(gameId)}`
+  if (gamePhase === 'GUIDE') return path === guidePath ? null : guidePath
+  if (gamePhase === 'PLAYING') {
+    const gamePath = gameId === 'persona-impostor'
+      ? '/games/demo/persona-impostor'
+      : gameId === 'persona-prediction'
+        ? '/games/demo/persona-prediction'
+        : `/games/demo/party?game=${encodeURIComponent(gameId)}`
+    const destination = withDemoRoomCode(gamePath, code)
+    return path === destination ? null : destination
+  }
+  return null
+}
+
+export function getPrivateDemoPlayerId(players, viewerId) {
+  return players.some((player) => player.id === viewerId) ? viewerId : players[0]?.id
+}
+
+export function resolveDemoAccess({ contextRoomCode, playerId, requestedRoomCode, roomStatus }) {
+  if (!playerId || contextRoomCode !== requestedRoomCode) return 'entry'
+  return roomStatus === 'IN_PROGRESS' ? 'allowed' : 'waiting'
+}
+
 export function syncImpostorChoice(answers, ownerId, impostorId) {
   if (!(ownerId in answers)) return { ...answers }
   return { ...answers, [impostorId]: answers[ownerId] }

@@ -1,37 +1,3 @@
-.impostor-public-personas {
-  display: flex;
-  gap: 7px;
-  overflow-x: auto;
-  margin: 0 0 10px;
-  padding-bottom: 2px;
-}
-
-.impostor-public-personas > div {
-  display: grid;
-  flex: 0 0 145px;
-  gap: 3px;
-  padding: 9px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-}
-
-.impostor-public-personas b {
-  color: var(--hot);
-  font-size: 0.68rem;
-}
-
-.impostor-public-personas span {
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
-.impostor-public-personas small {
-  color: var(--ink-soft);
-  font-size: 0.58rem;
-  line-height: 1.4;
-}
-
 .impostor-secret-card {
   min-height: 360px;
   margin-top: 8px;
