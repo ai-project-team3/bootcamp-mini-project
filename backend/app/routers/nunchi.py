@@ -47,6 +47,25 @@ def _current_round(room: Room, db: Session) -> int:
     return TOTAL_ROUNDS
 
 
+def _display_round(room: Room, db: Session) -> int:
+    """Which round GET /state reports.
+
+    press() must always route new presses to the first round that still has
+    room (`_current_round`), or the round after a just-completed one could
+    never accept a press. But reporting that same round to GET /state means
+    the moment a round fills up, /state jumps straight to the next (empty)
+    round — nobody, including the two who just pressed, ever sees that
+    round's SUCCESS/FAIL. So the display round lags one step: it keeps
+    showing a just-completed round until somebody presses in the next one.
+    """
+    current = _current_round(room, db)
+    if current > 1:
+        prev = current - 1
+        if len(_presses(room, prev, db)) >= room.player_limit and not _presses(room, current, db):
+            return prev
+    return current
+
+
 @router.post("/press", response_model=NunchiStateResponse)
 def press(code: str, payload: NunchiPressRequest, db: Session = Depends(get_db)) -> NunchiStateResponse:
     room = get_room(code, db)
@@ -105,7 +124,7 @@ def _settle(room: Room, round_no: int, presses: list[GameResult], db: Session) -
 
 
 def _state(room: Room, db: Session, player_id: str) -> NunchiStateResponse:
-    round_no = _current_round(room, db)
+    round_no = _display_round(room, db)
     presses = _presses(room, round_no, db)
     nickname = {p.id: p.nickname for p in get_players(room.id, db)}
     complete = len(presses) >= room.player_limit

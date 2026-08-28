@@ -11,6 +11,10 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
+  /* 한글은 어절 사이에 공백이 있는데 기본 word-break는 그 안에서도 끊는다.
+     어절 중간이 아니라 어절 경계에서만 줄바꿈되게 한다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 #root {

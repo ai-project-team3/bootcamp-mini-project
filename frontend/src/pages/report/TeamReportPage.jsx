@@ -4,12 +4,14 @@ import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import Card from '../../components/common/Card'
 import { getReport } from '../../api/report'
+import { shareCurrentPage } from '../../utils/share'
 import './TeamReportPage.css'
 
 export default function TeamReportPage() {
   const { code } = useParams()
   const [report, setReport] = useState(null)
   const [error, setError] = useState(null)
+  const [shareNote, setShareNote] = useState(null)
 
   useEffect(() => {
     getReport(code).then(setReport).catch((err) => setError(err.message))
@@ -35,9 +37,23 @@ export default function TeamReportPage() {
 
   const { team } = report
 
+  const handleShare = async () => {
+    const result = await shareCurrentPage('얼음땡 · 우리 팀 리포트', `우리 팀 등급은 ${team.rank}! 얼음땡 팀 리포트를 확인해보세요.`)
+    if (result === 'copied') setShareNote('링크를 복사했어요')
+    if (result === 'failed') setShareNote('공유에 실패했어요')
+    if (result !== 'cancelled') setTimeout(() => setShareNote(null), 2000)
+  }
+
   return (
     <PhoneFrame>
-      <TopBar title="팀 리포트" />
+      <TopBar
+        title="팀 리포트"
+        right={
+          <button type="button" className="report-share-btn" onClick={handleShare}>
+            {shareNote ?? '공유'}
+          </button>
+        }
+      />
       <div className="team-body">
         <div className="team-rank">{team.rank}</div>
         <p className="team-summary">{team.summary}</p>
