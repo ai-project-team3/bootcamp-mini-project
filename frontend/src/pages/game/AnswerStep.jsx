@@ -88,22 +88,29 @@ export default function AnswerStep({ code, playerId, questions, onAdvance }) {
     return (
       <div className="answer-results">
         <p className="answer-situation">{question.situation}</p>
+
         <div className="split">
-          <div className="split-side">
-            <span className={`split-num${myChoice === 'A' ? ' mine' : ''}`}>{a}</span>
-            <p className="split-label">{question.a}</p>
+          <div className="split-head">
+            <span className={`split-num a${myChoice === 'A' ? ' mine' : ''}`}>{a}</span>
+            <span className={`split-num b${myChoice === 'B' ? ' mine' : ''}`}>{b}</span>
           </div>
           <div className="split-bar">
-            <span className="split-fill a" style={{ width: `${(a / total) * 100}%` }} />
-            <span className="split-fill b" style={{ width: `${(b / total) * 100}%` }} />
+            <span className="split-fill a" style={{ flexGrow: a || 0.02 }} />
+            <span className="split-fill b" style={{ flexGrow: b || 0.02 }} />
           </div>
-          <div className="split-side">
-            <span className={`split-num${myChoice === 'B' ? ' mine' : ''}`}>{b}</span>
-            <p className="split-label">{question.b}</p>
+          <div className="split-labels">
+            <span className="split-label">{question.a}</span>
+            <span className="split-label">{question.b}</span>
           </div>
         </div>
+
         <p className="split-note">
-          {a === 0 || b === 0 ? '전원 같은 쪽을 골랐어요' : `${Math.max(a, b)} 대 ${Math.min(a, b)}로 갈렸어요`}
+          {a === 0 || b === 0
+            ? '전원 같은 쪽을 골랐어요'
+            : `${Math.max(a, b)} 대 ${Math.min(a, b)}로 갈렸어요`}
+        </p>
+        <p className="split-mine">
+          내가 고른 쪽은 <b>{myChoice === 'A' ? question.a : question.b}</b>
         </p>
       </div>
     )

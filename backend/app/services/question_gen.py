@@ -32,6 +32,8 @@ IMPRESSION_MAX_LEN = 40
 GENERATION_TIMEOUT_S = 15.0
 SLOW_RESPONSE_THRESHOLD_S = 10.0
 CONTEXT_LINE_MAX_LEN = 150
+GAME_WORD_MAX_LEN = 16
+SUBTITLE_MAX_LEN = 30
 TEAM_KINDS = ("개발", "기획", "디자인", "마케팅", "학교 과제", "기타")
 
 # p1~p5는 반드시 "팀원 중 누가 ~할 것 같은가"를 묻는 지목형 질문이어야 한다(§4-2 —
@@ -48,6 +50,30 @@ class BinaryQuestionOut(BaseModel):
     situation: str = Field(max_length=SITUATION_MAX_LEN)
     a: str = Field(max_length=CHOICE_MAX_LEN)
     b: str = Field(max_length=CHOICE_MAX_LEN)
+
+
+class TelepathyPairOut(BaseModel):
+    a: str = Field(max_length=GAME_WORD_MAX_LEN)
+    b: str = Field(max_length=GAME_WORD_MAX_LEN)
+
+
+class LiarWordOut(BaseModel):
+    major: str = Field(max_length=GAME_WORD_MAX_LEN)
+    minor: str = Field(max_length=GAME_WORD_MAX_LEN)
+
+
+class TypeSubtitlesOut(BaseModel):
+    """§7 — 유형 이름은 고정이고 부제만 프로젝트 맥락을 탄다. 카드 이미지가
+    이름에 1:1로 붙어 있어서 이름이 바뀌면 이미지를 만들 수 없다."""
+
+    T1: str = Field(max_length=SUBTITLE_MAX_LEN)
+    T2: str = Field(max_length=SUBTITLE_MAX_LEN)
+    T3: str = Field(max_length=SUBTITLE_MAX_LEN)
+    T4: str = Field(max_length=SUBTITLE_MAX_LEN)
+    T5: str = Field(max_length=SUBTITLE_MAX_LEN)
+    T6: str = Field(max_length=SUBTITLE_MAX_LEN)
+    T7: str = Field(max_length=SUBTITLE_MAX_LEN)
+    T8: str = Field(max_length=SUBTITLE_MAX_LEN)
 
 
 class GeneratedQuestions(BaseModel):
@@ -71,6 +97,11 @@ class GeneratedQuestions(BaseModel):
     p3: str = Field(max_length=IMPRESSION_MAX_LEN)
     p4: str = Field(max_length=IMPRESSION_MAX_LEN)
     p5: str = Field(max_length=IMPRESSION_MAX_LEN)
+    # 게임 소재 — 채점에 안 들어가므로 블록별로 따로 폴백한다(§5-3).
+    telepathy: list[TelepathyPairOut]
+    traits: list[str]
+    liar_words: list[LiarWordOut]
+    type_subtitles: TypeSubtitlesOut
 
 
 def _default_rows(room_id: str) -> list[Question]:
@@ -145,6 +176,48 @@ def _validate(result: GeneratedQuestions) -> bool:
             return False
 
     return True
+
+
+def _apply_game_content(db: Session, room_id: str, result: GeneratedQuestions) -> None:
+    """§5-3 — 채점과 무관한 생성물은 블록별로 따로 받는다.
+
+    문항 13슬롯은 하나라도 어긋나면 통째로 버려야 하지만(능력치 눈금이 세션마다
+    흔들리면 리포트끼리 비교가 안 된다), 게임 소재는 라이어 제시어가 이상해도
+    텔레파시는 살려도 안전하다.
+    """
+    from ..content.game_content import LIAR_ROUNDS, TELEPATHY_ROUNDS, save
+
+    pairs = [
+        {"a": t.a, "b": t.b}
+        for t in result.telepathy
+        if t.a and t.b and t.a != t.b and not contains_banned_word(t.a, t.b)
+    ]
+    if len(pairs) >= TELEPATHY_ROUNDS:
+        save(db, room_id, "TELEPATHY", pairs[:TELEPATHY_ROUNDS])
+    else:
+        logger.warning("game content: telepathy fell back (%d usable pairs)", len(pairs))
+
+    traits = [t for t in result.traits if t and len(t) <= GAME_WORD_MAX_LEN and not contains_banned_word(t)]
+    if len(set(traits)) >= 6:
+        save(db, room_id, "TRAITS", traits[:6])
+    else:
+        logger.warning("game content: traits fell back (%d usable)", len(set(traits)))
+
+    words = [
+        {"major": w.major, "minor": w.minor}
+        for w in result.liar_words
+        if w.major and w.minor and w.major != w.minor and not contains_banned_word(w.major, w.minor)
+    ]
+    if len(words) >= LIAR_ROUNDS:
+        save(db, room_id, "LIAR_WORDS", words[:LIAR_ROUNDS])
+    else:
+        logger.warning("game content: liar words fell back (%d usable pairs)", len(words))
+
+    subs = result.type_subtitles.model_dump()
+    if all(v and len(v) <= SUBTITLE_MAX_LEN and not contains_banned_word(v) for v in subs.values()):
+        save(db, room_id, "TYPE_SUBTITLES", subs)
+    else:
+        logger.warning("game content: type subtitles fell back")
 
 
 def _apply_generated(db: Session, room: Room, result: GeneratedQuestions) -> None:
@@ -234,14 +307,17 @@ def generate_questions(room_id: str, project_text: str) -> None:
         return  # 빈 입력이면 호출 자체를 생략하고 기본 세트 유지
 
     result = _call_llm(project_text)
-    if result is None or not _validate(result):
-        return  # 실패/타임아웃/검증 실패 — 기본 세트가 이미 채워져 있으므로 그대로 둔다
+    if result is None:
+        return  # 호출 실패/타임아웃 — 기본 세트가 이미 채워져 있으므로 그대로 둔다
 
     db = SessionLocal()
     try:
         room = db.get(Room, room_id)
         if room is None:
             return
-        _apply_generated(db, room, result)
+        # 문항이 검증에 걸려도 게임 소재는 따로 살린다(§5-3 블록별 폴백).
+        if _validate(result):
+            _apply_generated(db, room, result)
+        _apply_game_content(db, room.id, result)
     finally:
         db.close()

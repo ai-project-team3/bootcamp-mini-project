@@ -14,7 +14,15 @@ from ..schemas.type_guess import (
     SelfStatusResponse,
     TypeGuessStatusResponse,
 )
-from ..services.scoring import compute_behavior_abilities, compute_half_obs, compute_lie_correct_counts, determine_type
+from ..services.scoring import (
+    DOM_ANSWER_WEIGHT,
+    DOM_NUNCHI_WEIGHT,
+    compute_behavior_abilities,
+    compute_guess_hits,
+    compute_nunchi_scores,
+    determine_type,
+    obs_from_hits,
+)
 
 router = APIRouter(prefix="/rooms/{code}/type-guess", tags=["type-guess"])
 
@@ -31,14 +39,22 @@ def _players(room_id: str, db: Session) -> list[Player]:
 
 
 def _provisional_types(db: Session, room: Room, players: list[Player]) -> dict[str, str]:
-    """카드 노출 시점의 유형(관찰력은 거짓 찾기 결과만 반영한 절반 값)."""
+    """카드를 뿌리는 시점의 유형.
+
+    유형 맞히기가 아직 안 끝났으므로 관찰력은 그때까지의 기록(텔레파시 ·
+    ○○님은 · 라이어 지목)만으로 계산한다. 최종 리포트 값과 조금 다를 수
+    있는데, 카드가 이미 뿌려진 뒤에 유형이 바뀌면 맞히기가 성립하지 않으므로
+    이 시점 값이 카드에 박히는 게 맞다.
+    """
     abilities = compute_behavior_abilities(db, room.id, players)
-    lie_correct = compute_lie_correct_counts(db, room.id)
+    nunchi = compute_nunchi_scores(db, room.id, players)
+    hits = compute_guess_hits(db, room.id, players)
     types = {}
     for p in players:
         a = abilities[p.id]
-        obs_half = compute_half_obs(lie_correct, p.id, len(players))
-        types[p.id] = determine_type(a["DOM"], a["EXP"], obs_half, a["SPD"])
+        dom = a["DOM"] * DOM_ANSWER_WEIGHT + nunchi[p.id] * DOM_NUNCHI_WEIGHT
+        got, tried = hits[p.id]
+        types[p.id] = determine_type(dom, a["EXP"], obs_from_hits(got, tried), a["SPD"])
     return types
 
 

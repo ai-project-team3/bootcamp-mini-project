@@ -57,7 +57,7 @@ export default function PersonalReportPage() {
         <div className="report-header" style={{ color: type.color }}>
           <span className="report-header-symbol">{type.symbol}</span>
           <h1 className="report-header-name">{type.name}</h1>
-          <p className="report-header-subtitle">{type.subtitle}</p>
+          <p className="report-header-subtitle">{me.type_subtitle || type.subtitle}</p>
           <p className="report-header-meta">
             {me.nickname} · {me.mbti || 'MBTI 미입력'}
           </p>

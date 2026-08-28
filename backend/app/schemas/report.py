@@ -19,6 +19,7 @@ class PlayerReport(BaseModel):
     impression_pre: dict[str, float]
     impression_post: dict[str, float]
     type_code: str
+    type_subtitle: Optional[str] = None
     self_guess: Optional[str] = None
     badges: list[str]
     quote: Optional[str] = None
