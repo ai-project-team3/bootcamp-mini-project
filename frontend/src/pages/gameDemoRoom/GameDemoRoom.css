@@ -90,3 +90,15 @@
     height: 100px;
   }
 }
+
+/* The invite URL in plain sight. Over the LAN the page is not a secure context
+   and the clipboard API is unavailable, so a player has to be able to read or
+   long-press the address instead of relying on the copy button. */
+.game-room-invite-url {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  word-break: break-all;
+  user-select: all;
+}

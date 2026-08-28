@@ -35,3 +35,25 @@
 .phone--dark .phone-body {
   padding: 0;
 }
+
+/* ===== Phones =====
+   On a handset the app is the whole screen. The desktop framing — the centred
+   card, its rounded border, and the padding around it — leaves dead space and a
+   "phone inside a phone" look, so below this width the shell goes edge to edge.
+   These live here, after the base rules, so import order cannot flip them. */
+@media (max-width: 560px) {
+  #root {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .phone {
+    max-width: none;
+    min-height: 100vh;
+    /* dvh accounts for the browser's collapsing address bar. */
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

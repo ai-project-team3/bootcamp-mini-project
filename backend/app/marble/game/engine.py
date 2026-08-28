@@ -161,6 +161,7 @@ def submit_answer(room: Room, player_id: str, choice_index: int) -> None:
     room.last_answer_correct = is_correct
     room.last_chance_card = None
     room.assigned_forfeit = None
+    room.forfeit_target_id = None
 
     if not is_correct:
         # Stay put; perform a dare instead.
@@ -188,11 +189,13 @@ def submit_answer(room: Room, player_id: str, choice_index: int) -> None:
 
 
 def _apply_chance_card(room: Room, player_id: str) -> None:
-    card = draw_chance_card(room.content_mode)
+    # Only reached after a correct answer, so the draw is benefits-only: a
+    # player who got the question right is never handed a dare.
+    card = draw_chance_card(room.content_mode, benefits_only=True)
     room.last_chance_card = card
     player = room.players[player_id]
 
-    if card.kind == "penalty":
+    if card.kind == "penalty":  # pragma: no cover - benefits_only rules this out
         room.assigned_forfeit = card.forfeit_text
         room.forfeit_target_id = None
         if needs_forfeit_target(room.content_mode):

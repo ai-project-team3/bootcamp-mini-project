@@ -67,7 +67,7 @@ export default function GameDemoEntryPage() {
 
   return (
     <PhoneFrame>
-      <TopBar title="게임 데모" showBack={false} />
+      <TopBar title="게임 데모" onBack={() => navigate('/games')} />
       <GameDemoRoomHero eyebrow="MINWOO GAME LAB" title={<>닉네임만 정하고<br />같이 시작해요</>}>
         2명부터 10명까지 초대코드로 모일 수 있어요.
       </GameDemoRoomHero>

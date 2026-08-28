@@ -5,8 +5,19 @@ import Card from '../../components/common/Card'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import { DEMO_GAME_CATALOG } from '../../data/gameDemo/gameDemoData'
-import { STANDALONE_GAMES } from '../../data/gamesHub/standaloneGames'
+import { STANDALONE_GAMES, isRoomFree } from '../../data/gamesHub/standaloneGames'
 import '../gameDemoHub/GameDemoHubPage.css'
+
+/** A game needs a room unless it runs its own, or is playable on one phone. */
+function needsRoom(game) {
+  return !game.standalone && !isRoomFree(game.id)
+}
+
+function pathFor(game) {
+  if (game.standalone) return game.path
+  if (isRoomFree(game.id)) return `/games/party/${game.id}`
+  return '/games/demo'
+}
 
 const GROUPS = [
   { key: 'Persona Games', label: '페르소나 게임' },
@@ -16,10 +27,11 @@ const GROUPS = [
 /**
  * Every game in one list, grouped and collapsible.
  *
- * Two kinds of game live here and they start differently, so the card says
- * which: a `standalone` game runs its own room and opens straight away, while
- * the rest are played in a shared demo room, so their cards lead to the demo
- * entry where the host makes a room and then picks for everyone.
+ * Games start in one of three ways, and the card says which:
+ * - `standalone` (마피아, 커플 브루마블) run their own rooms and open directly.
+ * - Room-free party games are played by passing one phone, so they open directly too.
+ * - Everything else needs a screen each, so its card leads to the demo entry
+ *   where the host makes a room and then picks the game for everyone.
  *
  * The layout reuses the demo hub's stylesheet so both lists look the same.
  */
@@ -57,18 +69,18 @@ export default function GamesHubPage() {
                     key={game.id}
                     type="button"
                     className="demo-hub-button"
-                    onClick={() => navigate(game.standalone ? game.path : '/games/demo')}
+                    onClick={() => navigate(pathFor(game))}
                   >
                     <Card className="demo-hub-card">
                       <div className="demo-hub-card-top">
                         <span>{game.emoji}</span>
-                        <Badge tone={game.standalone ? 'positive' : 'fun'}>
-                          {game.standalone ? 'PLAY' : 'ROOM'}
+                        <Badge tone={needsRoom(game) ? 'fun' : 'positive'}>
+                          {needsRoom(game) ? 'ROOM' : 'PLAY'}
                         </Badge>
                       </div>
                       <h2>{game.title}</h2>
                       <p>{game.desc}</p>
-                      <b>{game.standalone ? '바로 시작 →' : '방 만들기 →'}</b>
+                      <b>{needsRoom(game) ? '방 만들기 →' : '바로 시작 →'}</b>
                     </Card>
                   </button>
                 ))}

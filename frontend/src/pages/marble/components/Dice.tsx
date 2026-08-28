@@ -5,7 +5,7 @@ interface DiceProps {
   lastRoll: number | null;
   disabled: boolean;
   onRoll: () => void;
-  /** Shown under the die so the hub always says whose move it is. */
+  /** Shown under the board so the table always knows whose move it is. */
   caption?: string;
   /** Small overline above the die, e.g. the turn counter. */
   eyebrow?: string;
@@ -21,7 +21,7 @@ const PIP_LAYOUT: Record<number, number[]> = {
   3: [0, 4, 8],
 };
 
-export function Dice({ lastRoll, disabled, onRoll, caption, eyebrow }: DiceProps) {
+export function useDiceRoll({ lastRoll, disabled, onRoll }: Omit<DiceProps, "caption" | "eyebrow">) {
   const [isRolling, setIsRolling] = useState(false);
   const [displayValue, setDisplayValue] = useState<number | null>(null);
   const timers = useRef<{ interval: ReturnType<typeof setInterval> | null; timeout: ReturnType<typeof setTimeout> | null }>({
@@ -53,6 +53,19 @@ export function Dice({ lastRoll, disabled, onRoll, caption, eyebrow }: DiceProps
   const shown = isRolling ? displayValue : lastRoll;
   const pips = shown !== null ? (PIP_LAYOUT[shown] ?? []) : [];
 
+  return { isRolling, shown, pips, roll: handleClick };
+}
+
+export interface DiceStageProps {
+  isRolling: boolean;
+  shown: number | null;
+  pips: number[];
+  /** Small overline above the die, e.g. the turn counter. */
+  eyebrow?: string;
+}
+
+/** The die itself. Sits in the board's 2x2 hub, which is all that fits there. */
+export function DiceStage({ isRolling, shown, pips, eyebrow }: DiceStageProps) {
   return (
     <div className="pm-dice-arena">
       {eyebrow && <p className="pm-eyebrow pm-dice__eyebrow">{eyebrow}</p>}
@@ -77,10 +90,48 @@ export function Dice({ lastRoll, disabled, onRoll, caption, eyebrow }: DiceProps
       <span className="pm-sr-only" aria-live="polite">
         {shown !== null ? `주사위 ${shown}` : "주사위 대기 중"}
       </span>
-      <button type="button" className="pm-button pm-button--primary pm-dice__button" onClick={handleClick} disabled={disabled || isRolling}>
+    </div>
+  );
+}
+
+export interface DiceControlsProps {
+  isRolling: boolean;
+  disabled: boolean;
+  onRoll: () => void;
+  /** Shown under the board so the table always knows whose move it is. */
+  caption?: string;
+}
+
+/**
+ * The roll button and the turn caption.
+ *
+ * They render under the board, not in the hub: the hub is only about half the
+ * board wide, and the button and caption used to spill out of it onto the
+ * surrounding tiles.
+ */
+export function DiceControls({ isRolling, disabled, onRoll, caption }: DiceControlsProps) {
+  return (
+    <div className="pm-dice-controls">
+      <button
+        type="button"
+        className="pm-button pm-button--primary pm-dice__button"
+        onClick={onRoll}
+        disabled={disabled || isRolling}
+      >
         {isRolling ? "굴리는 중..." : "주사위 굴리기"}
       </button>
       {caption && <p className="pm-dice__caption">{caption}</p>}
     </div>
+  );
+}
+
+/** Both halves together — used where the layout does not split them. */
+export function Dice({ lastRoll, disabled, onRoll, caption, eyebrow }: DiceProps) {
+  const { isRolling, shown, pips, roll } = useDiceRoll({ lastRoll, disabled, onRoll });
+  return (
+    <>
+      <DiceStage isRolling={isRolling} shown={shown} pips={pips} eyebrow={eyebrow} />
+      <DiceControls isRolling={isRolling} disabled={disabled} onRoll={roll} caption={caption} />
+    </>
   );
 }

@@ -13,7 +13,7 @@ import type { ContentMode, RoomPlayer, RoomState } from "./api/types";
 import { useMarbleRoom } from "./hooks/useMarbleRoom";
 import { useMarbleSession } from "./hooks/useMarbleSession";
 import { Board } from "./components/Board";
-import { Dice } from "./components/Dice";
+import { DiceControls, DiceStage, useDiceRoll } from "./components/Dice";
 import { ScoreDashboard } from "./components/ScoreDashboard";
 import { QuizModal } from "./components/QuizModal";
 import { GameOverScreen } from "./components/GameOverScreen";
@@ -241,6 +241,16 @@ export function MarbleApp({ onToneChange }: MarbleAppProps = {}) {
     return index >= 0 ? index : null;
   }, [state?.forfeit_target_id, state?.players, state?.current_player_id]);
 
+  // Rolling state is shared by the die in the hub and the button under the
+  // board, so it lives here rather than inside either piece.
+  const diceDisabled =
+    !state || state.current_player_id !== session?.playerId || state.phase !== "ROLL_DICE" || busy;
+  const dice = useDiceRoll({
+    lastRoll: state?.last_dice_roll ?? null,
+    disabled: diceDisabled,
+    onRoll: handleRoll,
+  });
+
   if (!session) {
     return (
       <div className="pm-app" data-pm-theme={themeMode}>
@@ -329,15 +339,20 @@ export function MarbleApp({ onToneChange }: MarbleAppProps = {}) {
                 players={state.players}
                 animatedPositions={animatedPositions}
                 hoppingPlayerId={hoppingPlayerId}
+                footer={
+                  <DiceControls
+                    isRolling={dice.isRolling}
+                    disabled={diceDisabled}
+                    onRoll={dice.roll}
+                    caption={isMyTurn ? "내 차례예요!" : `${currentPlayer?.nickname ?? "상대"}님 차례`}
+                  />
+                }
               >
-                <Dice
-                  lastRoll={state.last_dice_roll}
-                  disabled={!isMyTurn || state.phase !== "ROLL_DICE" || busy}
-                  onRoll={handleRoll}
+                <DiceStage
+                  isRolling={dice.isRolling}
+                  shown={dice.shown}
+                  pips={dice.pips}
                   eyebrow={me ? `내 진행 ${me.steps_moved} / ${state.board_size}` : undefined}
-                  caption={
-                    isMyTurn ? "내 차례예요!" : `${currentPlayer?.nickname ?? "상대"}님 차례`
-                  }
                 />
               </Board>
             </div>
