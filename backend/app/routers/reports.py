@@ -37,7 +37,7 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
         raise HTTPException(status_code=400, detail="아직 게임이 끝나지 않았습니다")
 
     players = db.query(Player).filter(Player.room_id == room.id).order_by(Player.seat_no).all()
-    if len(players) != 5:
+    if len(players) != room.player_limit:
         raise HTTPException(status_code=400, detail="플레이어 수가 올바르지 않습니다")
 
     behavior = compute_behavior_abilities(db, room.id, players)
@@ -51,8 +51,8 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
     final_types: dict[str, str] = {}
     for p in players:
         a = dict(behavior[p.id])
-        obs_half = compute_half_obs(lie_correct, p.id)
-        obs_full = compute_full_obs(lie_correct, type_correct, p.id)
+        obs_half = compute_half_obs(lie_correct, p.id, len(players))
+        obs_full = compute_full_obs(lie_correct, type_correct, p.id, len(players))
         provisional_types[p.id] = determine_type(a["DOM"], a["EXP"], obs_half, a["SPD"])
         a["OBS"] = obs_full
         abilities[p.id] = a
@@ -88,7 +88,8 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
             if lie_stmt
             else 0
         )
-        quote_note = f"{4 - catches}명이 속았습니다" if lie_stmt else None
+        fooled = len(players) - 1 - catches
+        quote_note = f"{fooled}명이 속았습니다" if lie_stmt else None
 
         player_reports.append(
             PlayerReport(

@@ -52,3 +52,61 @@
   color: var(--hot);
   margin: 4px 0 0;
 }
+
+.rc-project-hint {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+}
+
+.rc-project-input {
+  width: 100%;
+  flex: 1;
+  min-height: 100px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 16px;
+}
+
+.rc-player-limit-label {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.rc-player-limit-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.rc-player-limit-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.rc-player-limit-btn:disabled {
+  opacity: 0.4;
+}
+
+.rc-player-limit-value {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  min-width: 48px;
+  text-align: center;
+}

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from ..constants import MAX_PLAYERS, TYPES
+from ..constants import TYPES
 from ..database import get_db
 from ..models.guess import Guess
 from ..models.player import Player
@@ -37,7 +37,7 @@ def _provisional_types(db: Session, room: Room, players: list[Player]) -> dict[s
     types = {}
     for p in players:
         a = abilities[p.id]
-        obs_half = compute_half_obs(lie_correct, p.id)
+        obs_half = compute_half_obs(lie_correct, p.id, len(players))
         types[p.id] = determine_type(a["DOM"], a["EXP"], obs_half, a["SPD"])
     return types
 
@@ -67,25 +67,25 @@ def submit_self_guess(code: str, payload: SelfGuessRequest, db: Session = Depend
     else:
         existing.target_type_code = payload.type_code
     db.commit()
-    return _self_status(room.id, db)
+    return _self_status(room, db)
 
 
 @router.get("/self-status", response_model=SelfStatusResponse)
 def get_self_status(code: str, db: Session = Depends(get_db)) -> SelfStatusResponse:
     room = _get_room(code, db)
-    return _self_status(room.id, db)
+    return _self_status(room, db)
 
 
-def _self_status(room_id: str, db: Session) -> SelfStatusResponse:
-    guesses = db.query(Guess).filter(Guess.room_id == room_id, Guess.kind == "TYPE").all()
+def _self_status(room: Room, db: Session) -> SelfStatusResponse:
+    guesses = db.query(Guess).filter(Guess.room_id == room.id, Guess.kind == "TYPE").all()
     submitted = sum(1 for g in guesses if g.guesser_id == g.target_player_id)
-    return SelfStatusResponse(submitted=submitted, total=MAX_PLAYERS, revealed=submitted >= MAX_PLAYERS)
+    return SelfStatusResponse(submitted=submitted, total=room.player_limit, revealed=submitted >= room.player_limit)
 
 
 @router.get("/cards", response_model=list[CardOut])
 def get_cards(code: str, player_id: str = Query(...), db: Session = Depends(get_db)) -> list[CardOut]:
     room = _get_room(code, db)
-    if not _self_status(room.id, db).revealed:
+    if not _self_status(room, db).revealed:
         raise HTTPException(status_code=400, detail="아직 전원이 자기 유형을 찍지 않았습니다")
 
     players = _players(room.id, db)
@@ -145,7 +145,7 @@ def submit_assignment(code: str, payload: AssignRequest, db: Session = Depends(g
         )
     db.commit()
 
-    status = _assign_status(room.id, db, players)
+    status = _assign_status(room, db, players)
     if status.revealed and room.phase == "TYPE_GUESS":
         room.status = "DONE"
         room.phase = "DONE"
@@ -157,22 +157,22 @@ def submit_assignment(code: str, payload: AssignRequest, db: Session = Depends(g
 def get_status(code: str, db: Session = Depends(get_db)) -> TypeGuessStatusResponse:
     room = _get_room(code, db)
     players = _players(room.id, db)
-    return _assign_status(room.id, db, players)
+    return _assign_status(room, db, players)
 
 
-def _assign_status(room_id: str, db: Session, players: list[Player]) -> TypeGuessStatusResponse:
+def _assign_status(room: Room, db: Session, players: list[Player]) -> TypeGuessStatusResponse:
     seat_by_player = {p.id: p.seat_no for p in players}
     nickname_by_player = {p.id: p.nickname for p in players}
     guesses = (
         db.query(Guess)
-        .filter(Guess.room_id == room_id, Guess.kind == "TYPE", Guess.round_no.isnot(None))
+        .filter(Guess.room_id == room.id, Guess.kind == "TYPE", Guess.round_no.isnot(None))
         .all()
     )
     by_guesser: dict[str, int] = {}
     for g in guesses:
         by_guesser[g.guesser_id] = by_guesser.get(g.guesser_id, 0) + 1
     submitted = sum(1 for count in by_guesser.values() if count == len(players) - 1)
-    revealed = submitted >= MAX_PLAYERS
+    revealed = submitted >= room.player_limit
 
     results = []
     if revealed:
@@ -185,4 +185,4 @@ def _assign_status(room_id: str, db: Session, players: list[Player]) -> TypeGues
                     correct=correct,
                 )
             )
-    return TypeGuessStatusResponse(submitted=submitted, total=MAX_PLAYERS, revealed=revealed, results=results)
+    return TypeGuessStatusResponse(submitted=submitted, total=room.player_limit, revealed=revealed, results=results)

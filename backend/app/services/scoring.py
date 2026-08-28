@@ -108,16 +108,20 @@ def compute_type_guess_correct_counts(db: Session, room_id: str, players: list[P
     return correct
 
 
-def compute_half_obs(lie_correct: dict[str, int], player_id: str) -> float:
-    """§4-4: 거짓 찾기 정답 수가 관찰력의 절반을 만든다 — 유형 카드 노출 시점 값."""
-    return _clamp((lie_correct.get(player_id, 0) / 4) * 2.5, 0.0, 2.5)
+def compute_half_obs(lie_correct: dict[str, int], player_id: str, player_count: int) -> float:
+    """§4-4: 거짓 찾기 정답 수가 관찰력의 절반을 만든다 — 유형 카드 노출 시점 값.
+    분모(기획안 원문 4)는 나 외 인원수(player_count - 1)로 일반화했다."""
+    others = max(player_count - 1, 1)
+    return _clamp((lie_correct.get(player_id, 0) / others) * 2.5, 0.0, 2.5)
 
 
-def compute_full_obs(lie_correct: dict[str, int], type_correct: dict[str, int], player_id: str) -> float:
-    """§5: 관찰력 = (거짓 찾기 정답 + 유형 맞히기 정답) / 8 × 5 — 최종 리포트 값."""
+def compute_full_obs(lie_correct: dict[str, int], type_correct: dict[str, int], player_id: str, player_count: int) -> float:
+    """§5: 관찰력 = (거짓 찾기 정답 + 유형 맞히기 정답) / (2 × 나 외 인원수) × 5 — 최종
+    리포트 값. 분모(기획안 원문 4+4)는 나 외 인원수 기준으로 일반화했다."""
+    others = max(player_count - 1, 1)
     lie = lie_correct.get(player_id, 0)
     type_ = type_correct.get(player_id, 0)
-    return _clamp((lie + type_) / 8 * 5)
+    return _clamp((lie + type_) / (2 * others) * 5)
 
 
 def _tiebreak_level(value: float, spd: float) -> str:
@@ -156,12 +160,13 @@ def compute_impression_abilities(
         if g.target_player_id and g.round_no:
             counts[g.target_player_id][g.round_no] += 1
     question_ability = {q["question_no"]: q["ability"] for q in IMPRESSION_QUESTIONS}
+    max_votes = max(len(players) - 1, 1)  # 한 문항에서 받을 수 있는 최대 득표 = 나 외 인원수
     result: dict[str, dict[str, float]] = {}
     for p in players:
         abilities = {}
         for qn, ability in question_ability.items():
             votes = counts[p.id].get(qn, 0)
-            abilities[ability] = _clamp((votes / 4) * 5)
+            abilities[ability] = _clamp((votes / max_votes) * 5)
         result[p.id] = abilities
     return result
 
@@ -338,7 +343,8 @@ def compute_team_grade(db: Session, room: Room, players: list[Player], abilities
             if abilities[p.id][code] == best_val:
                 leaders.add(p.id)
                 break
-    dispersion_hit = len(leaders) >= 4
+    # 컷오프(기획안 원문 4명, 5인 기준)는 인원수 - 1로 일반화했다.
+    dispersion_hit = len(leaders) >= max(len(players) - 1, 1)
 
     # 상호 이해도: 거짓 찾기 전체 정답률(상위=50% 이상)
     lie_guesses = db.query(Guess).filter(Guess.room_id == room.id, Guess.kind == "LIE").all()
@@ -361,6 +367,9 @@ def compute_team_grade(db: Session, room: Room, players: list[Player], abilities
         by_q[a.question_no].append(a.choice)
     split_count = sum(1 for choices in by_q.values() if len(set(choices)) > 1)
     diversity_hit = split_count >= 5
+    # §5-7 사후 점검: 8문항 중 5개 이상에서 전원이 같은 답을 골랐다면 생성 실패일
+    # 가능성이 높다. 오류로 처리하지 않고 팀 요약 문구만 이 경우로 바꾼다.
+    unanimous_hit = (8 - split_count) >= 5
 
     hits = sum([dispersion_hit, understanding_hit, impression_hit, diversity_hit])
     rank = TEAM_GRADES_BY_HIT_COUNT[hits]
@@ -379,6 +388,9 @@ def compute_team_grade(db: Session, room: Room, players: list[Player], abilities
         summary = "역할이 자연스럽게 나뉘는 팀"
     else:
         summary = "합이 잘 맞는 팀"
+
+    if unanimous_hit:
+        summary = "이례적으로 합이 맞은 팀"
 
     return {"rank": rank, "reasons": reasons, "summary": summary}
 
