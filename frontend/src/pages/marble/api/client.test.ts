@@ -19,13 +19,13 @@ afterEach(() => {
 describe("marble api client", () => {
   it("creates a room with the chosen content mode", async () => {
     const spy = mockFetch({ room_id: "ABC123" });
-    const result = await createRoom("adult");
+    const result = await createRoom("adult", 2);
 
     expect(result.room_id).toBe("ABC123");
     const [url, init] = spy.mock.calls[0];
     expect(url).toContain("/rooms");
     expect(init.method).toBe("POST");
-    expect(JSON.parse(init.body)).toEqual({ content_mode: "adult" });
+    expect(JSON.parse(init.body)).toEqual({ content_mode: "adult", max_players: 2 });
   });
 
   it("joins a room with a nickname", async () => {

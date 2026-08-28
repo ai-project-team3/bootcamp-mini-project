@@ -11,6 +11,9 @@ from enum import Enum
 
 BOARD_SIZE = 12
 
+MIN_PLAYERS = 2
+MAX_PLAYERS = 8
+
 
 class ContentMode(str, Enum):
     GENERAL = "general"
@@ -121,14 +124,25 @@ class Room:
     chemistry_summary: str | None = None
     #: Last question template used per trait, to avoid asking it twice in a row.
     last_template_index: dict[TraitKey, int] = field(default_factory=dict)
-
-    MAX_PLAYERS = 2
+    #: Whose persona the open quiz is about. With more than two players the
+    #: question has to name someone, so the UI reads it from here.
+    quiz_subject_id: str | None = None
+    #: Who receives the dare. Only set in adult mode, where a forfeit is
+    #: something one person does to another; general-mode dares stand alone.
+    forfeit_target_id: str | None = None
+    #: Who a chance card just sent to the back of the queue, for the UI to say so.
+    skipped_player_id: str | None = None
+    #: Room size chosen when the room was created, 2 through 8.
+    max_players: int = MIN_PLAYERS
 
     def is_full(self) -> bool:
-        return len(self.players) >= self.MAX_PLAYERS
+        return len(self.players) >= self.max_players
+
+    def others(self, player_id: str) -> list[Player]:
+        """Everyone except the given player, in seating order."""
+        return [self.players[pid] for pid in self.turn_order if pid != player_id]
 
     def opponent_of(self, player_id: str) -> Player | None:
-        for pid, player in self.players.items():
-            if pid != player_id:
-                return player
-        return None
+        """The next player in seating order. Kept for the two-player case."""
+        others = self.others(player_id)
+        return others[0] if others else None

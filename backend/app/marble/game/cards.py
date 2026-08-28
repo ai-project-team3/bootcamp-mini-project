@@ -42,6 +42,15 @@ def pick_forfeit(content_mode: ContentMode) -> str:
     return random.choice(pool)
 
 
+def needs_forfeit_target(content_mode: ContentMode) -> bool:
+    """Adult-mode dares are done *to* someone, so the room draws a target.
+
+    General-mode dares are performed for the table and stand on their own, so
+    they are left untargeted.
+    """
+    return content_mode is ContentMode.ADULT
+
+
 def draw_chance_card(content_mode: ContentMode) -> ChanceCardResult:
     if random.random() < BENEFIT_PROBABILITY:
         return ChanceCardResult(kind="benefit", benefit=random.choice(BENEFIT_CARDS))

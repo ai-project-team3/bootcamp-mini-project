@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import APIRouter, HTTPException
 
-from app.marble.models.room import ContentMode, GamePhase, Player, Room
+from app.marble.models.room import MAX_PLAYERS, MIN_PLAYERS, ContentMode, GamePhase, Player, Room
 from app.marble.persona.provider import MockPersonaProvider
 from app.marble.schemas.room import CreateRoomRequest, JoinRoomRequest
 from app.marble.store import store
@@ -74,6 +74,10 @@ def serialize_room(room: Room) -> dict:
         ],
         "host_player_id": room.host_player_id,
         "current_player_id": room.current_player_id,
+        "max_players": room.max_players,
+        "quiz_subject_id": room.quiz_subject_id,
+        "forfeit_target_id": room.forfeit_target_id,
+        "skipped_player_id": room.skipped_player_id,
         "last_dice_roll": room.last_dice_roll,
         "quiz": quiz,
         "last_answer_correct": room.last_answer_correct,
@@ -88,7 +92,13 @@ def serialize_room(room: Room) -> dict:
 @router.post("")
 def create_room(req: CreateRoomRequest):
     room_id = _new_room_id()
-    store.create(Room(room_id=room_id, content_mode=ContentMode(req.content_mode)))
+    store.create(
+        Room(
+            room_id=room_id,
+            content_mode=ContentMode(req.content_mode),
+            max_players=req.max_players,
+        )
+    )
     return {"room_id": room_id}
 
 

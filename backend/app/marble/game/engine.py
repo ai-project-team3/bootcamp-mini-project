@@ -13,13 +13,14 @@ from __future__ import annotations
 import random
 
 from app.marble.game.board import generate_board
-from app.marble.game.cards import draw_chance_card, pick_forfeit
+from app.marble.game.cards import draw_chance_card, needs_forfeit_target, pick_forfeit
 from app.marble.game.chemistry import summarize_chemistry
 from app.marble.game.quiz import generate_quiz
 from app.marble.models.room import (
     BOARD_SIZE,
     BenefitCard,
     GamePhase,
+    Player,
     Room,
     TileType,
 )
@@ -48,15 +49,29 @@ def _clear_transient(room: Room) -> None:
     room.last_answer_correct = None
     room.assigned_forfeit = None
     room.last_chance_card = None
+    room.quiz_subject_id = None
+    room.forfeit_target_id = None
+    room.skipped_player_id = None
+
+
+def _assign_forfeit(room: Room, player_id: str) -> None:
+    """Hand out a dare, drawing a target when the mode calls for one."""
+    room.assigned_forfeit = pick_forfeit(room.content_mode)
+    room.forfeit_target_id = None
+    if not needs_forfeit_target(room.content_mode):
+        return
+    candidates = room.others(player_id)
+    if candidates:
+        room.forfeit_target_id = random.choice(candidates).player_id
 
 
 def start_game(room: Room) -> None:
-    if len(room.players) < Room.MAX_PLAYERS:
+    if not room.is_full():
         raise InvalidPhase("Room is not full yet")
 
-    a, b = (room.players[pid] for pid in room.turn_order)
-    assert a.persona and b.persona
-    room.board = generate_board(a.persona.stats, b.persona.stats)
+    everyone = [room.players[pid] for pid in room.turn_order]
+    assert all(p.persona for p in everyone)
+    room.board = generate_board(*(p.persona.stats for p in everyone if p.persona))
 
     for player in room.players.values():
         player.position = 0
@@ -92,10 +107,13 @@ def roll_dice(room: Room, player_id: str) -> None:
             advance_turn(room, keep_dice=True)
         return
 
-    opponent = room.opponent_of(player_id)
-    assert opponent and opponent.persona
+    # With more than two players the question has to be about someone in
+    # particular, so the subject is drawn and recorded for the UI to name.
+    subject = random.choice(room.others(player_id))
+    assert subject.persona
+    room.quiz_subject_id = subject.player_id
     room.quiz = generate_quiz(
-        opponent.persona,
+        subject.persona,
         tile.type,
         room.content_mode,
         avoid_template_index=room.last_template_index.get(_trait_for(tile.type)),
@@ -124,8 +142,9 @@ def _apply_move(room: Room, player_id: str, target_position: int, steps: int) ->
 def _finish(room: Room, winner_id: str | None) -> None:
     room.winner_id = winner_id
     room.phase = GamePhase.GAME_OVER
-    a, b = (room.players[pid] for pid in room.turn_order)
-    room.chemistry_summary = summarize_chemistry(a, b, winner_id)
+    room.chemistry_summary = summarize_chemistry(
+        [room.players[pid] for pid in room.turn_order], winner_id
+    )
 
 
 def submit_answer(room: Room, player_id: str, choice_index: int) -> None:
@@ -148,7 +167,7 @@ def submit_answer(room: Room, player_id: str, choice_index: int) -> None:
         if player.active_benefit is BenefitCard.FORFEIT_IMMUNITY:
             player.active_benefit = None
         else:
-            room.assigned_forfeit = pick_forfeit(room.content_mode)
+            _assign_forfeit(room, player_id)
         room.phase = GamePhase.SUBMIT_ANSWER
         return
 
@@ -175,6 +194,11 @@ def _apply_chance_card(room: Room, player_id: str) -> None:
 
     if card.kind == "penalty":
         room.assigned_forfeit = card.forfeit_text
+        room.forfeit_target_id = None
+        if needs_forfeit_target(room.content_mode):
+            candidates = room.others(player_id)
+            if candidates:
+                room.forfeit_target_id = random.choice(candidates).player_id
         return
 
     if card.benefit in (BenefitCard.SCORE_DOUBLE, BenefitCard.FORFEIT_IMMUNITY):
@@ -182,9 +206,11 @@ def _apply_chance_card(room: Room, player_id: str) -> None:
     elif card.benefit is BenefitCard.EXTRA_HOP:
         _apply_move(room, player_id, (player.position + 1) % BOARD_SIZE, 1)
     elif card.benefit is BenefitCard.SKIP_OPPONENT:
-        opponent = room.opponent_of(player_id)
-        if opponent:
-            opponent.skip_next_turn = True
+        candidates = room.others(player_id)
+        if candidates:
+            victim = random.choice(candidates)
+            victim.skip_next_turn = True
+            room.skipped_player_id = victim.player_id
     # EXTRA_ROLL is handled in advance_turn.
 
 
@@ -207,10 +233,24 @@ def advance_turn(room: Room, keep_dice: bool = False) -> None:
 
     current = room.current_player_id
     assert current is not None
-    nxt = next(pid for pid in room.turn_order if pid != current)
+    room.current_player_id = _next_player_id(room, current)
 
-    if room.players[nxt].skip_next_turn:
-        room.players[nxt].skip_next_turn = False
-        nxt = current
 
-    room.current_player_id = nxt
+def _next_player_id(room: Room, current: str) -> str:
+    """Walk the seating order, burning the skip flag of anyone who has one.
+
+    The loop is bounded by the table size so a room where everyone is skipped
+    still hands the turn back to the current player instead of spinning.
+    """
+    order = room.turn_order
+    index = order.index(current)
+    for step in range(1, len(order) + 1):
+        candidate = order[(index + step) % len(order)]
+        if candidate == current:
+            return current
+        player: Player = room.players[candidate]
+        if player.skip_next_turn:
+            player.skip_next_turn = False
+            continue
+        return candidate
+    return current

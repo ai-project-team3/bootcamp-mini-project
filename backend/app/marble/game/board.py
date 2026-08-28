@@ -39,13 +39,14 @@ def allocate_stat_tile_counts(weights: dict[str, int]) -> dict[str, int]:
     return dict(zip(STAT_KEYS, counts))
 
 
-def generate_board(stats_a: PersonaStats, stats_b: PersonaStats) -> list[Tile]:
-    weights = {
-        "logic": stats_a.logic + stats_b.logic,
-        "empathy": stats_a.empathy + stats_b.empathy,
-        "drive": stats_a.drive + stats_b.drive,
-        "caution": stats_a.caution + stats_b.caution,
-    }
+def generate_board(*stats: PersonaStats) -> list[Tile]:
+    """Build the board from everyone at the table.
+
+    The tile mix leans toward the traits the room scores highest on, so a room
+    of cautious people gets more caution tiles. Any number of players works —
+    the weights are just a sum.
+    """
+    weights = {key: sum(getattr(s, key) for s in stats) for key in STAT_KEYS}
     counts = allocate_stat_tile_counts(weights)
 
     tiles: list[TileType] = []

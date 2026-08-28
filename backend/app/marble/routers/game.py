@@ -12,7 +12,9 @@ router = APIRouter(prefix="/marble/rooms", tags=["marble-game"])
 def start(room_id: str):
     room = get_room_or_404(room_id)
     if not room.is_full():
-        raise HTTPException(400, "두 명이 모두 참가해야 시작할 수 있습니다")
+        raise HTTPException(
+            400, f"{room.max_players}명이 모두 참가해야 시작할 수 있습니다"
+        )
     try:
         engine.start_game(room)
     except engine.InvalidPhase as exc:

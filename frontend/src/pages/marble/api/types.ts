@@ -54,6 +54,14 @@ export interface RoomState {
   winner_id: string | null;
   chemistry_summary: string | null;
   board_size: number;
+  /** Seats in this room, 2 through 8. */
+  max_players: number;
+  /** Whose persona the open quiz is about — with 3+ players it must be named. */
+  quiz_subject_id: string | null;
+  /** Who the dare is done to. Adult mode only; null in general mode. */
+  forfeit_target_id: string | null;
+  /** Who a chance card just sent to the back of the queue. */
+  skipped_player_id: string | null;
 }
 
 export interface JoinResult {

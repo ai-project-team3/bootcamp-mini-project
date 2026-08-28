@@ -1,4 +1,7 @@
+import { useEffect, useState } from "react";
+
 import type { BenefitCard, ChanceCard, RoomQuiz } from "../api/types";
+import { ForfeitSlot } from "./ForfeitSlot";
 
 interface QuizModalProps {
   quiz: RoomQuiz;
@@ -10,6 +13,10 @@ interface QuizModalProps {
   selectedIndex: number | null;
   assignedForfeit: string | null;
   lastChanceCard: ChanceCard | null;
+  /** Names on the draw reel, in seating order. Empty when no draw is needed. */
+  forfeitCandidates: string[];
+  /** Index in `forfeitCandidates` the reel must land on, or null for no draw. */
+  forfeitWinnerIndex: number | null;
   onAnswer: (choiceIndex: number) => void;
   onForfeitComplete: () => void;
 }
@@ -30,13 +37,24 @@ export function QuizModal({
   selectedIndex,
   assignedForfeit,
   lastChanceCard,
+  forfeitCandidates,
+  forfeitWinnerIndex,
   onAnswer,
   onForfeitComplete,
 }: QuizModalProps) {
+  // Adult mode draws a target for the dare, so the dare text is withheld until
+  // the reel stops — reading it early would spoil the draw.
+  const needsDraw = forfeitWinnerIndex !== null && forfeitCandidates.length > 0;
+  const [drawDone, setDrawDone] = useState(false);
+
+  useEffect(() => {
+    setDrawDone(false);
+  }, [assignedForfeit, forfeitWinnerIndex]);
+
   return (
     <div className="pm-modal-backdrop" role="dialog" aria-modal="true">
       <div className="pm-modal">
-        <p className="pm-eyebrow">상대 성향 퀴즈</p>
+        <p className="pm-eyebrow">성향 퀴즈</p>
         <p className="pm-modal__question">{quiz.question}</p>
         <div className="pm-modal__choices">
           {quiz.choices.map((choice, index) => {
@@ -77,18 +95,31 @@ export function QuizModal({
                 {BENEFIT_REVEAL[lastChanceCard.benefit]}
               </p>
             )}
-            {assignedForfeit && (
+            {assignedForfeit && needsDraw && (
+              <ForfeitSlot
+                names={forfeitCandidates}
+                winnerIndex={forfeitWinnerIndex}
+                onSettled={() => setDrawDone(true)}
+              />
+            )}
+            {assignedForfeit && (!needsDraw || drawDone) && (
               <p className="pm-modal__card pm-modal__card--forfeit">
                 {lastChanceCard?.kind === "penalty" ? "찬스 카드 벌칙 발동! " : "벌칙: "}
+                {needsDraw ? `${forfeitCandidates[forfeitWinnerIndex!]}님에게 — ` : ""}
                 {assignedForfeit}
               </p>
             )}
             {canAnswer ? (
-              <button type="button" className="pm-button pm-button--primary" onClick={onForfeitComplete}>
+              <button
+                type="button"
+                className="pm-button pm-button--primary"
+                onClick={onForfeitComplete}
+                disabled={needsDraw && !drawDone}
+              >
                 {assignedForfeit ? "수행 완료" : "다음으로"}
               </button>
             ) : (
-              <p className="pm-modal__feedback">상대가 진행하기를 기다리는 중...</p>
+              <p className="pm-modal__feedback">다른 사람이 진행하기를 기다리는 중...</p>
             )}
           </>
         )}

@@ -18,7 +18,8 @@ const base = {
   assignedForfeit: null,
   lastChanceCard: null,
   onAnswer: () => {},
-  onForfeitComplete: () => {},
+  forfeitCandidates: [],
+  forfeitWinnerIndex: null,  onForfeitComplete: () => {},
 };
 
 describe("QuizModal", () => {
@@ -89,6 +90,6 @@ describe("QuizModal", () => {
 
   it("tells the watching player to wait after the answer", () => {
     render(<QuizModal {...base} answered canAnswer={false} lastAnswerCorrect selectedIndex={1} />);
-    expect(screen.getByText(/상대가 진행하기를 기다리는 중/)).toBeInTheDocument();
+    expect(screen.getByText(/다른 사람이 진행하기를 기다리는 중/)).toBeInTheDocument();
   });
 });

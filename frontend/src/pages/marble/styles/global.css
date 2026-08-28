@@ -1015,3 +1015,46 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== Seat picker (lobby) ===== */
+.pm-seat-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.pm-seat-picker__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--pm-ink-soft);
+}
+
+.pm-seat-picker__options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pm-seat {
+  min-width: 44px;
+  padding: 10px 0;
+  flex: 1 1 44px;
+  border: 1px solid var(--pm-line);
+  border-radius: 10px;
+  background: var(--pm-surface);
+  color: var(--pm-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pm-seat:hover {
+  border-color: var(--pm-accent);
+}
+
+.pm-seat--selected {
+  border-color: var(--pm-accent);
+  background: var(--pm-accent);
+  color: #fff;
+}

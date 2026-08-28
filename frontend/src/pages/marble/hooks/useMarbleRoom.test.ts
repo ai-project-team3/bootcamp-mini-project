@@ -21,6 +21,10 @@ function roomState(overrides: Partial<RoomState> = {}): RoomState {
     winner_id: null,
     chemistry_summary: null,
     board_size: 12,
+    max_players: 2,
+    quiz_subject_id: null,
+    forfeit_target_id: null,
+    skipped_player_id: null,
     ...overrides,
   };
 }

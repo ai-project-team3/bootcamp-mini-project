@@ -15,10 +15,10 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export function createRoom(contentMode: ContentMode) {
+export function createRoom(contentMode: ContentMode, maxPlayers: number) {
   return request<{ room_id: string }>("/marble/rooms", {
     method: "POST",
-    body: JSON.stringify({ content_mode: contentMode }),
+    body: JSON.stringify({ content_mode: contentMode, max_players: maxPlayers }),
   });
 }
 

@@ -1,0 +1,132 @@
+/* Slot-machine draw for the adult-mode dare target.
+   Every selector is prefixed `pm-`, matching the rest of this game. */
+
+.pm-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* The frame is a generated illustration; its clear window sits at a known spot,
+   measured from the asset: 27.3% / 28.9%, 45.2% x 43.4%. The reel is absolutely
+   positioned into exactly that rectangle. */
+.pm-slot-frame {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1 / 1;
+}
+
+.pm-slot-frame__art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  user-select: none;
+  pointer-events: none;
+}
+
+.pm-slot-window {
+  position: absolute;
+  left: 27.3%;
+  top: 28.9%;
+  width: 45.2%;
+  /* height comes from the component so the row maths stay in one place */
+  overflow: hidden;
+  background: linear-gradient(180deg, #fdf6ec, #f7e9d8);
+  box-shadow: inset 0 8px 16px -10px rgba(60, 20, 40, 0.8),
+    inset 0 -8px 16px -10px rgba(60, 20, 40, 0.8);
+}
+
+.pm-slot-strip {
+  will-change: transform;
+}
+
+.pm-slot-cell {
+  display: flex;
+  color: #4a2338;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pm-font-display, inherit);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--pm-ink, #1a1418);
+  white-space: nowrap;
+}
+
+/* Fade the names as they leave the window so the reel reads as a cylinder. */
+.pm-slot-mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 40%;
+  pointer-events: none;
+}
+
+.pm-slot-mask--top {
+  top: 0;
+  height: 34%;
+  background: linear-gradient(to bottom, rgba(253, 246, 236, 0.96), transparent);
+}
+
+.pm-slot-mask--bottom {
+  bottom: 0;
+  height: 34%;
+  background: linear-gradient(to top, rgba(247, 233, 216, 0.96), transparent);
+}
+
+/* The win line: the middle row of three. */
+.pm-slot-marker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 33.33%;
+  height: 33.34%;
+  pointer-events: none;
+  border-top: 2px solid var(--pm-accent, #c9256b);
+  border-bottom: 2px solid var(--pm-accent, #c9256b);
+  opacity: 0.35;
+}
+
+.pm-slot--settled .pm-slot-marker {
+  opacity: 1;
+  animation: pm-slot-lock 0.45s ease-out;
+}
+
+.pm-slot--settled .pm-slot-cell {
+  color: var(--pm-accent, #c9256b);
+}
+
+.pm-slot-caption {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--pm-ink-soft, #6f6570);
+}
+
+.pm-slot--settled .pm-slot-caption {
+  font-weight: 700;
+  color: var(--pm-accent, #c9256b);
+}
+
+@keyframes pm-slot-lock {
+  0% {
+    box-shadow: 0 0 0 0 var(--pm-accent, #c9256b);
+  }
+  100% {
+    box-shadow: 0 0 0 14px transparent;
+  }
+}
+
+/* Someone who has asked for less motion gets the result, not the theatre. */
+@media (prefers-reduced-motion: reduce) {
+  .pm-slot-strip {
+    transition: none;
+  }
+
+  .pm-slot--settled .pm-slot-marker {
+    animation: none;
+  }
+}

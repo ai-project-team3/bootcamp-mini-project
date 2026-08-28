@@ -41,7 +41,7 @@ describe("MarbleApp", () => {
 
     await waitFor(() => expect(screen.getByText("ABC123")).toBeInTheDocument());
     expect(screen.getByText("대기실")).toBeInTheDocument();
-    expect(client.createRoom).toHaveBeenCalledWith("general");
+    expect(client.createRoom).toHaveBeenCalledWith("general", 2);
   });
 
   it("passes the chosen content mode when creating the room", async () => {
@@ -54,7 +54,7 @@ describe("MarbleApp", () => {
     fireEvent.change(screen.getByLabelText("닉네임"), { target: { value: "민수" } });
     fireEvent.click(screen.getByRole("button", { name: "방 만들기" }));
 
-    await waitFor(() => expect(client.createRoom).toHaveBeenCalledWith("adult"));
+    await waitFor(() => expect(client.createRoom).toHaveBeenCalledWith("adult", 2));
   });
 
   it("joins an existing room by code", async () => {

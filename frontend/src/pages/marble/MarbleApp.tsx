@@ -19,6 +19,7 @@ import { GameOverScreen } from "./components/GameOverScreen";
 import { LobbyScreen } from "./components/LobbyScreen";
 import { WaitingRoom } from "./components/WaitingRoom";
 import "./styles/global.css";
+import { MIN_PLAYERS } from "./constants";
 
 const HOP_TICK_MS = 220;
 
@@ -51,6 +52,7 @@ export function MarbleApp() {
   const hopIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const inviteCode = useMemo(readInviteCode, []);
+  const [maxPlayers, setMaxPlayers] = useState<number>(MIN_PLAYERS);
 
   const themeMode = (state?.content_mode ?? contentMode) === "adult" ? "dark" : "light";
 
@@ -146,11 +148,11 @@ export function MarbleApp() {
   const handleCreate = useCallback(
     (nickname: string) =>
       run(async () => {
-        const { room_id } = await createRoom(contentMode);
+        const { room_id } = await createRoom(contentMode, maxPlayers);
         const joined = await joinRoom(room_id, nickname);
         setSession({ roomId: room_id, playerId: joined.player_id, isHost: joined.is_host });
       }, "방을 만들지 못했어요."),
-    [run, contentMode, setSession]
+    [run, contentMode, maxPlayers, setSession]
   );
 
   const handleJoin = useCallback(
@@ -200,6 +202,26 @@ export function MarbleApp() {
     setActionError(null);
   }, [clearSession]);
 
+  // Who the dare could land on, and where the reel must stop. The server picks
+  // the target; the reel only replays that choice, so a client cannot influence
+  // it — and everyone watching sees the same name come up.
+  const forfeitCandidates = useMemo(
+    () =>
+      state?.forfeit_target_id
+        ? (state?.players ?? [])
+            .filter((p) => p.player_id !== state?.current_player_id)
+            .map((p) => p.nickname)
+        : [],
+    [state?.forfeit_target_id, state?.players, state?.current_player_id],
+  );
+
+  const forfeitWinnerIndex = useMemo(() => {
+    if (!state?.forfeit_target_id) return null;
+    const others = (state?.players ?? []).filter((p) => p.player_id !== state?.current_player_id);
+    const index = others.findIndex((p) => p.player_id === state?.forfeit_target_id);
+    return index >= 0 ? index : null;
+  }, [state?.forfeit_target_id, state?.players, state?.current_player_id]);
+
   if (!session) {
     return (
       <div className="pm-app" data-pm-theme={themeMode}>
@@ -207,6 +229,8 @@ export function MarbleApp() {
           <LobbyScreen
             contentMode={contentMode}
             onContentModeChange={setContentMode}
+            maxPlayers={maxPlayers}
+            onMaxPlayersChange={setMaxPlayers}
             onCreate={handleCreate}
             onJoin={handleJoin}
             initialRoomCode={inviteCode}
@@ -249,6 +273,7 @@ export function MarbleApp() {
   const isMyTurn = state.current_player_id === session.playerId;
   const currentPlayer = state.players.find((p) => p.player_id === state.current_player_id);
   const showQuizModal = state.quiz !== null && (uiStage === "quiz" || uiStage === "feedback");
+
 
   const animatedPositions =
     hoppingPlayerId && displayPosition !== null ? { [hoppingPlayerId]: displayPosition } : undefined;
@@ -310,6 +335,8 @@ export function MarbleApp() {
           selectedIndex={selectedIndex}
           assignedForfeit={state.assigned_forfeit}
           lastChanceCard={state.last_chance_card}
+          forfeitCandidates={forfeitCandidates}
+          forfeitWinnerIndex={forfeitWinnerIndex}
           onAnswer={handleAnswer}
           onForfeitComplete={handleForfeitDone}
         />

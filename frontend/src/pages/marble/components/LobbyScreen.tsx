@@ -2,10 +2,13 @@ import { useState } from "react";
 import type { ContentMode } from "../api/types";
 import tokenA from "../assets/token-a.png";
 import tokenB from "../assets/token-b.png";
+import { PLAYER_COUNT_OPTIONS } from "../constants";
 
 interface LobbyScreenProps {
   contentMode: ContentMode;
   onContentModeChange: (mode: ContentMode) => void;
+  maxPlayers: number;
+  onMaxPlayersChange: (count: number) => void;
   onCreate: (nickname: string) => void;
   onJoin: (roomId: string, nickname: string) => void;
   /** Prefilled from an invite link's ?room= parameter. */
@@ -17,6 +20,8 @@ interface LobbyScreenProps {
 export function LobbyScreen({
   contentMode,
   onContentModeChange,
+  maxPlayers,
+  onMaxPlayersChange,
   onCreate,
   onJoin,
   initialRoomCode = "",
@@ -92,8 +97,27 @@ export function LobbyScreen({
               🌙
             </span>
             <span className="pm-mode-option__title">19금 모드</span>
-            <span className="pm-mode-option__desc">더 과감한 질문과 벌칙 (성인 커플용)</span>
+            <span className="pm-mode-option__desc">더 과감한 질문과 벌칙, 벌칙 받을 사람은 추첨</span>
           </button>
+        </div>
+      )}
+
+      {tab === "create" && (
+        <div className="pm-seat-picker">
+          <span className="pm-seat-picker__label">참여 인원</span>
+          <div className="pm-seat-picker__options" role="group" aria-label="참여 인원">
+            {PLAYER_COUNT_OPTIONS.map((count) => (
+              <button
+                key={count}
+                type="button"
+                className={`pm-seat ${maxPlayers === count ? "pm-seat--selected" : ""}`}
+                aria-pressed={maxPlayers === count}
+                onClick={() => onMaxPlayersChange(count)}
+              >
+                {count}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
