@@ -18,10 +18,10 @@ from ..config import settings
 
 logger = logging.getLogger(__name__)
 
-COMMENT_MAX_LEN = 90
-SUMMARY_MAX_LEN = 40
-REASON_MAX_LEN = 70
-HIGHLIGHT_MAX_LEN = 80
+COMMENT_MAX_LEN = 150
+SUMMARY_MAX_LEN = 60
+REASON_MAX_LEN = 100
+HIGHLIGHT_MAX_LEN = 110
 TIMEOUT_S = 20.0
 
 # 출력에서 이 단어가 하나라도 보이면 통째로 버린다. MBTI를 재탕한 리포트는
@@ -65,6 +65,14 @@ PROMPT_RULES = """문구 규칙(§12) — 하나라도 어기면 안 된다.
    만든다. 단 성격유형 검사 이름이나 네 글자 코드, 그 부분 글자(I/E/N/S/T/
    F/J/P 각각), "내향", "외향", "성향검사" 같은 단어는 절대 쓰지 않는다 —
    성향만 녹이고 이름표는 붙이지 않는다.
+8. 칭호(badges)와 궁합(compat)이 주어지면 최소 하나씩은 코멘트 소재로
+   쓴다 — 칭호는 line2(오늘의 장면)에서 "왜 그 칭호를 받았는지"가 그림처럼
+   보이게 풀어 쓰고, 궁합은 line3(뒤집어 칭찬)에서 등급이 제일 좋은 상대나
+   제일 안 맞는 상대를 이름으로 콕 짚어 언급한다. 궁합 note 문구를 그대로
+   베끼지 말고 이 사람 얘기로 다시 풀어 쓴다.
+9. 길이를 채우려고 같은 말을 늘리지 않는다 — 늘어난 글자 수는 전부 이
+   사람한테만 해당하는 구체적인 장면·디테일에 쓴다. 다른 사람한테 복사해
+   붙여도 말이 되는 문장이면 다시 쓴다.
 모든 문장은 '~습니다'체로 끝낸다."""
 
 
@@ -101,11 +109,13 @@ def generate(context: str, expected_nicknames: set[str]) -> Optional[GeneratedRe
         "톤: 익살스럽게 비꼬다가 마지막에 칭찬 한 줌. 진지한 성격 검사가 아니라 "
         "서로 보여주며 웃는 물건이다.\n\n"
         f"{PROMPT_RULES}\n\n"
-        "players: 각 사람마다 line1(찌르는 관찰) · line2(오늘 실제로 있었던 장면) · "
-        "line3(line1에서 깐 그 행동을 뒤집어 칭찬) 세 줄. 각 90자 이내.\n"
-        "team_summary: 이 팀을 한 줄로. 40자 이내.\n"
-        "team_reasons: 등급이 그렇게 나온 이유 4개. 각 70자 이내.\n"
-        "highlights: 오늘의 장면 3개. 각 80자 이내.\n"
+        "players: 각 사람마다 line1(찌르는 관찰) · line2(오늘 실제로 있었던 장면 —"
+        " 칭호를 받은 이유가 드러나야 함) · line3(line1을 뒤집어 칭찬하면서 궁합"
+        f" 상대 이름도 짚기) 세 줄. 각 {COMMENT_MAX_LEN}자 이내, 짧게 끝내지 말고"
+        " 여유를 채워 구체적으로 쓴다.\n"
+        f"team_summary: 이 팀을 한 줄로. {SUMMARY_MAX_LEN}자 이내.\n"
+        f"team_reasons: 등급이 그렇게 나온 이유 4개. 각 {REASON_MAX_LEN}자 이내.\n"
+        f"highlights: 오늘의 장면 3개. 각 {HIGHLIGHT_MAX_LEN}자 이내.\n"
     )
     started = time.monotonic()
     try:
@@ -149,12 +159,19 @@ def build_context(
     lines.append("")
     for p in players:
         a = p["abilities"]
+        compat = p.get("compat") or []
+        compat_line = (
+            " / ".join(f"{c['nickname']} {c['grade']}({c['tag']}) — {c['note']}" for c in compat)
+            if compat
+            else "-"
+        )
         lines.append(
             f"[{p['nickname']}] {p['mbti'] or '-'} · 유형 {p['type_name']}\n"
             f"  능력치 주도 {a['DOM']:.1f} / 순발 {a['SPD']:.1f} / 표현 {a['EXP']:.1f} /"
             f" 공감 {a['EMP']:.1f} / 관찰 {a['OBS']:.1f}\n"
             f"  첫인상 처음 {p['pre_votes']}표 → 나중 {p['post_votes']}표\n"
             f"  본인이 고른 자기 설명: {p['trait'] or '-'} ({p['trait_note'] or '-'})\n"
-            f"  맞히기 {p['hits']}/{p['tries']} · 칭호 {', '.join(p['badges']) or '-'}"
+            f"  맞히기 {p['hits']}/{p['tries']} · 칭호 {', '.join(p['badges']) or '-'}\n"
+            f"  궁합 {compat_line}"
         )
     return "\n".join(lines)
