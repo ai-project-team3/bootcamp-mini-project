@@ -25,3 +25,17 @@ export const STANDALONE_GAMES = [
     standalone: true,
   },
 ]
+
+/**
+ * Party games that need no room.
+ *
+ * These are played by passing one phone around, so they work with the built-in
+ * demo roster and never touch the demo-room API. Everything else — the persona
+ * games, 라이어게임 and 금지어 게임 — depends on each player having their own
+ * screen, so those still start from the demo room.
+ */
+export const ROOM_FREE_PARTY_GAMES = ['name-chain', 'category-market', 'charades', 'telepathy']
+
+export function isRoomFree(gameId) {
+  return ROOM_FREE_PARTY_GAMES.includes(gameId)
+}

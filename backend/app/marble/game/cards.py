@@ -51,7 +51,13 @@ def needs_forfeit_target(content_mode: ContentMode) -> bool:
     return content_mode is ContentMode.ADULT
 
 
-def draw_chance_card(content_mode: ContentMode) -> ChanceCardResult:
-    if random.random() < BENEFIT_PROBABILITY:
+def draw_chance_card(content_mode: ContentMode, benefits_only: bool = False) -> ChanceCardResult:
+    """Draw a chance card.
+
+    `benefits_only` is for chance tiles reached by a correct answer: getting the
+    question right and being handed a dare anyway reads as a bug to the player,
+    so that path never draws a penalty.
+    """
+    if benefits_only or random.random() < BENEFIT_PROBABILITY:
         return ChanceCardResult(kind="benefit", benefit=random.choice(BENEFIT_CARDS))
     return ChanceCardResult(kind="penalty", forfeit_text=pick_forfeit(content_mode))

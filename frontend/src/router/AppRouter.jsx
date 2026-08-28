@@ -19,6 +19,7 @@ import ResultHubPage from '../pages/hub/ResultHubPage'
 import PersonalReportPage from '../pages/report/PersonalReportPage'
 import TeamReportPage from '../pages/report/TeamReportPage'
 import GamesHubPage from '../pages/gamesHub/GamesHubPage'
+import SoloPartyGamePage from '../pages/partyGamesDemo/SoloPartyGamePage'
 import MafiaGamePage from '../pages/minigames/MafiaGamePage'
 import MarbleGamePage from '../pages/minigames/MarbleGamePage'
 
@@ -49,6 +50,8 @@ export default function AppRouter() {
       {/* 모든 게임을 한 곳에서 고르는 화면. 데모룸 게임은 여기서 /games/demo 로,
           자체 방을 쓰는 미니게임은 바로 아래 두 경로로 들어간다. */}
       <Route path="/games" element={<GamesHubPage />} />
+      {/* Party games that need no room: one phone, no server. */}
+      <Route path="/games/party/:gameId" element={<SoloPartyGamePage />} />
       <Route path="/games/mafia" element={<MafiaGamePage />} />
       <Route path="/games/marble" element={<MarbleGamePage />} />
       <Route path="*" element={<Navigate to="/" replace />} />

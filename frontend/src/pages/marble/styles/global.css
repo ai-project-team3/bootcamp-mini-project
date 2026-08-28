@@ -1217,3 +1217,42 @@
     font-size: 0.85rem;
   }
 }
+
+/* ===== Board wrapper =====
+   The board is a strict 4x4 grid, so the roll button and turn caption sit in a
+   wrapper below it rather than inside the hub, which is only half as wide and
+   used to have them spilling out over the tiles. */
+.pm-board-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pm-space-3);
+  width: 100%;
+}
+
+/* The grid keeps its own square via aspect-ratio; without this the column
+   flex parent stretches it and the tiles stop being square. */
+.pm-board-wrap > .pm-board {
+  /* A flex item's automatic minimum size is its content, which would let the
+     hub's contents stretch the grid taller than wide. Releasing it lets
+     aspect-ratio keep the board square. */
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+.pm-board__footer {
+  display: flex;
+  justify-content: center;
+}
+
+.pm-dice-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--pm-space-2);
+  width: 100%;
+}
+
+.pm-dice-controls .pm-dice__button {
+  width: 100%;
+  max-width: 260px;
+}

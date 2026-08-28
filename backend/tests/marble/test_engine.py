@@ -200,15 +200,22 @@ class TestChanceCards:
             engine.submit_answer(room, "a", 0)
         assert room.players["b"].skip_next_turn is True
 
-    def test_penalty_card_assigns_a_forfeit_even_though_the_answer_was_right(self):
+    def test_a_correct_answer_never_ends_in_a_dare(self):
+        """Getting the question right and being handed a dare anyway reads as a
+        bug, so a chance tile reached by a correct answer draws benefits only."""
         room = staged_quiz(make_room(), roll=3, tile_type=TileType.CHANCE)
-        with patch(
-            "app.marble.game.engine.draw_chance_card",
-            return_value=ChanceCardResult(kind="penalty", forfeit_text="벌칙!"),
-        ):
-            engine.submit_answer(room, "a", 0)
+        engine.submit_answer(room, "a", 0)
         assert room.last_answer_correct is True
-        assert room.assigned_forfeit == "벌칙!"
+        assert room.assigned_forfeit is None
+        assert room.forfeit_target_id is None
+        assert room.last_chance_card.kind == "benefit"
+
+    def test_the_chance_draw_after_a_correct_answer_asks_for_benefits_only(self):
+        room = staged_quiz(make_room(), roll=3, tile_type=TileType.CHANCE)
+        with patch("app.marble.game.engine.draw_chance_card") as draw:
+            draw.return_value = ChanceCardResult(kind="benefit", benefit=BenefitCard.EXTRA_HOP)
+            engine.submit_answer(room, "a", 0)
+        assert draw.call_args.kwargs.get("benefits_only") is True
 
 
 class TestAdvanceTurn:

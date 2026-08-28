@@ -8,6 +8,7 @@ import GameDemoRoomHero from '../../components/common/GameDemoRoomHero'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import { useRoomFlow } from '../../context/RoomFlowContext'
+import { copyText } from '../../shared/clipboard'
 import {
   canStartDemoRoom,
   DEMO_ROOM_MAX_PLAYERS,
@@ -24,6 +25,13 @@ export default function GameDemoRoomPage() {
   const [players, setPlayers] = useState([])
   const [error, setError] = useState('')
   const [starting, setStarting] = useState(false)
+  const [copied, setCopied] = useState(null)
+
+  const handleCopyInvite = async () => {
+    const ok = await copyText(inviteUrl)
+    setCopied(ok)
+    window.setTimeout(() => setCopied(null), 2600)
+  }
 
   useEffect(() => {
     if (!playerId || roomCode !== code) return
@@ -88,7 +96,10 @@ export default function GameDemoRoomPage() {
         <div>
           <small>초대코드</small>
           <strong>{code}</strong>
-          <button type="button" onClick={() => navigator.clipboard?.writeText(inviteUrl)}>초대 링크 복사</button>
+          <button type="button" onClick={handleCopyInvite}>
+            {copied === true ? '복사됐어요!' : copied === false ? '복사 실패 — 아래 주소를 길게 눌러 복사하세요' : '초대 링크 복사'}
+          </button>
+          <small className="game-room-invite-url">{inviteUrl}</small>
         </div>
       </Card>
 

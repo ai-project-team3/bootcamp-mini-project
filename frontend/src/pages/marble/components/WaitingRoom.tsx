@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { RoomState } from "../api/types";
 import { seatArt } from "./seatArt";
 import { PLAYER_COUNT_OPTIONS } from "../constants";
+import { copyText } from "../../../shared/clipboard";
 
 
 interface WaitingRoomProps {
@@ -38,14 +39,18 @@ export function WaitingRoom({
   const isFull = joined >= seatCount;
   const remaining = Math.max(seatCount - joined, 0);
 
+  const [copyFailed, setCopyFailed] = useState(false);
+
   const copy = async (text: string, kind: "code" | "link") => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(kind);
-      window.setTimeout(() => setCopied(null), 1600);
-    } catch {
-      // Clipboard can be blocked; the code stays visible for manual copying.
-    }
+    // Over the LAN the page is not a secure context, so navigator.clipboard is
+    // missing; copyText falls back and reports whether it actually worked.
+    const ok = await copyText(text);
+    setCopyFailed(!ok);
+    setCopied(ok ? kind : null);
+    window.setTimeout(() => {
+      setCopied(null);
+      setCopyFailed(false);
+    }, 2600);
   };
 
   return (
@@ -73,6 +78,9 @@ export function WaitingRoom({
           {copied === "link" ? "복사됨!" : "초대 링크 복사"}
         </button>
         {copied === "code" && <span className="pm-waiting__copied">코드가 복사됐어요</span>}
+        {copyFailed && (
+          <span className="pm-waiting__copied">복사가 안 돼요. 방 코드를 직접 알려주세요.</span>
+        )}
       </div>
 
       <div className="pm-waiting__tally">
