@@ -37,12 +37,18 @@ class DemoRoomLaunchError(DemoRoomError):
     pass
 
 
+#: Nickname prefix for seats filled by the "혼자 해보기" button, so a bot is
+#: recognisable in every roster it appears in.
+TEST_BOT_NICKNAME_PREFIX = '테스트봇'
+
+
 @dataclass(frozen=True)
 class DemoPlayer:
     id: str
     nickname: str
     seat_no: int
     is_host: bool
+    is_bot: bool = False
 
 
 @dataclass(frozen=True)
@@ -110,6 +116,35 @@ class DemoRoomStore:
             player = DemoPlayer(str(uuid.uuid4()), nickname.strip(), len(room.players) + 1, False)
             room.players.append(player)
             return player
+
+    def fill_test_players(self, code: str, player_id: str, count: int) -> DemoRoom:
+        """Add seats nobody has to hold, so one person can test the whole flow.
+
+        Demo-only. A real group arrives through the invite code; this exists
+        because 마피아 needs four people before it will start and nobody has
+        four phones to hand. The bots play themselves once a game begins — see
+        `mafia/game/bots.py` and `marble/game/bots.py`.
+        """
+        with self._lock:
+            room = self._require_room(code)
+            if room.status != 'WAITING':
+                raise DemoRoomStartError('대기실에서만 인원을 채울 수 있습니다')
+            host = next((player for player in room.players if player.id == player_id), None)
+            if host is None or not host.is_host:
+                raise DemoRoomAuthorizationError('방장만 인원을 채울 수 있습니다')
+            bot_number = sum(1 for player in room.players if player.is_bot)
+            for _ in range(max(count, 0)):
+                if not demo_room_has_capacity(len(room.players)):
+                    break
+                bot_number += 1
+                room.players.append(DemoPlayer(
+                    str(uuid.uuid4()),
+                    f'{TEST_BOT_NICKNAME_PREFIX}{bot_number}',
+                    len(room.players) + 1,
+                    False,
+                    is_bot=True,
+                ))
+            return room
 
     def start_room(self, code: str, player_id: str) -> DemoRoom:
         with self._lock:

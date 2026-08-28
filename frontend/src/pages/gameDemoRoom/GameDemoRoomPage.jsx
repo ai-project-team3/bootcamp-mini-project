@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getDemoPlayers, getDemoRoom, startDemoRoom } from '../../api/demoRooms'
+import { fillDemoTestPlayers, getDemoPlayers, getDemoRoom, startDemoRoom } from '../../api/demoRooms'
 import Button from '../../components/common/Button'
 import GameDemoRoomHero from '../../components/common/GameDemoRoomHero'
 import PhoneFrame from '../../components/layout/PhoneFrame'
@@ -22,6 +22,7 @@ export default function GameDemoRoomPage() {
   const [players, setPlayers] = useState([])
   const [error, setError] = useState('')
   const [starting, setStarting] = useState(false)
+  const [filling, setFilling] = useState(false)
 
   useEffect(() => {
     if (!playerId || roomCode !== code) return
@@ -71,6 +72,21 @@ export default function GameDemoRoomPage() {
     }
   }
 
+  // Demo-only: one person cannot hold four phones, and 마피아 will not start
+  // below four. The bots play themselves once a game begins.
+  const handleFill = async (count) => {
+    setFilling(true)
+    setError('')
+    try {
+      await fillDemoTestPlayers(code, playerId, count)
+      setPlayers(await getDemoPlayers(code))
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setFilling(false)
+    }
+  }
+
   const inviteUrl = `${window.location.origin}/games/demo/join/${code}`
   const canStart = canStartDemoRoom({ isHost, playerCount: players.length })
 
@@ -89,6 +105,28 @@ export default function GameDemoRoomPage() {
           isMe: player.id === playerId,
         }))}
         error={error}
+        hostTools={isHost ? (
+          <>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => handleFill(1)}
+              disabled={filling || players.length >= DEMO_ROOM_MAX_PLAYERS}
+            >
+              {filling ? '채우는 중...' : '테스트 인원 한 명 추가 (혼자 해볼 때)'}
+            </button>
+            {players.length < 4 && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => handleFill(4 - players.length)}
+                disabled={filling}
+              >
+                4명까지 채우기 (마피아 최소 인원)
+              </button>
+            )}
+          </>
+        ) : null}
         footer={isHost ? (
           <Button onClick={handleStart} disabled={!canStart || starting}>
             {starting ? '여는 중...' : players.length < DEMO_ROOM_MIN_PLAYERS ? '한 명 더 기다려주세요' : '게임 고르기'}

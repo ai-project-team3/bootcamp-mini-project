@@ -19,6 +19,10 @@ class GamePhase(str, Enum):
 class Player:
     player_id: str
     nickname: str
+    #: A seat filled by the demo's "혼자 해보기" button rather than a person.
+    #: `game/bots.py` votes and acts at night for these, so a solo tester is
+    #: never waiting on somebody who does not exist.
+    is_bot: bool = False
     is_alive: bool = True
     role: str | None = None
     assigned_score: float | None = None

@@ -35,10 +35,14 @@ class LaunchablePlayer:
     id: str
     nickname: str
     is_host: bool
+    is_bot: bool = False
 
 
-#: game id -> (nicknames, host_index, options) -> (room_id, player_ids in order)
-_LAUNCHERS: dict[str, Callable[[list[str], int, dict[str, str] | None], tuple[str, list[str]]]] = {
+#: game id -> (nicknames, host_index, options, bots) -> (room_id, player_ids)
+_LAUNCHERS: dict[
+    str,
+    Callable[[list[str], int, dict[str, str] | None, list[bool] | None], tuple[str, list[str]]],
+] = {
     'mafia': mafia_handoff.create_room_for,
     'marble': marble_handoff.create_room_for,
 }
@@ -69,7 +73,10 @@ def launch(
     host_index = next((i for i, player in enumerate(players) if player.is_host), 0)
     try:
         room_id, game_player_ids = launcher(
-            [player.nickname for player in players], host_index, options
+            [player.nickname for player in players],
+            host_index,
+            options,
+            [player.is_bot for player in players],
         )
     except (mafia_handoff.MafiaHandoffError, marble_handoff.MarbleHandoffError) as error:
         # The games speak for themselves about their own size limits.

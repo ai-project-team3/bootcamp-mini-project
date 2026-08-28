@@ -36,23 +36,28 @@ def create_room_for(
     nicknames: list[str],
     host_index: int = 0,
     options: dict[str, str] | None = None,
+    bots: list[bool] | None = None,
 ) -> tuple[str, list[str]]:
     """Seat a whole group in a new mafia room.
 
     Returns the room code and one player id per nickname, in the same order, so
     the caller can hand each person their own id without exposing anyone else's.
     `options` is the per-game settings the host chose; mafia's room size comes
-    from the group itself, so there is nothing here for it to read yet.
+    from the group itself, so there is nothing here for it to read yet. `bots`
+    marks, per nickname, the seats the demo filled rather than a person.
     """
     check_player_count(len(nicknames))
     if not 0 <= host_index < len(nicknames):
         raise MafiaHandoffError("방장을 찾을 수 없어요")
 
+    flags = bots or [False] * len(nicknames)
     room = Room(room_id=_new_room_id(), player_count=len(nicknames))
     player_ids: list[str] = []
-    for nickname in nicknames:
+    for nickname, is_bot in zip(nicknames, flags):
         player_id = str(uuid.uuid4())
-        room.players[player_id] = Player(player_id=player_id, nickname=nickname)
+        room.players[player_id] = Player(
+            player_id=player_id, nickname=nickname, is_bot=is_bot
+        )
         player_ids.append(player_id)
     room.host_player_id = player_ids[host_index]
     store.create(room)
