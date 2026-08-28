@@ -1,0 +1,37 @@
+.phone {
+  width: 100%;
+  max-width: 380px;
+  min-height: 720px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 18px 28px;
+}
+
+/* Dark shell for screens with a dark palette of their own. Keeping the frame
+   in the app's light surface would ring a bright border around a night scene. */
+.phone--dark {
+  background: #0b0e16;
+  border-color: #2a3346;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.phone--dark .topbar-title,
+.phone--dark .topbar-back {
+  color: #edeff4;
+}
+
+/* The games paint their own background edge to edge inside the shell. */
+.phone--dark .phone-body {
+  padding: 0;
+}

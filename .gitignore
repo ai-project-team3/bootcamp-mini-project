@@ -18,7 +18,7 @@ frontend/tsconfig.tsbuildinfo
 # OS / editor
 .DS_Store
 Thumbs.db
-.idea/
 .vscode/*
 !.vscode/extensions.json
+.idea/
 *.log

@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.standalone import app
+from app.main import app
 from app.mafia.store import store
 from app.mafia.game import state_machine
 from app.mafia.models.room import GamePhase

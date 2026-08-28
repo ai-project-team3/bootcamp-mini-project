@@ -1,0 +1,22 @@
+.hub-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 40px;
+}
+
+.hub-title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 1.6rem;
+  margin: 0;
+  text-align: center;
+}
+
+.hub-sub {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 0 0 24px;
+  text-align: center;
+}

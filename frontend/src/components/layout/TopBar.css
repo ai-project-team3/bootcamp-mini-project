@@ -1,0 +1,33 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+  margin-bottom: 12px;
+}
+
+.topbar-back {
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  color: var(--ink);
+  padding: 4px 6px;
+  border-radius: 999px;
+}
+
+.topbar-back:hover {
+  background: var(--line);
+}
+
+.topbar-back-spacer {
+  width: 26px;
+  display: inline-block;
+}
+
+.topbar-title {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+
+.topbar-action { margin-left: auto; }

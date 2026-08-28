@@ -1,0 +1,22 @@
+.demo-flavor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin: 10px 0 12px;
+}
+
+.demo-flavor button {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.demo-flavor button.on {
+  border-color: var(--hot);
+  background: var(--hot-soft);
+  color: var(--hot);
+}

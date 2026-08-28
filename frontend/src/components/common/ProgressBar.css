@@ -1,0 +1,28 @@
+.pprog {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.pprog-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.pprog-fill {
+  height: 100%;
+  background: var(--hot);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.pprog-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}

@@ -34,7 +34,12 @@ function readInviteCode(): string {
   }
 }
 
-export function MarbleApp() {
+interface MarbleAppProps {
+  /** Lets the host shell follow the room's palette (일반=light, 19금=dark). */
+  onToneChange?: (tone: "light" | "dark") => void;
+}
+
+export function MarbleApp({ onToneChange }: MarbleAppProps = {}) {
   const { session, setSession, clearSession } = useMarbleSession();
   const { state, error: pollError } = useMarbleRoom(session?.roomId ?? null);
 
@@ -55,7 +60,12 @@ export function MarbleApp() {
   const inviteCode = useMemo(readInviteCode, []);
   const [maxPlayers, setMaxPlayers] = useState<number>(MIN_PLAYERS);
 
-  const themeMode = (state?.content_mode ?? contentMode) === "adult" ? "dark" : "light";
+  const themeMode: "light" | "dark" =
+    (state?.content_mode ?? contentMode) === "adult" ? "dark" : "light";
+
+  useEffect(() => {
+    onToneChange?.(themeMode);
+  }, [themeMode, onToneChange]);
 
   useEffect(() => {
     return () => {

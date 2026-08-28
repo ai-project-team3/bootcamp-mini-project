@@ -1,0 +1,92 @@
+.game-room-error {
+  margin: 10px 0;
+  color: var(--hot);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.game-room-invite-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.game-room-invite-card > div {
+  display: grid;
+  gap: 6px;
+}
+
+.game-room-invite-card small {
+  color: var(--ink-soft);
+}
+
+.game-room-invite-card strong {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 26px;
+  letter-spacing: .08em;
+}
+
+.game-room-invite-card button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--hot);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.game-room-player-section {
+  margin: 24px 0;
+}
+
+.game-room-player-section h2 {
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.game-room-player-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.game-room-player-list li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.game-room-player-list em,
+.game-room-player-list small {
+  margin-left: auto;
+  color: var(--hot);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.game-room-player-list em + small {
+  margin-left: 0;
+}
+
+@media (max-width: 420px) {
+  .game-room-invite-card {
+    gap: 12px;
+  }
+
+  .game-room-invite-card svg {
+    width: 100px;
+    height: 100px;
+  }
+}

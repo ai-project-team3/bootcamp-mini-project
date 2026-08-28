@@ -143,7 +143,7 @@ def test_the_host_can_resize_the_room_before_it_starts():
     from fastapi.testclient import TestClient
 
     from app.marble.store import store
-    from app.standalone import app
+    from app.main import app
 
     store.clear()
     client = TestClient(app)
@@ -166,7 +166,7 @@ def test_the_room_cannot_shrink_below_the_people_already_in_it():
     from fastapi.testclient import TestClient
 
     from app.marble.store import store
-    from app.standalone import app
+    from app.main import app
 
     store.clear()
     client = TestClient(app)
@@ -186,7 +186,7 @@ def test_the_room_cannot_be_resized_once_the_game_is_running():
     from fastapi.testclient import TestClient
 
     from app.marble.store import store
-    from app.standalone import app
+    from app.main import app
 
     store.clear()
     client = TestClient(app)
@@ -206,7 +206,7 @@ def test_an_out_of_range_room_size_is_rejected():
     from fastapi.testclient import TestClient
 
     from app.marble.store import store
-    from app.standalone import app
+    from app.main import app
 
     store.clear()
     client = TestClient(app)

@@ -1,137 +1,132 @@
-# 페르소나 미니게임 (miniproject)
+# 얼음땡
 
-6인 팀 미니프로젝트의 **미니게임 모듈 저장소**. 성향(페르소나) 데이터를 활용하는
-두 개의 미니게임을 담는다. 두 게임은 합쳐지는 것이 아니라 **독립된 모듈로 나란히**
-존재한다.
-
-| 미니게임 | 인원 | 설명 | 위치 |
-|---|---|---|---|
-| **마피아 게임** | 4~6인 | 성향으로 직업이 정해지는 아이스브레이킹 마피아. 최후변론·찬반투표까지 타이머로 자동 진행 | `backend/app/mafia/`, `frontend/src/pages/mafia/` |
-| **커플 브루마블** | 2인 | 성향 기반 1대1 연인 보드게임. 12칸 보드, 퀴즈·찬스카드, 케미 총평 | `backend/app/marble/`, `frontend/src/pages/marble/` |
+팀 프로젝트를 막 시작한 5명이 18분짜리 아이스브레이킹을 함께 하면, 각자의 캐릭터 카드와
+팀 리포트가 나오는 웹 서비스입니다. 기획안(`ai-project-team3/-` 저장소의
+`얼음땡-기획안.md`)의 진행 순서·능력치 산출식·유형/칭호/궁합/팀등급 계산까지 실제로
+구현되어 있습니다.
 
 ## 스택
 
-- **Frontend**: React 18 + Vite + TypeScript, Vitest
-- **Backend**: FastAPI + Pydantic (상태는 인메모리, DB 없음)
+- **Frontend**: React 19 + Vite, react-router-dom
+- **Backend**: FastAPI, SQLAlchemy
+- **DB**: MariaDB
 
-## 실행
+## 진행 순서 (기획안 §4, §14)
 
-가장 간단한 방법은 저장소 루트의 **`start.bat`** 실행이다. 백엔드(8000)와
-프론트엔드(5173)를 함께 띄우고 브라우저를 연다.
+```
+/                         시작 (닉네임·성별·MBTI, 방 만들기 / 코드로 참여)
+  → /room/create           방 만들기 (QR·초대코드)
+  → /join/:code             초대코드로 참여
+  → /room/:code/waiting     대기실 (5명이 모이면 호스트가 시작)
+  → /room/:code/game        공통 게임 화면 — 첫인상 투표①, 이지선다 8문항,
+                             첫인상 투표②, 유형 맞히기를 이 화면 하나가 담당
+  → /room/:code/statements  둘은 진실, 하나는 거짓 (문장 입력 + 거짓 찾기)
+  → /room/:code/hub         결과 허브
+  → /room/:code/report/me   개인 리포트
+  → /room/:code/report/team 팀 리포트
+```
 
-직접 띄우려면:
+전원이 제출하면 호스트 클릭 없이 서버가 자동으로 다음 단계로 넘깁니다(짧은 주기
+폴링 기반, WebSocket 미사용).
+
+## 실행 방법
+
+### Frontend
 
 ```bash
-# 백엔드
-python -m venv .venv
-.venv\Scripts\activate            # Windows
-pip install -r backend/requirements.txt
-cd backend
-uvicorn app.standalone:app --reload --host 0.0.0.0
-
-# 프론트엔드 (다른 터미널)
 cd frontend
 npm install
-npm run dev -- --host 0.0.0.0
+npm run dev
 ```
 
-브라우저에서 게임을 고른다:
-
-- 마피아 게임 → <http://localhost:5173/#/mafia>
-- 커플 브루마블 → <http://localhost:5173/#/marble>
-
-### 여러 기기에서 함께 플레이
-
-같은 와이파이에 있으면 각자 휴대폰에서 **`http://<이 PC의 IP>:5173`** 으로 접속하면
-된다. 프론트엔드는 자기를 내려준 주소를 그대로 API 주소로 쓰고(`src/shared/apiBase.ts`),
-백엔드 CORS도 사설망 대역을 허용하므로 별도 설정이 필요 없다. 배포 시에는
-`VITE_API_BASE` 로 API 주소를 지정한다.
-
-## 테스트
+### Backend
 
 ```bash
-cd backend && pytest        # 164개
-cd frontend && npm test     # 158개
+cd backend
+python -m venv .venv
+.venv/Scripts/activate   # Windows
+pip install -r requirements.txt
+cp .env.example .env     # DB 접속 정보 수정
+python -m app.init_db    # 테이블 생성 (최초 1회 / 스키마 변경 시)
+uvicorn app.main:app --reload
 ```
+
+### MariaDB (선택 — docker-compose)
+
+```bash
+docker compose up -d
+```
+
+MariaDB 컨테이너가 뜬 뒤 `python -m app.init_db`를 실행하면 `rooms`, `players`,
+`answers`, `statements`, `guesses`, `abilities`, `reports` 테이블이 생성됩니다.
 
 ## 디렉터리 구조
 
-두 게임 모두 CrewVerse의 백엔드 골격(`models` / `schemas` / `routers` / `utils`)을
-자기 패키지 **안에서** 따르고, 화면은 CrewVerse 방식대로 화면마다 폴더 하나에
-컴포넌트 + 전용 CSS + 테스트를 함께 둔다.
-
 ```
-backend/
-  app/
-    standalone.py     로컬 실행용 진입점 (합친 뒤에는 CrewVerse의 app/main.py가 대신함)
-    mafia/            마피아 게임 전체 — 모든 경로가 /mafia/... 로 네임스페이스됨
-      __init__.py     routers 목록 export
-      config.py  constants.py  store.py
-      models/  schemas/  routers/  utils/
-      game/  roles/  persona/  validation/
-    marble/           커플 브루마블 전체 — 모든 경로가 /marble/...
-      __init__.py  store.py
-      models/  schemas/  routers/  utils/  game/  persona/
-  tests/
-    mafia/  marble/
-  requirements.txt
 frontend/
   src/
-    main.tsx          로컬 실행용 진입점 + 게임 선택 화면 (합칠 때 버림)
-    standalone.css    로컬 실행용 페이지 리셋 (합칠 때 버림)
-    shared/apiBase.ts API 주소 결정
-    pages/
-      mafia/          MafiaApp.tsx + 화면별 폴더(home, waiting, roleReveal, day,
-                      finalDefense, executionVote, night, result) + api/hooks/
-                      utils/assets/components/styles
-      marble/         MarbleApp.tsx + components/ + api/hooks/assets/styles
-docs/                 설계 문서 및 구현 계획
+    pages/        화면별 컴포넌트 (기능마다 폴더 분리)
+    components/   공통 UI (layout, common)
+    context/      화면 간 공유 상태 (닉네임·성별·MBTI·방코드·playerId)
+    data/         문항·유형 등 정적 게임 콘텐츠
+    router/       라우트 정의
+    styles/       디자인 토큰(theme.css) + 전역 스타일
+backend/
+  app/
+    models/       SQLAlchemy 모델 (Room, Player, Answer, Statement, Guess, Ability, Report)
+    schemas/      Pydantic 요청/응답 스키마
+    routers/      엔드포인트 (health, rooms, players, answers, impressions,
+                   statements, type_guess, reports)
+    content/      문항·문구 사전 (기획안 §4-2·§4-3·§11)
+    services/     능력치·유형·칭호·궁합·팀등급 산출 로직 (기획안 §5~§9)
+    config.py     환경변수 설정
+    database.py   MariaDB 연결/세션
 ```
 
-## CrewVerse에 합칠 때
+## 기획안 대비 정한 기본값
 
-두 게임 모두 CrewVerse 파일을 **하나도 건드리지 않도록** 격리되어 있다.
-경로는 `/mafia/`·`/marble/` 로, CSS는 각 게임의 루트 클래스(`.mafia-app`,
-`.pm-app`) 아래로 스코프되어 있다.
+기획안이 확정하지 않고 남겨둔 항목(§17)은 아래처럼 임시로 채워뒀습니다. 코드 주석에도
+표시되어 있으니 바꾸기 쉽습니다.
 
-1. **백엔드**: `backend/app/mafia/` 와 `backend/app/marble/` 폴더를 복사하고,
-   CrewVerse의 `app/main.py` 에 다음을 추가한다.
+| 항목 | 기본값 |
+|---|---|
+| O1 유형 8종 색·심볼 | `backend/app/constants.py`의 `TYPES`에 테마 팔레트 기반으로 임시 배정 |
+| O2 문장 입력 글자 수 상한 | 60자 |
+| O3 코멘트 생성 | LLM 미연동, `content/comments.py` 사전 문장 그대로 사용 |
+| O4 결과 링크 유효기간 | 없음(무기한) |
 
-   ```python
-   from app.mafia import routers as mafia_routers
-   from app.marble import routers as marble_routers
+궁합 S/A/B, 팀등급(SSS~S) 4지표 "상위" 판정 컷오프도 기획안에 구체적인 수치가 없어
+`services/scoring.py`에 임의로 정해뒀습니다(주석 참고).
 
-   for router in (*mafia_routers, *marble_routers):
-       app.include_router(router)
-   ```
+## 부가 미니게임 — 마피아 · 커플 브루마블
 
-2. **프론트엔드**: `src/pages/mafia/` 와 `src/pages/marble/` 폴더를 복사하고,
-   `AppRouter.jsx` 에 라우트 두 개를 추가한다. `MafiaApp`/`MarbleApp` 은 각자
-   화면 전환을 스스로 처리하므로 감싸는 쪽에서 할 일이 없다.
+기획안 §17의 "페르소나 이후 게임"에 해당하는 별도 파트입니다. 본 게임(얼음땡)과
+코드가 섞이지 않도록 각자 폴더 안에 격리되어 있습니다.
 
-3. **손봐야 하는 파일** — 앱당 하나뿐이라 자동으로 합쳐지지 않는다:
-   `backend/requirements.txt`(의존성 합집합), `frontend/package.json`,
-   `frontend/package-lock.json`, `frontend/index.html`(폰트 링크 합치기).
-   `backend/app/__init__.py` 는 양쪽 다 빈 파일이라 문제없다.
+| 게임 | 인원 | 경로 | 코드 |
+|---|---|---|---|
+| **마피아** | 4~8인 | `/games/mafia` | `backend/app/mafia/`, `frontend/src/pages/mafia/` |
+| **커플 브루마블** | 2~8인 | `/games/marble` | `backend/app/marble/`, `frontend/src/pages/marble/` |
 
-4. **버리는 파일**: `backend/app/standalone.py`, `frontend/src/main.tsx`,
-   `frontend/src/standalone.css` — 전부 로컬 실행용이다.
+- API는 `/mafia/...`, `/marble/...` 로 네임스페이스되어 본 게임의 `/rooms`, 데모의
+  `/demo/rooms` 와 겹치지 않습니다.
+- CSS는 각 게임의 루트 클래스(`.mafia-app`, `.pm-app`) 아래로 스코프되어 있어
+  공용 디자인 토큰과 서로 영향을 주지 않습니다.
+- 성향 데이터는 어댑터(`persona/provider.py`)를 통해 들어옵니다. 실제 페르소나 API가
+  준비되면 그 구현체만 교체하면 되고 게임 로직은 그대로입니다.
+- 두 게임 모두 인메모리 방 저장소를 쓰며 DB를 사용하지 않습니다.
 
-## 실제 페르소나 데이터 연동 시
+### 미니게임 테스트
 
-두 게임 모두 어댑터 패턴으로 데이터 출처를 분리해 두었다. 게임 로직과 화면 코드는
-수정할 필요가 없다.
+```bash
+cd backend && pytest        # 데모룸 + 두 미니게임
+cd frontend && npm test     # 두 미니게임 (vitest)
+```
 
-- **마피아**: `backend/app/mafia/persona/provider.py` 의 `PersonaProvider` 를 구현한
-  `RealPersonaProvider` 를 만들어 `MockPersonaProvider` 대신 주입한다. 또는 외부
-  팀이 `POST /mafia/rooms/{room_id}/persona` 로 직접 보내도 된다
-  (스키마는 `docs/mafia_game_design.md` §2.2).
-- **마블**: `backend/app/marble/persona/provider.py` 의 `persona_provider` 만 교체한다.
+## 알려진 제한
 
-대기실의 "무작위 성향 데이터 채우기" 버튼은 데모 전용 엔드포인트를 호출하며,
-실제 서비스에서는 쓰지 않는다.
-
-## 참고 — 제거된 하위 프로젝트
-
-`docs/superpowers/` 안의 `2026-08-28-persona-pipeline*` 문서 2개는 이전에 있었던
-`persona_pipeline` CLI 하위 프로젝트의 기록이다. 해당 코드는 제거되었고 문서만 남아 있다.
+- "둘은 진실, 하나는 거짓" 턴에서 대상자 본인은 자기 차례가 끝나는 순간의 "정답 공개"
+  화면을 못 보고 바로 다음 턴으로 넘어갑니다. 데이터·채점은 정확하고 리포트에도 반영되지만
+  연출상 사소한 공백입니다.
+- 새로고침하면 닉네임·playerId 등 세션 정보가 초기화됩니다(로컬 상태만 사용, 영속화는
+  범위 밖).
