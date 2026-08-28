@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Button from '../../components/common/Button'
+import TypeMark from '../../components/common/TypeMark'
 import Card from '../../components/common/Card'
 import { getPlayers } from '../../api/players'
 import { getAssignStatus, getCards, getSelfStatus, submitAssignment, submitSelfGuess } from '../../api/typeGuess'
@@ -166,7 +167,7 @@ export default function TypeGuessStep({ code, playerId, onAdvance }) {
       <div className="typeguess-grid">
         {Object.entries(TYPES).map(([code_, t]) => (
           <button key={code_} className="typeguess-type-btn" style={{ borderColor: t.color }} onClick={() => handleSelfPick(code_)}>
-            <span className="typeguess-type-symbol">{t.symbol}</span>
+            <TypeMark type={t} size={44} />
             <span className="typeguess-type-name">{t.name}</span>
           </button>
         ))}

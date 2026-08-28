@@ -173,3 +173,15 @@
   font-size: 0.74rem;
   color: var(--gold);
 }
+
+/* 유형 마크 — 이미지가 들어오면 이미지, 없으면 이모지 */
+.type-mark {
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+.type-mark-emoji {
+  line-height: 1;
+  text-align: center;
+}

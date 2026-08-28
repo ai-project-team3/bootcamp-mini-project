@@ -4,6 +4,7 @@ import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import Card from '../../components/common/Card'
 import Badge from '../../components/common/Badge'
+import TypeMark from '../../components/common/TypeMark'
 import { useRoomFlow } from '../../context/RoomFlowContext'
 import { getReport } from '../../api/report'
 import { ABILITY_LABELS, ABILITY_ORDER, TYPES } from '../../data/types'
@@ -55,7 +56,7 @@ export default function PersonalReportPage() {
       <TopBar title="개인 리포트" />
       <div className="report-body">
         <div className="report-header" style={{ color: type.color }}>
-          <span className="report-header-symbol">{type.symbol}</span>
+          <TypeMark type={type} size={96} className="report-header-mark" />
           <h1 className="report-header-name">{type.name}</h1>
           <p className="report-header-subtitle">{me.type_subtitle || type.subtitle}</p>
           <p className="report-header-meta">
