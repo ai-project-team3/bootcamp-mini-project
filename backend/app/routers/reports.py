@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..models.ability import Ability
 from ..models.guess import Guess
 from ..models.player import Player
 from ..models.report import Report
@@ -123,6 +124,7 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
     highlights = build_highlights(db, room, players, badges)
 
     _upsert_cache(db, room, players, final_types, badges, player_reports)
+    _persist_abilities(db, room, abilities, impression_pre, impression_post)
 
     return RoomReportResponse(
         session_id=room.id,
@@ -165,4 +167,49 @@ def _upsert_cache(
             row.comment_lines = pr.comment_lines
             row.badges = badges[p.id]
             row.quote = pr.quote
+    db.commit()
+
+
+def _persist_abilities(
+    db: Session,
+    room: Room,
+    behavior: dict[str, dict[str, float]],
+    impression_pre: dict[str, dict[str, float]],
+    impression_post: dict[str, dict[str, float]],
+) -> None:
+    """능력치를 남긴다. 리포트 응답만으로는 게임 파트에 넘길 값이 없다.
+
+    출처별로 따로 저장한다 — BEHAVIOR만 진짜 능력치이고 IMPRESSION_*는 레이더
+    점선 전용이라, 넘길 때 섞이면 안 된다 (기획안 §6, §14).
+    """
+    by_source = {
+        "BEHAVIOR": behavior,
+        "IMPRESSION_PRE": impression_pre,
+        "IMPRESSION_POST": impression_post,
+    }
+    for source, table in by_source.items():
+        for player_id, scores in table.items():
+            for code, value in scores.items():
+                row = (
+                    db.query(Ability)
+                    .filter(
+                        Ability.room_id == room.id,
+                        Ability.player_id == player_id,
+                        Ability.code == code,
+                        Ability.source == source,
+                    )
+                    .first()
+                )
+                if row is None:
+                    db.add(
+                        Ability(
+                            room_id=room.id,
+                            player_id=player_id,
+                            code=code,
+                            source=source,
+                            value=value,
+                        )
+                    )
+                else:
+                    row.value = value
     db.commit()

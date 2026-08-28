@@ -197,6 +197,19 @@ def run(n: int) -> None:
         check("혼자면 관찰력 중립", me["abilities"]["OBS"] == 2.5, str(me["abilities"]["OBS"]))
     check("궁합 = 인원-1", len(me["compat"]) == n - 1)
 
+    handoff = client.get(f"/rooms/{code}/persona")
+    check("페르소나 인계", handoff.status_code == 200, handoff.text)
+    if handoff.status_code == 200:
+        h = handoff.json()
+        check("인계 인원수", len(h["players"]) == n)
+        scores = h["players"][0]["personaScores"]
+        check("인계 5축", len(scores) == 5, str(scores))
+        check(
+            "인계 0~100 정수",
+            all(isinstance(v, int) and 0 <= v <= 100 for v in scores.values()),
+            str(scores),
+        )
+
 
 for size in (1, 2, 3, 5, 8):
     run(size)
