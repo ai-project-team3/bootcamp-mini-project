@@ -58,7 +58,7 @@ export default function StartPage() {
 
   return (
     <PhoneFrame>
-      <TopBar showBack={false} />
+      <TopBar onBack={() => navigate('/')} />
       <div className="start-body">
         <div className="start-hero">
           <span className="start-hero-glow" aria-hidden />
@@ -122,20 +122,6 @@ export default function StartPage() {
         </div>
 
         {error && <p className="start-error">{error}</p>}
-
-        <div className="start-minigames">
-          <span className="start-label">게임 바로가기</span>
-          <p className="start-minigames-note">얼음땡을 하지 않고 게임만 골라서 할 수도 있어요.</p>
-          <button
-            type="button"
-            className="start-minigame-btn start-minigame-btn--wide"
-            onClick={() => navigate('/games')}
-          >
-            <span aria-hidden>🎮</span>
-            게임 목록 보기
-            <b>미니게임 · 페르소나 · 파티 게임</b>
-          </button>
-        </div>
       </div>
       <Button onClick={handleCreate} disabled={busy}>
         {busy ? '만드는 중...' : '방 만들기'}

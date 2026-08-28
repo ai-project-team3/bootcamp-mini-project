@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import LandingPage from '../pages/landing/LandingPage'
 import StartPage from '../pages/start/StartPage'
 import RoomCreatePage from '../pages/roomCreate/RoomCreatePage'
 import JoinPage from '../pages/join/JoinPage'
@@ -24,7 +25,10 @@ import MarbleGamePage from '../pages/minigames/MarbleGamePage'
 export default function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<StartPage />} />
+      {/* 첫 화면은 얼음땡이 끝나는 화면과 같은 UI로, 게임 목록으로 바로 들어간다.
+          얼음땡 진행 흐름 자체는 /start 에 그대로 남아 있다. */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/start" element={<StartPage />} />
       <Route path="/room/create" element={<RoomCreatePage />} />
       <Route path="/join/:code" element={<JoinPage />} />
       <Route path="/room/:code/waiting" element={<WaitingRoomPage />} />
