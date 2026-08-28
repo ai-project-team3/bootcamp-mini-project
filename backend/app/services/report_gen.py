@@ -50,14 +50,21 @@ class GeneratedReport(BaseModel):
 
 PROMPT_RULES = """문구 규칙(§12) — 하나라도 어기면 안 된다.
 1. 숫자를 문장에 쓰지 않는다. "6초 만에 골랐다" ✕ → "손이 먼저 나갑니다" ○
-2. 까는 대상은 오늘 한 행동이지 사람이 아니다. "게으르다" ✕
-3. line3은 line1에서 깐 바로 그 행동을 뒤집어 칭찬한다. 다른 장점을 새로
-   꺼내지 않는다. 이게 있어야 돌려까기가 되고, 없으면 그냥 욕이 된다.
+2. 까는 대상은 오늘 한 행동이지 사람이 아니다. "게으르다" ✕ → "본인 차례에만
+   성실했다" ○ 같은 식으로, 행동을 과장해서 놀리되 인신공격은 하지 않는다.
+3. line1·line2는 봐줄 필요 없이 익살스럽게 비꼰다 — 순화하지 않고 세게
+   찌른다. line3은 line1에서 깐 바로 그 행동을 뒤집어 반드시 진심 어린
+   칭찬으로 마무리한다. 다른 장점을 새로 꺼내지 않는다. 이게 있어야
+   돌려까기가 되고, 없으면 그냥 욕이 된다 — 놀리기만 하고 안 띄워주면 실패다.
 4. 외모·성별·나이·직업은 소재로 쓰지 않는다.
 5. 첫인상 득표는 놀리되 사실로 확정하지 않는다.
 6. team_summary와 team_reasons에는 비꼼을 넣지 않는다. 개인은 놀려도 되지만
    팀 전체를 까면 자리 분위기가 죽는다.
-7. 성격유형 검사 이름이나 네 글자 코드를 절대 쓰지 않는다.
+7. 각 사람의 MBTI가 흔히 갖는 성향(계획적/즉흥적, 논리적/감정적, 사교적/
+   내향적 등)을 line1·line2·line3의 소재로 적극 활용해서 그 사람다운 글로
+   만든다. 단 성격유형 검사 이름이나 네 글자 코드, 그 부분 글자(I/E/N/S/T/
+   F/J/P 각각), "내향", "외향", "성향검사" 같은 단어는 절대 쓰지 않는다 —
+   성향만 녹이고 이름표는 붙이지 않는다.
 모든 문장은 '~습니다'체로 끝낸다."""
 
 
@@ -104,12 +111,14 @@ def generate(context: str, expected_nicknames: set[str]) -> Optional[GeneratedRe
     try:
         client = genai.Client(api_key=settings.gemini_api_key)
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 response_schema=GeneratedReport,
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
+                # gemini-3.6-flash rejects thinking_budget=0 outright (400 INVALID_ARGUMENT);
+                # 1 is the lowest budget it accepts, closest to the original "skip thinking" intent.
+                thinking_config=types.ThinkingConfig(thinking_budget=1),
                 http_options=types.HttpOptions(timeout=int(TIMEOUT_S * 1000)),
             ),
         )

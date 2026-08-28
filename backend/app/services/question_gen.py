@@ -273,14 +273,16 @@ def _call_llm(project_text: str) -> Optional[GeneratedQuestions]:
     try:
         client = genai.Client(api_key=settings.gemini_api_key)
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 response_schema=GeneratedQuestions,
                 # thinking을 켜두면 이 정도 분량의 JSON 생성도 15초 데드라인을
                 # 넘겨 504로 죽는 걸 실측으로 확인해 껐다(O2 응답 시간 실측).
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
+                # gemini-3.6-flash는 thinking_budget=0을 거부해서(400 INVALID_ARGUMENT)
+                # 허용되는 가장 낮은 값인 1로 맞췄다.
+                thinking_config=types.ThinkingConfig(thinking_budget=1),
                 http_options=types.HttpOptions(timeout=int(GENERATION_TIMEOUT_S * 1000)),
             ),
         )
