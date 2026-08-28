@@ -130,3 +130,10 @@ body {
     max-width: 320px;
   }
 }
+
+/* The back button floats over whichever game is mounted, so the game below it
+   needs room or its heading sits under the button. Dev-only, like the button. */
+.dev-back + .mafia-app .app-shell,
+.dev-back + .pm-app .pm-shell {
+  padding-top: 52px;
+}

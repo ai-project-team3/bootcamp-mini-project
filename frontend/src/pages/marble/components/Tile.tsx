@@ -35,7 +35,6 @@ const TILE_CLASS: Record<TileModel["type"], string> = {
 };
 
 /** Token art is assigned by seat, so each player keeps one marble all game. */
-const SEAT_CLASS = ["pm-token--a", "pm-token--b"];
 
 interface TileProps {
   tile: TileModel;
@@ -55,7 +54,7 @@ export function Tile({ tile, occupantSeats, playerNames, hoppingSeat, style }: T
           {occupantSeats.map((seat) => (
             <img
               key={seat}
-              className={`pm-token ${SEAT_CLASS[seat]} ${seat === hoppingSeat ? "pm-token--hopping" : ""}`}
+              className={`pm-token ${seat === hoppingSeat ? "pm-token--hopping" : ""}`}
               src={seatArt(seat)}
               alt={playerNames[seat] ?? `플레이어 ${seat + 1}`}
             />

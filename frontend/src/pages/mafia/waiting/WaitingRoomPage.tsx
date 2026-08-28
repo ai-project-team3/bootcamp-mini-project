@@ -95,7 +95,7 @@ export function WaitingRoomPage({ session, state }: WaitingRoomPageProps) {
       {isHost && (
         <div className="stack">
           <h2>인원수</h2>
-          <div className="row-between">
+          <div className="count-options">
             {PLAYER_COUNT_OPTIONS.map((count) => (
               <button
                 key={count}

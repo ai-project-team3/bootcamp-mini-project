@@ -21,8 +21,15 @@
   --pm-heart: #d64550;
   --pm-heart-empty: #ded2bd;
 
+  /* One per seat, matching the token art in assets/token-*.png. */
   --pm-player-a: #d97757;
   --pm-player-b: #3f7a8c;
+  --pm-player-c: #c8912f;
+  --pm-player-d: #6b4fb8;
+  --pm-player-e: #3f9e7a;
+  --pm-player-f: #d4736a;
+  --pm-player-g: #4a5fa8;
+  --pm-player-h: #c05f86;
 
   --pm-logic-fg: #3f6fb0;
   --pm-logic-bg: #dce8f7;
@@ -112,6 +119,12 @@
 
   --pm-player-a: #e0a08a;
   --pm-player-b: #7fb3e8;
+  --pm-player-c: #e8c46a;
+  --pm-player-d: #a98ce8;
+  --pm-player-e: #6fd4aa;
+  --pm-player-f: #eb9a92;
+  --pm-player-g: #8b9ee8;
+  --pm-player-h: #e894b4;
 
   --pm-logic-fg: #6f9ceb;
   --pm-logic-bg: #1b2c47;

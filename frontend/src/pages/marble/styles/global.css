@@ -243,17 +243,41 @@
 .pm-tile--caution { --pm-tile-fg: var(--pm-caution-fg); --pm-tile-bg: var(--pm-caution-bg); --pm-tile-edge: var(--pm-caution-edge); }
 .pm-tile--chance { --pm-tile-fg: var(--pm-chance-fg); --pm-tile-bg: var(--pm-chance-bg); --pm-tile-edge: var(--pm-chance-edge); }
 
+/* Up to eight pieces can share one tile. They are pinned inside the tile and
+   overlap like a stack of chips rather than running off the board. */
 .pm-tile__occupants {
   position: absolute;
   bottom: 3px;
+  left: 2px;
+  right: 2px;
   display: flex;
+  justify-content: center;
+  align-items: flex-end;
   gap: 1px;
+  pointer-events: none;
+}
+
+/* Every piece after the first slides back over the one before it. */
+.pm-tile__occupants > .pm-token + .pm-token {
+  margin-left: -60%;
+}
+
+/* A crowded tile shrinks its pieces so the pile still reads as separate marbles. */
+.pm-tile__occupants:has(> .pm-token:nth-child(4)) .pm-token {
+  width: 26px;
+  height: 26px;
+}
+
+.pm-tile__occupants:has(> .pm-token:nth-child(6)) .pm-token {
+  width: 21px;
+  height: 21px;
 }
 
 /* Rendered glass-marble playing piece, with a contact shadow grounding it on the tile. */
 .pm-token {
   width: 34px;
   height: 34px;
+  flex: 0 0 auto;
   object-fit: contain;
   font-size: 0;
   filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.4));
@@ -398,14 +422,17 @@
   }
 }
 
+/* One row for a couple, a wrapping grid once the table grows — eight cards
+   side by side would squeeze each to nothing and push the board off screen. */
 .pm-dashboard {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   align-items: stretch;
   gap: var(--pm-space-3);
 }
 
 .pm-player-card {
-  flex: 1;
+  min-width: 0;
   border-radius: 14px;
   border: 1px solid var(--pm-border);
   background: linear-gradient(160deg, var(--pm-surface-raised), var(--pm-surface));
@@ -487,6 +514,12 @@
 
 .pm-progress__fill--0 { background: var(--pm-player-a); }
 .pm-progress__fill--1 { background: var(--pm-player-b); }
+.pm-progress__fill--2 { background: var(--pm-player-c); }
+.pm-progress__fill--3 { background: var(--pm-player-d); }
+.pm-progress__fill--4 { background: var(--pm-player-e); }
+.pm-progress__fill--5 { background: var(--pm-player-f); }
+.pm-progress__fill--6 { background: var(--pm-player-g); }
+.pm-progress__fill--7 { background: var(--pm-player-h); }
 
 .pm-player-card__laps {
   font-size: 0.74rem;
@@ -650,13 +683,14 @@
 }
 
 .pm-gameover__scores {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: var(--pm-space-4);
   width: 100%;
 }
 
 .pm-gameover__score-card {
-  flex: 1;
+  min-width: 0;
   border-radius: var(--pm-radius-sm);
   border: 1px solid var(--pm-border);
   background: var(--pm-surface-raised);
@@ -1010,7 +1044,7 @@
   text-transform: uppercase;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 480px) and (min-width: 421px) {
   .pm-waiting__seats {
     grid-template-columns: 1fr;
   }
@@ -1027,7 +1061,7 @@
 .pm-seat-picker__label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--pm-ink-soft);
+  color: var(--pm-text-muted);
 }
 
 .pm-seat-picker__options {
@@ -1040,10 +1074,10 @@
   min-width: 44px;
   padding: 10px 0;
   flex: 1 1 44px;
-  border: 1px solid var(--pm-line);
+  border: 1px solid var(--pm-border);
   border-radius: 10px;
   background: var(--pm-surface);
-  color: var(--pm-ink);
+  color: var(--pm-text);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -1072,12 +1106,12 @@
   font-family: var(--pm-font-display);
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--pm-ink);
+  color: var(--pm-text);
 }
 
 .pm-waiting__tally-label {
   font-size: 0.9rem;
-  color: var(--pm-ink-soft);
+  color: var(--pm-text-muted);
 }
 
 .pm-waiting__tally-bar {
@@ -1086,7 +1120,7 @@
   max-width: 260px;
   height: 6px;
   border-radius: 999px;
-  background: var(--pm-line);
+  background: var(--pm-border);
   overflow: hidden;
 }
 
@@ -1103,4 +1137,83 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
+}
+
+/* ===== Narrow screens =====
+   The game is played on phones held in one hand, so nothing may rely on a
+   viewport wider than a small handset. These rules keep the shell, the seat
+   picker and the score cards inside a ~320px screen. */
+
+/* Nothing in this game may push the page sideways. */
+.pm-app {
+  overflow-x: hidden;
+}
+
+.pm-shell {
+  min-width: 0;
+}
+
+@media (max-width: 420px) {
+  .pm-shell {
+    gap: var(--pm-space-4);
+  }
+
+  /* Seven size buttons will not fit on one line; let them wrap and shrink. */
+  .pm-seat {
+    flex: 1 1 36px;
+    min-width: 36px;
+    padding: 8px 0;
+    font-size: 0.9rem;
+  }
+
+  .pm-seat-picker__options {
+    gap: 6px;
+  }
+
+  /* Two score cards per row. A table of eight in one column would push the
+     board a whole screen down. */
+  .pm-dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--pm-space-2);
+  }
+
+  .pm-player-card__name {
+    font-size: 0.85rem;
+  }
+
+  .pm-player-card__score {
+    font-size: 1.1rem;
+  }
+
+  .pm-player-card {
+    padding: var(--pm-space-2) var(--pm-space-3);
+    gap: var(--pm-space-2);
+  }
+
+  .pm-player-card__token {
+    width: 28px;
+    height: 28px;
+  }
+
+  .pm-gameover__scores {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .pm-waiting__tally-count {
+    font-size: 1.3rem;
+  }
+
+  /* Eight seats in one column is a long scroll before the start button. */
+  .pm-waiting__seats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--pm-space-2);
+  }
+}
+
+@media (max-width: 340px) {
+  .pm-seat {
+    flex: 1 1 30px;
+    min-width: 30px;
+    font-size: 0.85rem;
+  }
 }
