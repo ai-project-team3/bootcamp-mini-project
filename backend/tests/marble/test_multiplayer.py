@@ -137,3 +137,84 @@ def test_the_dare_target_is_spread_across_the_table_not_fixed():
         engine._assign_forfeit(room, "p0")
         picked.add(room.forfeit_target_id)
     assert picked == {"p1", "p2", "p3", "p4", "p5"}, f"대상이 골고루 안 뽑힘: {picked}"
+
+
+def test_the_host_can_resize_the_room_before_it_starts():
+    from fastapi.testclient import TestClient
+
+    from app.marble.store import store
+    from app.standalone import app
+
+    store.clear()
+    client = TestClient(app)
+    room_id = client.post("/marble/rooms", json={"content_mode": "general", "max_players": 2}).json()[
+        "room_id"
+    ]
+    for name in ("민준", "서연"):
+        client.post(f"/marble/rooms/{room_id}/join", json={"nickname": name})
+
+    grown = client.post(f"/marble/rooms/{room_id}/max-players", json={"max_players": 6})
+    assert grown.status_code == 200
+    assert grown.json() == {"max_players": 6}
+    assert client.get(f"/marble/rooms/{room_id}/state").json()["max_players"] == 6
+
+    # A third player can now get in, where before the room was full.
+    assert client.post(f"/marble/rooms/{room_id}/join", json={"nickname": "도윤"}).status_code == 200
+
+
+def test_the_room_cannot_shrink_below_the_people_already_in_it():
+    from fastapi.testclient import TestClient
+
+    from app.marble.store import store
+    from app.standalone import app
+
+    store.clear()
+    client = TestClient(app)
+    room_id = client.post("/marble/rooms", json={"content_mode": "general", "max_players": 5}).json()[
+        "room_id"
+    ]
+    for name in ("민준", "서연", "도윤"):
+        client.post(f"/marble/rooms/{room_id}/join", json={"nickname": name})
+
+    assert (
+        client.post(f"/marble/rooms/{room_id}/max-players", json={"max_players": 2}).status_code == 400
+    )
+    assert client.get(f"/marble/rooms/{room_id}/state").json()["max_players"] == 5
+
+
+def test_the_room_cannot_be_resized_once_the_game_is_running():
+    from fastapi.testclient import TestClient
+
+    from app.marble.store import store
+    from app.standalone import app
+
+    store.clear()
+    client = TestClient(app)
+    room_id = client.post("/marble/rooms", json={"content_mode": "general", "max_players": 2}).json()[
+        "room_id"
+    ]
+    for name in ("민준", "서연"):
+        client.post(f"/marble/rooms/{room_id}/join", json={"nickname": name})
+    client.post(f"/marble/rooms/{room_id}/start")
+
+    assert (
+        client.post(f"/marble/rooms/{room_id}/max-players", json={"max_players": 4}).status_code == 400
+    )
+
+
+def test_an_out_of_range_room_size_is_rejected():
+    from fastapi.testclient import TestClient
+
+    from app.marble.store import store
+    from app.standalone import app
+
+    store.clear()
+    client = TestClient(app)
+    room_id = client.post("/marble/rooms", json={"content_mode": "general", "max_players": 2}).json()[
+        "room_id"
+    ]
+    for size in (1, 9):
+        assert (
+            client.post(f"/marble/rooms/{room_id}/max-players", json={"max_players": size}).status_code
+            == 422
+        )

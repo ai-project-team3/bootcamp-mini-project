@@ -12,3 +12,7 @@ class CreateRoomRequest(BaseModel):
 
 class JoinRoomRequest(BaseModel):
     nickname: str
+
+
+class UpdateMaxPlayersRequest(BaseModel):
+    max_players: int = Field(ge=MIN_PLAYERS, le=MAX_PLAYERS)

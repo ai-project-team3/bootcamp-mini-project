@@ -4,7 +4,11 @@ from fastapi import APIRouter, HTTPException
 
 from app.marble.models.room import MAX_PLAYERS, MIN_PLAYERS, ContentMode, GamePhase, Player, Room
 from app.marble.persona.provider import MockPersonaProvider
-from app.marble.schemas.room import CreateRoomRequest, JoinRoomRequest
+from app.marble.schemas.room import (
+    CreateRoomRequest,
+    JoinRoomRequest,
+    UpdateMaxPlayersRequest,
+)
 from app.marble.store import store
 from app.marble.utils.deps import get_room_or_404
 from app.marble.utils.room_code import generate_room_code
@@ -121,6 +125,18 @@ def join_room(room_id: str, req: JoinRoomRequest):
         room.host_player_id = player_id
 
     return {"player_id": player_id, "is_host": room.host_player_id == player_id}
+
+
+@router.post("/{room_id}/max-players")
+def update_max_players(room_id: str, req: UpdateMaxPlayersRequest):
+    """Let the host resize the room while people are still arriving."""
+    room = get_room_or_404(room_id)
+    if room.phase is not GamePhase.WAITING:
+        raise HTTPException(400, "대기실에서만 인원수를 변경할 수 있습니다")
+    if req.max_players < len(room.players):
+        raise HTTPException(400, "이미 참가한 인원보다 적게 설정할 수 없습니다")
+    room.max_players = req.max_players
+    return {"max_players": room.max_players}
 
 
 @router.get("/{room_id}/state")

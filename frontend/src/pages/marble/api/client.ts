@@ -22,6 +22,13 @@ export function createRoom(contentMode: ContentMode, maxPlayers: number) {
   });
 }
 
+export function updateMaxPlayers(roomId: string, maxPlayers: number) {
+  return request<{ max_players: number }>(`/marble/rooms/${roomId}/max-players`, {
+    method: "POST",
+    body: JSON.stringify({ max_players: maxPlayers }),
+  });
+}
+
 export function joinRoom(roomId: string, nickname: string) {
   return request<JoinResult>(`/marble/rooms/${roomId}/join`, {
     method: "POST",

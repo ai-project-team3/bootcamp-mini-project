@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { RoomState } from "../api/types";
 import { seatArt } from "./seatArt";
+import { PLAYER_COUNT_OPTIONS } from "../constants";
 
 
 interface WaitingRoomProps {
@@ -8,6 +9,8 @@ interface WaitingRoomProps {
   playerId: string;
   onStart: () => void;
   onLeave: () => void;
+  /** Host-only: resize the room while people are still arriving. */
+  onChangeMaxPlayers: (count: number) => void;
   starting?: boolean;
   error?: string | null;
 }
@@ -18,7 +21,15 @@ function inviteLink(roomId: string): string {
   return `${origin}${pathname}?room=${roomId}`;
 }
 
-export function WaitingRoom({ state, playerId, onStart, onLeave, starting, error }: WaitingRoomProps) {
+export function WaitingRoom({
+  state,
+  playerId,
+  onStart,
+  onLeave,
+  onChangeMaxPlayers,
+  starting,
+  error,
+}: WaitingRoomProps) {
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
 
   const isHost = state.host_player_id === playerId;
@@ -78,6 +89,27 @@ export function WaitingRoom({ state, playerId, onStart, onLeave, starting, error
           />
         </span>
       </div>
+
+      {isHost && (
+        <div className="pm-seat-picker pm-waiting__resize">
+          <span className="pm-seat-picker__label">인원 변경</span>
+          <div className="pm-seat-picker__options" role="group" aria-label="인원 변경">
+            {PLAYER_COUNT_OPTIONS.map((count) => (
+              <button
+                key={count}
+                type="button"
+                className={`pm-seat ${seatCount === count ? "pm-seat--selected" : ""}`}
+                aria-pressed={seatCount === count}
+                // Shrinking below the people already here would strand them.
+                disabled={count < joined}
+                onClick={() => onChangeMaxPlayers(count)}
+              >
+                {count}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <ul className="pm-waiting__seats">
         {Array.from({ length: seatCount }, (_, seat) => {

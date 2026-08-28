@@ -7,6 +7,7 @@ import {
   rollDice,
   startGame,
   submitAnswer,
+  updateMaxPlayers,
 } from "./api/client";
 import type { ContentMode, RoomPlayer, RoomState } from "./api/types";
 import { useMarbleRoom } from "./hooks/useMarbleRoom";
@@ -164,6 +165,14 @@ export function MarbleApp() {
     [run, setSession]
   );
 
+  const handleChangeMaxPlayers = useCallback(
+    (count: number) => {
+      if (!session) return;
+      run(() => updateMaxPlayers(session.roomId, count), "인원수를 바꾸지 못했어요.");
+    },
+    [run, session]
+  );
+
   const handleStart = useCallback(() => {
     if (!session) return;
     return run(() => startGame(session.roomId), "게임을 시작하지 못했어요.");
@@ -261,6 +270,7 @@ export function MarbleApp() {
             playerId={session.playerId}
             onStart={handleStart}
             onLeave={handleLeave}
+            onChangeMaxPlayers={handleChangeMaxPlayers}
             starting={busy}
             error={actionError}
           />

@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-import slotFrame from "../assets/slot-frame.jpg";
 import "./ForfeitSlot.css";
 
-const SLOT_HEIGHT = 56;
+const SLOT_HEIGHT = 34;
 /** Rows visible at once. Three lets the next name creep into view during the
     tease, which is where the tension comes from. */
 const VISIBLE_ROWS = 3;
@@ -96,24 +95,21 @@ export function ForfeitSlot({ names, winnerIndex, onSettled }: ForfeitSlotProps)
 
   return (
     <div className={`pm-slot${settled ? " pm-slot--settled" : ""}`} data-testid="forfeit-slot">
-      <div className="pm-slot-frame">
-        <img className="pm-slot-frame__art" src={slotFrame} alt="" aria-hidden="true" />
-        <div className="pm-slot-window" style={{ height: windowHeight }}>
-          <div
-            className="pm-slot-strip"
-            style={{ transform: `translateY(${translate}px)` }}
-            aria-hidden={!settled}
-          >
-            {strip.map((name, i) => (
-              <div className="pm-slot-cell" key={i} style={{ height: SLOT_HEIGHT }}>
-                {name}
-              </div>
-            ))}
-          </div>
-          <div className="pm-slot-mask pm-slot-mask--top" />
-          <div className="pm-slot-mask pm-slot-mask--bottom" />
-          <div className="pm-slot-marker" aria-hidden="true" />
+      <div className="pm-slot-window" style={{ height: windowHeight }}>
+        <div
+          className="pm-slot-strip"
+          style={{ transform: `translateY(${translate}px)` }}
+          aria-hidden={!settled}
+        >
+          {strip.map((name, i) => (
+            <div className="pm-slot-cell" key={i} style={{ height: SLOT_HEIGHT }}>
+              {name}
+            </div>
+          ))}
         </div>
+        <div className="pm-slot-mask pm-slot-mask--top" />
+        <div className="pm-slot-mask pm-slot-mask--bottom" />
+        <div className="pm-slot-marker" aria-hidden="true" />
       </div>
       <p className="pm-slot-caption" role="status">
         {settled ? `${names[winnerIndex]}님 당첨!` : "벌칙 받을 사람 뽑는 중..."}

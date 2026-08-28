@@ -105,7 +105,6 @@ export function QuizModal({
             {assignedForfeit && (!needsDraw || drawDone) && (
               <p className="pm-modal__card pm-modal__card--forfeit">
                 {lastChanceCard?.kind === "penalty" ? "찬스 카드 벌칙 발동! " : "벌칙: "}
-                {needsDraw ? `${forfeitCandidates[forfeitWinnerIndex!]}님에게 — ` : ""}
                 {assignedForfeit}
               </p>
             )}

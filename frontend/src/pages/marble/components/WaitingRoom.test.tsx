@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { WaitingRoom } from "./WaitingRoom";
 import type { RoomPlayer, RoomState } from "../api/types";
 
@@ -45,14 +45,14 @@ const noop = () => {};
 describe("WaitingRoom", () => {
   it("shows the room code", () => {
     render(
-      <WaitingRoom state={roomState([player("p1", "민수")])} playerId="p1" onStart={noop} onLeave={noop} />
+      <WaitingRoom state={roomState([player("p1", "민수")])} playerId="p1" onStart={noop} onLeave={noop} onChangeMaxPlayers={noop} />
     );
     expect(screen.getByText("ABC123")).toBeInTheDocument();
   });
 
   it("shows an empty seat while waiting for the opponent", () => {
     render(
-      <WaitingRoom state={roomState([player("p1", "민수")])} playerId="p1" onStart={noop} onLeave={noop} />
+      <WaitingRoom state={roomState([player("p1", "민수")])} playerId="p1" onStart={noop} onLeave={noop} onChangeMaxPlayers={noop} />
     );
     expect(screen.getByTestId("pm-seat-0")).toHaveTextContent("민수");
     expect(screen.getByTestId("pm-seat-1")).toHaveTextContent("비어 있음");
@@ -60,14 +60,14 @@ describe("WaitingRoom", () => {
 
   it("marks which seat is you", () => {
     const players = [player("p1", "민수"), player("p2", "지은")];
-    render(<WaitingRoom state={roomState(players)} playerId="p2" onStart={noop} onLeave={noop} />);
+    render(<WaitingRoom state={roomState(players)} playerId="p2" onStart={noop} onLeave={noop} onChangeMaxPlayers={noop} />);
     expect(screen.getByTestId("pm-seat-1")).toHaveTextContent("나");
     expect(screen.getByTestId("pm-seat-0")).not.toHaveTextContent("나");
   });
 
   it("keeps the host's start button disabled until the room is full", () => {
     render(
-      <WaitingRoom state={roomState([player("p1", "민수")])} playerId="p1" onStart={noop} onLeave={noop} />
+      <WaitingRoom state={roomState([player("p1", "민수")])} playerId="p1" onStart={noop} onLeave={noop} onChangeMaxPlayers={noop} />
     );
     expect(screen.getByRole("button", { name: /1명을 더 기다리는 중/ })).toBeDisabled();
   });
@@ -75,7 +75,7 @@ describe("WaitingRoom", () => {
   it("lets the host start once both players are in", () => {
     const onStart = vi.fn();
     const players = [player("p1", "민수"), player("p2", "지은")];
-    render(<WaitingRoom state={roomState(players)} playerId="p1" onStart={onStart} onLeave={noop} />);
+    render(<WaitingRoom state={roomState(players)} playerId="p1" onStart={onStart} onLeave={noop} onChangeMaxPlayers={noop} />);
 
     const button = screen.getByRole("button", { name: "게임 시작" });
     expect(button).not.toBeDisabled();
@@ -85,7 +85,7 @@ describe("WaitingRoom", () => {
 
   it("shows a waiting hint to the non-host instead of a start button", () => {
     const players = [player("p1", "민수"), player("p2", "지은")];
-    render(<WaitingRoom state={roomState(players)} playerId="p2" onStart={noop} onLeave={noop} />);
+    render(<WaitingRoom state={roomState(players)} playerId="p2" onStart={noop} onLeave={noop} onChangeMaxPlayers={noop} />);
 
     expect(screen.queryByRole("button", { name: "게임 시작" })).not.toBeInTheDocument();
     expect(screen.getByText(/방장이 시작하기를 기다리는 중/)).toBeInTheDocument();
@@ -96,7 +96,7 @@ describe("WaitingRoom", () => {
     vi.stubGlobal("navigator", { clipboard: { writeText } });
 
     render(
-      <WaitingRoom state={roomState([player("p1", "민수")])} playerId="p1" onStart={noop} onLeave={noop} />
+      <WaitingRoom state={roomState([player("p1", "민수")])} playerId="p1" onStart={noop} onLeave={noop} onChangeMaxPlayers={noop} />
     );
     fireEvent.click(screen.getByText("초대 링크 복사"));
 
@@ -111,7 +111,7 @@ describe("WaitingRoom", () => {
         state={roomState([player("p1", "민수"), player("p2", "지은")], { max_players: 6 })}
         playerId="p1"
         onStart={noop}
-        onLeave={noop}
+        onLeave={noop} onChangeMaxPlayers={noop}
       />
     );
 
@@ -129,7 +129,7 @@ describe("WaitingRoom", () => {
         })}
         playerId="p1"
         onStart={noop}
-        onLeave={noop}
+        onLeave={noop} onChangeMaxPlayers={noop}
       />
     );
 
@@ -144,7 +144,7 @@ describe("WaitingRoom", () => {
         state={roomState(players, { max_players: 3 })}
         playerId="p1"
         onStart={noop}
-        onLeave={noop}
+        onLeave={noop} onChangeMaxPlayers={noop}
       />
     );
 
@@ -159,7 +159,7 @@ describe("WaitingRoom", () => {
         state={roomState([player("p1", "민수"), player("p2", "지은")], { max_players: 8 })}
         playerId="p1"
         onStart={noop}
-        onLeave={noop}
+        onLeave={noop} onChangeMaxPlayers={noop}
       />
     );
 
@@ -172,7 +172,7 @@ describe("WaitingRoom", () => {
         state={roomState([player("p1", "민수")], { max_players: 8 })}
         playerId="p1"
         onStart={noop}
-        onLeave={noop}
+        onLeave={noop} onChangeMaxPlayers={noop}
       />
     );
 
@@ -184,13 +184,63 @@ describe("WaitingRoom", () => {
     expect(new Set(sources).size).toBe(8);
   });
 
+
+  it("lets the host resize the room while people are still arriving", () => {
+    const onChangeMaxPlayers = vi.fn();
+    render(
+      <WaitingRoom
+        state={roomState([player("p1", "민수"), player("p2", "지은")], { max_players: 4 })}
+        playerId="p1"
+        onStart={noop}
+        onLeave={noop}
+        onChangeMaxPlayers={onChangeMaxPlayers}
+      />
+    );
+
+    const group = screen.getByRole("group", { name: "인원 변경" });
+    fireEvent.click(within(group).getByRole("button", { name: "6" }));
+    expect(onChangeMaxPlayers).toHaveBeenCalledWith(6);
+  });
+
+  it("will not offer a size smaller than the people already here", () => {
+    render(
+      <WaitingRoom
+        state={roomState([player("p1", "민수"), player("p2", "지은"), player("p3", "현우")], {
+          max_players: 5,
+        })}
+        playerId="p1"
+        onStart={noop}
+        onLeave={noop}
+        onChangeMaxPlayers={noop}
+      />
+    );
+
+    const group = screen.getByRole("group", { name: "인원 변경" });
+    expect(within(group).getByRole("button", { name: "2" })).toBeDisabled();
+    expect(within(group).getByRole("button", { name: "3" })).not.toBeDisabled();
+  });
+
+  it("hides the resize control from everyone but the host", () => {
+    render(
+      <WaitingRoom
+        state={roomState([player("p1", "민수"), player("p2", "지은")], { max_players: 4 })}
+        playerId="p2"
+        onStart={noop}
+        onLeave={noop}
+        onChangeMaxPlayers={noop}
+      />
+    );
+
+    expect(screen.queryByRole("group", { name: "인원 변경" })).not.toBeInTheDocument();
+  });
+
   it("shows the selected content mode", () => {
     render(
       <WaitingRoom
         state={roomState([player("p1", "민수")], { content_mode: "adult" })}
         playerId="p1"
         onStart={noop}
-        onLeave={noop}
+        onLeave={noop} onChangeMaxPlayers={noop}
       />
     );
     expect(screen.getByText("19금 모드")).toBeInTheDocument();
