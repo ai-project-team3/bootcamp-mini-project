@@ -28,17 +28,28 @@ def check_player_count(count: int) -> None:
         )
 
 
+VALID_CONTENT_MODES = ("general", "adult")
+
+
 def create_room_for(
     nicknames: list[str],
     host_index: int = 0,
-    content_mode: str = "general",
+    options: dict[str, str] | None = None,
 ) -> tuple[str, list[str]]:
     """Seat a whole group in a new marble room.
 
     Returns the room code and one player id per nickname, in the same order.
     Seating order is the order given, which is the order people joined the
     shared room, so turns follow the same sequence everyone already saw.
+
+    `options["content_mode"]` carries the host's 일반/19금 choice. It used to be
+    made on this game's own lobby screen, which a launched group never sees, so
+    it is asked for when the game is picked instead. Anything unrecognised is
+    refused rather than quietly played as 일반 모드.
     """
+    content_mode = (options or {}).get("content_mode", "general")
+    if content_mode not in VALID_CONTENT_MODES:
+        raise MarbleHandoffError("알 수 없는 모드입니다")
     check_player_count(len(nicknames))
     if not 0 <= host_index < len(nicknames):
         raise MarbleHandoffError("방장을 찾을 수 없어요")

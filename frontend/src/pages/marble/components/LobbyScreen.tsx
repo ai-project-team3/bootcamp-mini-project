@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ContentModeChoice from "../../../components/room/ContentModeChoice";
 import type { ContentMode } from "../api/types";
 import { PLAYER_COUNT_OPTIONS } from "../constants";
 import RoomEntryLayout from "../../../components/room/RoomEntryLayout";
@@ -78,37 +79,7 @@ export function LobbyScreen({
       error={error ?? localError}
       options={
         <>
-          <div className="game-room-option-group">
-            <span className="game-room-option-label">모드</span>
-            <div className="game-room-modes" role="group" aria-label="모드">
-              <button
-                type="button"
-                data-testid="pm-mode-general"
-                className="game-room-mode"
-                aria-pressed={contentMode === "general"}
-                onClick={() => onContentModeChange("general")}
-              >
-                <span className="game-room-mode-icon" aria-hidden="true">
-                  🌤️
-                </span>
-                <b>일반 모드</b>
-                <small>귀엽고 유쾌한 질문과 벌칙</small>
-              </button>
-              <button
-                type="button"
-                data-testid="pm-mode-adult"
-                className="game-room-mode"
-                aria-pressed={contentMode === "adult"}
-                onClick={() => onContentModeChange("adult")}
-              >
-                <span className="game-room-mode-icon" aria-hidden="true">
-                  🌙
-                </span>
-                <b>19금 모드</b>
-                <small>더 과감한 질문과 벌칙, 벌칙 받을 사람은 추첨</small>
-              </button>
-            </div>
-          </div>
+          <ContentModeChoice value={contentMode} onChange={onContentModeChange} />
 
           <div className="game-room-option-group">
             <span className="game-room-option-label">참여 인원</span>

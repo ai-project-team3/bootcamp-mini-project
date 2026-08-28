@@ -37,8 +37,8 @@ class LaunchablePlayer:
     is_host: bool
 
 
-#: game id -> (nicknames, host_index) -> (room_id, player_ids in the same order)
-_LAUNCHERS: dict[str, Callable[[list[str], int], tuple[str, list[str]]]] = {
+#: game id -> (nicknames, host_index, options) -> (room_id, player_ids in order)
+_LAUNCHERS: dict[str, Callable[[list[str], int, dict[str, str] | None], tuple[str, list[str]]]] = {
     'mafia': mafia_handoff.create_room_for,
     'marble': marble_handoff.create_room_for,
 }
@@ -49,7 +49,17 @@ def is_launchable(game_id: str) -> bool:
     return game_id in _LAUNCHERS
 
 
-def launch(game_id: str, players: list[LaunchablePlayer]) -> LaunchedGame:
+def launch(
+    game_id: str,
+    players: list[LaunchablePlayer],
+    options: dict[str, str] | None = None,
+) -> LaunchedGame:
+    """Start `game_id` for this group.
+
+    `options` is whatever that game asked the host for when it was picked —
+    커플 브루마블's 일반/19금 mode, for instance. Each game reads only the keys
+    it knows; the shared room does not interpret them.
+    """
     launcher = _LAUNCHERS.get(game_id)
     if launcher is None:
         raise GameLaunchError('이 게임은 방을 따로 만들지 않습니다')
@@ -58,7 +68,9 @@ def launch(game_id: str, players: list[LaunchablePlayer]) -> LaunchedGame:
 
     host_index = next((i for i, player in enumerate(players) if player.is_host), 0)
     try:
-        room_id, game_player_ids = launcher([player.nickname for player in players], host_index)
+        room_id, game_player_ids = launcher(
+            [player.nickname for player in players], host_index, options
+        )
     except (mafia_handoff.MafiaHandoffError, marble_handoff.MarbleHandoffError) as error:
         # The games speak for themselves about their own size limits.
         raise GameLaunchError(str(error)) from error

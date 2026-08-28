@@ -13,7 +13,7 @@ from app.mafia.store import store as mafia_store
 from app.marble.store import store as marble_store
 from app.routers import demo_rooms
 from app.schemas.demo_room import (
-    DemoRoomGameSelectRequest,
+    DemoRoomGameLaunchRequest,
     DemoRoomNicknameRequest,
     DemoRoomStartRequest,
 )
@@ -46,10 +46,12 @@ class DemoRoomGameLaunchTest(unittest.TestCase):
         )
         return players
 
-    def _launch(self, host_id: str, game_id: str):
+    def _launch(self, host_id: str, game_id: str, options: dict | None = None):
         return demo_rooms.launch_room_game(
             'ABC123',
-            DemoRoomGameSelectRequest(player_id=host_id, game_id=game_id),
+            DemoRoomGameLaunchRequest(
+                player_id=host_id, game_id=game_id, options=options or {}
+            ),
             self.store,
         )
 
@@ -157,6 +159,37 @@ class DemoRoomGameLaunchTest(unittest.TestCase):
             )
 
         self.assertEqual(error.exception.status_code, 403)
+
+    def test_marble_starts_in_the_mode_the_host_picked(self):
+        players = self._room_of(['방장', '둘', '셋'])
+
+        launched = self._launch(players[0].id, 'marble', {'content_mode': 'adult'})
+
+        room = marble_store.get(launched.launch.room_id)
+        self.assertEqual(room.content_mode.value, 'adult')
+
+    def test_marble_defaults_to_the_gentle_mode(self):
+        players = self._room_of(['방장', '둘', '셋'])
+
+        launched = self._launch(players[0].id, 'marble')
+
+        room = marble_store.get(launched.launch.room_id)
+        self.assertEqual(room.content_mode.value, 'general')
+
+    def test_an_unknown_mode_is_refused_rather_than_played_as_general(self):
+        players = self._room_of(['방장', '둘', '셋'])
+
+        with self.assertRaises(HTTPException) as error:
+            self._launch(players[0].id, 'marble', {'content_mode': 'whatever'})
+
+        self.assertEqual(error.exception.status_code, 400)
+
+    def test_a_game_that_ignores_options_is_unbothered_by_them(self):
+        players = self._room_of(['방장', '둘', '셋', '넷'])
+
+        launched = self._launch(players[0].id, 'mafia', {'content_mode': 'adult'})
+
+        self.assertEqual(len(mafia_store.get(launched.launch.room_id).players), 4)
 
     def test_launching_again_replaces_the_previous_game_room(self):
         players = self._room_of(['방장', '둘', '셋', '넷'])

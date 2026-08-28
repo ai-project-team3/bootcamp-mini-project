@@ -19,6 +19,17 @@ class DemoRoomGameSelectRequest(DemoRoomStartRequest):
     game_id: str = Field(min_length=1, max_length=40)
 
 
+class DemoRoomGameLaunchRequest(DemoRoomGameSelectRequest):
+    """Picking a game that runs its own room.
+
+    `options` is whatever that game asked the host for at the moment of
+    choosing — settings its own entry screen used to collect, which a group
+    coming from the shared room never sees. Only the game reads them.
+    """
+
+    options: dict[str, str] = Field(default_factory=dict)
+
+
 class DemoPlayerResponse(BaseModel):
     id: str
     nickname: str
