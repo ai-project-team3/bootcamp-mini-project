@@ -6,7 +6,7 @@ import { hasMarbleSession, resetMarbleGame } from "./resetGame";
 const SESSION = { roomId: "R1", playerId: "p1", isHost: true };
 
 beforeEach(() => {
-  window.localStorage.clear();
+  window.sessionStorage.clear();
 });
 
 afterEach(() => {
@@ -15,7 +15,7 @@ afterEach(() => {
 
 describe("resetMarbleGame", () => {
   it("releases the room and forgets the session", async () => {
-    window.localStorage.setItem("personaMarble.session", JSON.stringify(SESSION));
+    window.sessionStorage.setItem("personaMarble.session", JSON.stringify(SESSION));
     const leave = vi.spyOn(client, "leaveRoom").mockResolvedValue({ status: "room_closed" });
 
     await resetMarbleGame();
@@ -26,7 +26,7 @@ describe("resetMarbleGame", () => {
 
   it("still forgets the session when the server cannot be reached", async () => {
     // Otherwise a player whose server is down is stuck in a game they quit.
-    window.localStorage.setItem("personaMarble.session", JSON.stringify(SESSION));
+    window.sessionStorage.setItem("personaMarble.session", JSON.stringify(SESSION));
     vi.spyOn(client, "leaveRoom").mockRejectedValue(new Error("network down"));
 
     await expect(resetMarbleGame()).resolves.toBeUndefined();
@@ -43,7 +43,7 @@ describe("resetMarbleGame", () => {
 
   it("reports whether a game is running", () => {
     expect(hasMarbleSession()).toBe(false);
-    window.localStorage.setItem("personaMarble.session", JSON.stringify(SESSION));
+    window.sessionStorage.setItem("personaMarble.session", JSON.stringify(SESSION));
     expect(hasMarbleSession()).toBe(true);
   });
 });

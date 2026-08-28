@@ -2,6 +2,9 @@ import { useCallback, useState } from "react";
 
 const STORAGE_KEY = "personaMarble.session";
 
+/** Per tab, not per browser — see the note in `mafia/hooks/usePlayerSession`. */
+const storage = () => window.sessionStorage;
+
 export interface MarbleSession {
   roomId: string;
   playerId: string;
@@ -12,7 +15,7 @@ export interface MarbleSession {
  *  to tell the server which player is leaving. */
 export function readMarbleSession(): MarbleSession | null {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = storage().getItem(STORAGE_KEY);
     return raw ? (JSON.parse(raw) as MarbleSession) : null;
   } catch {
     // A corrupt or unavailable store should not block starting a fresh game.
@@ -20,11 +23,21 @@ export function readMarbleSession(): MarbleSession | null {
   }
 }
 
+/** Store a session from outside React — used when the shared room hands the
+ *  whole group over to this game and each player arrives already seated. */
+export function writeMarbleSession(session: MarbleSession): void {
+  try {
+    storage().setItem(STORAGE_KEY, JSON.stringify(session));
+  } catch {
+    // Non-fatal: the session just will not survive a reload.
+  }
+}
+
 /** Forget the room. Leaving this behind is what used to drop a player back
  *  into a game they had already quit. */
 export function clearMarbleSession(): void {
   try {
-    window.localStorage.removeItem(STORAGE_KEY);
+    storage().removeItem(STORAGE_KEY);
   } catch {
     // Non-fatal.
   }
@@ -36,11 +49,7 @@ export function useMarbleSession() {
 
   const setSession = useCallback((next: MarbleSession) => {
     setSessionState(next);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // Non-fatal: the session just will not survive a reload.
-    }
+    writeMarbleSession(next);
   }, []);
 
   const clearSession = useCallback(() => {

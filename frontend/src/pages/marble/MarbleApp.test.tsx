@@ -5,7 +5,7 @@ import * as client from "./api/client";
 import { makePlayer, makeRoomState } from "./test/fixtures";
 
 beforeEach(() => {
-  window.localStorage.clear();
+  window.sessionStorage.clear();
 });
 
 afterEach(() => {
@@ -84,7 +84,7 @@ describe("MarbleApp", () => {
   });
 
   it("renders the board once the game starts", async () => {
-    window.localStorage.setItem(
+    window.sessionStorage.setItem(
       "personaMarble.session",
       JSON.stringify({ roomId: "ABC123", playerId: "p1", isHost: true })
     );
@@ -97,7 +97,7 @@ describe("MarbleApp", () => {
   });
 
   it("disables the dice for the player who is not on turn", async () => {
-    window.localStorage.setItem(
+    window.sessionStorage.setItem(
       "personaMarble.session",
       JSON.stringify({ roomId: "ABC123", playerId: "p2", isHost: false })
     );
@@ -112,7 +112,7 @@ describe("MarbleApp", () => {
   });
 
   it("shows the winner when the room reports a completed lap", async () => {
-    window.localStorage.setItem(
+    window.sessionStorage.setItem(
       "personaMarble.session",
       JSON.stringify({ roomId: "ABC123", playerId: "p1", isHost: true })
     );
@@ -135,7 +135,7 @@ describe("MarbleApp", () => {
   });
 
   it("drops a session whose room no longer exists", async () => {
-    window.localStorage.setItem(
+    window.sessionStorage.setItem(
       "personaMarble.session",
       JSON.stringify({ roomId: "GONE", playerId: "p1", isHost: true })
     );

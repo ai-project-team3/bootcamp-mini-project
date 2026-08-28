@@ -8,11 +8,25 @@ export interface PlayerSession {
 
 const STORAGE_KEY = "mafia_game_session";
 
+/**
+ * Why `sessionStorage` and not `localStorage`.
+ *
+ * A session is one player at one screen. `localStorage` is shared by every tab
+ * of a browser, so two people testing from two tabs on one laptop would share a
+ * single seat and both see the same hand — and when the shared room hands a
+ * group over to this game, the second tab would find a session already written
+ * by the first and never claim its own. `sessionStorage` is per tab, which is
+ * what a player is. It still survives a reload, so refreshing mid-game keeps
+ * the seat; only closing the tab gives it up, and that already loses the shared
+ * room's context anyway.
+ */
+const storage = () => window.sessionStorage;
+
 /** The stored session, readable from outside React — the exit control needs it
  *  to tell the server which player is leaving. */
 export function readMafiaSession(): PlayerSession | null {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = storage().getItem(STORAGE_KEY);
     return raw ? (JSON.parse(raw) as PlayerSession) : null;
   } catch {
     return null;
@@ -21,7 +35,7 @@ export function readMafiaSession(): PlayerSession | null {
 
 export function writeMafiaSession(session: PlayerSession): void {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    storage().setItem(STORAGE_KEY, JSON.stringify(session));
   } catch {
     // Non-fatal: the session just will not survive a reload.
   }
@@ -31,7 +45,7 @@ export function writeMafiaSession(session: PlayerSession): void {
  *  into a game they had already quit. */
 export function clearMafiaSession(): void {
   try {
-    window.localStorage.removeItem(STORAGE_KEY);
+    storage().removeItem(STORAGE_KEY);
   } catch {
     // Non-fatal.
   }

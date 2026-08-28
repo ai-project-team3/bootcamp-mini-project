@@ -19,7 +19,7 @@ export default function ResultHubPage() {
         <Button variant="secondary" onClick={() => navigate(`/room/${code}/report/team`)}>
           팀 리포트
         </Button>
-        <Button variant="ghost" onClick={() => navigate('/games')}>
+        <Button variant="ghost" onClick={() => navigate('/games/demo')}>
           게임으로 가기
         </Button>
       </div>

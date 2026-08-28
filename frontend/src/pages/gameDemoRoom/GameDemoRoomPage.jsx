@@ -91,10 +91,10 @@ export default function GameDemoRoomPage() {
         error={error}
         footer={isHost ? (
           <Button onClick={handleStart} disabled={!canStart || starting}>
-            {starting ? '시작하는 중...' : players.length < DEMO_ROOM_MIN_PLAYERS ? '한 명 더 기다려주세요' : '게임 선택 시작'}
+            {starting ? '여는 중...' : players.length < DEMO_ROOM_MIN_PLAYERS ? '한 명 더 기다려주세요' : '게임 고르기'}
           </Button>
         ) : (
-          <Button variant="ghost" disabled>방장이 시작하기를 기다리는 중</Button>
+          <Button variant="ghost" disabled>방장이 게임을 고르기를 기다리는 중</Button>
         )}
       />
     </PhoneFrame>

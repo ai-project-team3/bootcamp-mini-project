@@ -6,7 +6,7 @@ import { hasMafiaSession, resetMafiaGame } from "./resetGame";
 const SESSION = { roomId: "R1", playerId: "p1", isHost: true };
 
 beforeEach(() => {
-  window.localStorage.clear();
+  window.sessionStorage.clear();
 });
 
 afterEach(() => {
@@ -15,7 +15,7 @@ afterEach(() => {
 
 describe("resetMafiaGame", () => {
   it("releases the room and forgets the session", async () => {
-    window.localStorage.setItem("mafia_game_session", JSON.stringify(SESSION));
+    window.sessionStorage.setItem("mafia_game_session", JSON.stringify(SESSION));
     const leave = vi.spyOn(client, "leaveRoom").mockResolvedValue({ status: "room_closed" });
 
     await resetMafiaGame();
@@ -26,7 +26,7 @@ describe("resetMafiaGame", () => {
 
   it("still forgets the session when the server cannot be reached", async () => {
     // Otherwise a player whose server is down is stuck in a game they quit.
-    window.localStorage.setItem("mafia_game_session", JSON.stringify(SESSION));
+    window.sessionStorage.setItem("mafia_game_session", JSON.stringify(SESSION));
     vi.spyOn(client, "leaveRoom").mockRejectedValue(new Error("network down"));
 
     await expect(resetMafiaGame()).resolves.toBeUndefined();
@@ -43,7 +43,7 @@ describe("resetMafiaGame", () => {
 
   it("reports whether a game is running", () => {
     expect(hasMafiaSession()).toBe(false);
-    window.localStorage.setItem("mafia_game_session", JSON.stringify(SESSION));
+    window.sessionStorage.setItem("mafia_game_session", JSON.stringify(SESSION));
     expect(hasMafiaSession()).toBe(true);
   });
 });

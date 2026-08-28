@@ -30,7 +30,16 @@ const ROLE_REVEALED_PHASES: GamePhase[] = [
   "NIGHT_ACTION",
 ];
 
-export function MafiaApp() {
+interface MafiaAppProps {
+  /**
+   * The room stopped existing — usually because the host ended the game.
+   * The page owns what happens next, since only it knows whether these players
+   * arrived from a shared room they can still go back to.
+   */
+  onRoomClosed?: () => void;
+}
+
+export function MafiaApp({ onRoomClosed }: MafiaAppProps = {}) {
   const { session, setSession, clearSession } = usePlayerSession();
   const { state, error } = useRoomState(session?.roomId ?? null);
   const [myView, setMyView] = useState<MyView | null>(null);
@@ -47,7 +56,8 @@ export function MafiaApp() {
     if (!error || !error.includes("404")) return;
     setNotice("이전 방을 찾을 수 없어요. 새로 시작해주세요.");
     clearSession();
-  }, [error, clearSession]);
+    onRoomClosed?.();
+  }, [error, clearSession, onRoomClosed]);
 
   const renderPage = () => {
     if (!session) {

@@ -4,53 +4,49 @@ import Badge from '../../components/common/Badge'
 import Card from '../../components/common/Card'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
-import { DEMO_GAME_CATALOG } from '../../data/gameDemo/gameDemoData'
-import { STANDALONE_GAMES, isRoomFree } from '../../data/gamesHub/standaloneGames'
+import { isRoomFree } from '../../data/gamesHub/standaloneGames'
+import { ROOM_GAME_GROUPS, roomGamesInGroup } from '../../data/gamesHub/roomGameCatalog'
 import '../gameDemoHub/GameDemoHubPage.css'
 
-/** A game needs a room unless it runs its own, or is playable on one phone. */
+/** A game needs a room unless it is playable by passing one phone around. */
 function needsRoom(game) {
-  return !game.standalone && !isRoomFree(game.id)
+  return !isRoomFree(game.id)
 }
 
 function pathFor(game) {
-  if (game.standalone) return game.path
-  if (isRoomFree(game.id)) return `/games/party/${game.id}`
-  return '/games/demo'
+  return isRoomFree(game.id) ? `/games/party/${game.id}` : '/games/demo'
 }
 
-const GROUPS = [
-  { key: 'Persona Games', label: '페르소나 게임' },
-  { key: 'Party Games', label: '파티 게임' },
-]
-
 /**
- * Every game in one list, grouped and collapsible.
+ * What there is to play, before anyone has a room.
  *
- * Games start in one of three ways, and the card says which:
- * - `standalone` (마피아, 커플 브루마블) run their own rooms and open directly.
- * - Room-free party games are played by passing one phone, so they open directly too.
- * - Everything else needs a screen each, so its card leads to the demo entry
- *   where the host makes a room and then picks the game for everyone.
+ * Every game that needs a screen each — 마피아 and 커플 브루마블 included —
+ * leads to the same place: making or joining a room. The game itself is chosen
+ * later, from inside the room, once everyone has arrived. There is deliberately
+ * no second way into a game from here: two entrances to 마피아, one making its
+ * own room and one using the shared one, is exactly the confusion this screen
+ * used to cause.
  *
- * The layout reuses the demo hub's stylesheet so both lists look the same.
+ * Room-free party games are played by passing one phone, so those still open
+ * straight away.
+ *
+ * The layout reuses the room chooser's stylesheet so both lists look the same.
  */
 export default function GamesHubPage() {
   const navigate = useNavigate()
   const [openGroups, setOpenGroups] = useState({ 'Persona Games': true, 'Party Games': false })
   const toggleGroup = (group) => setOpenGroups((current) => ({ ...current, [group]: !current[group] }))
-  const allGames = [...STANDALONE_GAMES, ...DEMO_GAME_CATALOG]
 
   return (
     <PhoneFrame>
-      <TopBar title="게임 선택" onBack={() => navigate('/')} />
+      <TopBar title="게임 목록" onBack={() => navigate('/')} />
       <header className="demo-hub-head">
         <span>ALL GAMES</span>
-        <h1>어떤 게임을<br />해볼까요?</h1>
-        <p>카테고리를 눌러 펼치고 접을 수 있어요.</p>
+        <h1>어떤 게임이<br />있는지 볼까요?</h1>
+        <p>여럿이 하는 게임은 방을 먼저 만들고, 모인 다음에 골라요.</p>
       </header>
-      {GROUPS.map(({ key, label }) => {
-        const games = allGames.filter((game) => game.group === key)
+      {ROOM_GAME_GROUPS.map(({ key, label }) => {
+        const games = roomGamesInGroup(key)
         return (
           <section key={key} className="demo-hub-group">
             <button
@@ -80,7 +76,7 @@ export default function GamesHubPage() {
                       </div>
                       <h2>{game.title}</h2>
                       <p>{game.desc}</p>
-                      <b>{needsRoom(game) ? '방 만들기 →' : '바로 시작 →'}</b>
+                      <b>{needsRoom(game) ? '방 만들고 시작 →' : '바로 시작 →'}</b>
                     </Card>
                   </button>
                 ))}

@@ -8,18 +8,48 @@ work. Nothing was merged into another branch to produce it.
 
 ## How a player moves through the app
 
+People gather first and choose a game second. There is one room and one game
+list, and the list is inside the room:
+
 ```
-/                     the app's end screen; 게임 바로가기 opens the list
-/games                two groups — 페르소나 게임 / 파티 게임, each collapsible
-/games/mafia          마피아          (own room)
-/games/marble         커플 브루마블   (own room)
-/games/demo           party games     (one demo room, then a game each)
-/games/party/:gameId  the four games that need no room at all
+/                          the app's end screen; 게임 바로가기 opens room creation
+/games/demo                make a room, or join one with an invite code
+/games/demo/join/:code     what an invite link opens
+/games/demo/room/:code     the waiting room — who is here, invite code, QR
+/games/demo/room/:code/games   the host picks from every game, and everyone goes
+/games                     a catalog of what exists; every room game leads back
+                           to /games/demo, because a room comes first
+/games/party/:gameId       the four games that need no room at all
 ```
 
+From the room's list the host picks anything. Games that play inside the room
+(너 누구야?, 너라면?, the party games) move everyone to the shared guide screen.
+마피아 and 커플 브루마블 keep rooms of their own, so they are *launched*: the
+server builds that game's room around the people already gathered, and each
+player walks in holding their own id. Nobody re-enters a nickname or a code.
+
 Four party games — 이름 끝말잇기, 카테고리 시장에 가면, 몸으로 말해요, 통했나? —
-are played by passing one phone, so they open straight from the list. The rest
-need a screen per player and therefore a room.
+are played by passing one phone, so they open straight from the catalog. The
+rest need a screen per player and therefore a room.
+
+### Handing a group over to a game with its own rooms
+
+```
+host  POST /demo/rooms/{code}/game-launch        {player_id, game_id}
+      -> builds a 마피아/브루마블 room seated with the whole roster
+everyone  GET  /demo/rooms/{code}                -> launch: {game_id, room_id}
+everyone  POST /demo/rooms/{code}/game-launch/claim  {player_id}
+      -> that one player's id in the new room, and nobody else's
+```
+
+The id map never leaves the server whole, so knowing a room code is not enough
+to play as somebody else. `backend/app/services/game_launch.py` is the registry;
+each game builds its own room in `<game>/handoff.py`, so the shared room never
+imports a game's models or store.
+
+A game only opens if the group is the right size for it — 마피아 needs 4~8, so
+with three people its card is greyed with the reason on it. The backend enforces
+the same limits and answers with its own message.
 
 ## One room screen for every game
 
@@ -41,18 +71,28 @@ so a Card inside picks them up without either game restyling the shared parts.
 
 ## Leaving a game
 
-'게임 목록' is the only way out of 마피아 and 브루마블, so the clean-up cannot
-be walked around. It runs `resetMafiaGame` / `resetMarbleGame`:
+The top-bar button is the only way out of 마피아 and 브루마블, so the clean-up
+cannot be walked around. It runs `resetMafiaGame` / `resetMarbleGame`:
 
-1. `POST /mafia|marble/rooms/{id}/leave` releases the room. The host leaving
-   closes it outright, which is what tells everyone else — their next poll
-   404s, and their client already drops its session on a 404.
+1. `POST /mafia|marble/rooms/{id}/leave` releases the game's room. The host
+   leaving closes it outright, which is what tells everyone else — their next
+   poll 404s, and their client already drops its session on a 404.
 2. The stored session is cleared even if the server cannot be reached, so a
    player is never trapped in a game they quit.
-3. The page navigates to `/games`; React state goes with the unmount.
+3. React state goes with the unmount.
 
-Coming back therefore lands on an empty room-creation screen: the room has to
-be made again and the players invited again.
+Where it lands depends on how the game was entered. A group that came from the
+shared room goes back to that room's game list, still gathered and free to pick
+something else — the game is torn down, the room is not. A player who opened
+마피아 directly lands on room creation, with nothing left of the old game.
+
+## One player, one tab
+
+Both games keep their session in `sessionStorage`, not `localStorage`.
+`localStorage` is shared by every tab of a browser, so two people testing from
+two tabs on one laptop would share one seat: the second tab would find the first
+player's session and never claim its own. `sessionStorage` is per tab, which is
+what a player is, and it still survives a reload.
 
 ## Running it
 
