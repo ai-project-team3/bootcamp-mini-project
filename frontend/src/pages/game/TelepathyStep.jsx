@@ -111,32 +111,34 @@ export default function TelepathyStep({ code, playerId, onAdvance }) {
   return (
     <div className="tele-step">
       <ProgressBar current={roundNo} total={round.total_rounds} />
-      {!choice ? (
-        <>
-          <p className="tele-prompt">나는?</p>
-          <div className="answer-choices">
-            <button className="answer-choice-btn choice-a" onClick={() => setChoice('A')}>
-              {round.a}
-            </button>
-            <button className="answer-choice-btn choice-b" onClick={() => setChoice('B')}>
-              {round.b}
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <p className="tele-prompt">
-            나랑 <b>{choice === 'A' ? round.a : round.b}</b>를 같이 고를 사람은?
-          </p>
-          <div className="tele-picks">
-            {others.map((p) => (
-              <button key={p.id} className="tele-pick" onClick={() => pick(p.id)}>
-                {p.nickname}
+      <div className="step-body">
+        {!choice ? (
+          <>
+            <p className="tele-prompt">나는?</p>
+            <div className="answer-choices">
+              <button className="answer-choice-btn choice-a" onClick={() => setChoice('A')}>
+                {round.a}
               </button>
-            ))}
-          </div>
-        </>
-      )}
+              <button className="answer-choice-btn choice-b" onClick={() => setChoice('B')}>
+                {round.b}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="tele-prompt">
+              나랑 <b>{choice === 'A' ? round.a : round.b}</b>를 같이 고를 사람은?
+            </p>
+            <div className="tele-picks">
+              {others.map((p) => (
+                <button key={p.id} className="tele-pick" onClick={() => pick(p.id)}>
+                  {p.nickname}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   )
 }

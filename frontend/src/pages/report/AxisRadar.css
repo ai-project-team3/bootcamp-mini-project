@@ -29,10 +29,6 @@
   background: var(--gold);
 }
 
-.radar-dot-post {
-  background: var(--deep);
-}
-
 .radar-axis-label {
   font-size: 9px;
   fill: var(--ink-soft);
