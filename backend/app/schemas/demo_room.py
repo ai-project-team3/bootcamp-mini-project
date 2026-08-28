@@ -26,6 +26,17 @@ class DemoPlayerResponse(BaseModel):
     is_host: bool
 
 
+class DemoRoomLaunchResponse(BaseModel):
+    """Which game the room jumped into, without saying who anybody is.
+
+    The per-player ids stay on the server; everyone polls this and then claims
+    their own seat through `/launch/claim`.
+    """
+
+    game_id: str
+    room_id: str
+
+
 class DemoRoomResponse(BaseModel):
     code: str
     status: str
@@ -33,6 +44,16 @@ class DemoRoomResponse(BaseModel):
     max_players: int
     selected_game_id: str | None = None
     game_phase: str
+    launch: DemoRoomLaunchResponse | None = None
+
+
+class DemoRoomClaimResponse(BaseModel):
+    """One player's own seat in the launched game."""
+
+    game_id: str
+    room_id: str
+    player_id: str
+    is_host: bool
 
 
 class DemoRoomCreateResponse(BaseModel):

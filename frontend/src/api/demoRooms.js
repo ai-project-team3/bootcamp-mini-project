@@ -43,6 +43,27 @@ export function startSelectedDemoGame(code, playerId) {
   })
 }
 
+/**
+ * Start a game that runs its own rooms, for everyone already in this one.
+ *
+ * Host only. The server builds the game's room around the current roster, so
+ * nobody re-enters a nickname or an invite code.
+ */
+export function launchDemoGame(code, playerId, gameId) {
+  return apiFetch(`/demo/rooms/${code}/game-launch`, {
+    method: 'POST',
+    body: JSON.stringify({ player_id: playerId, game_id: gameId }),
+  })
+}
+
+/** This player's own seat in the launched game. Nobody else's id is returned. */
+export function claimLaunchedGame(code, playerId) {
+  return apiFetch(`/demo/rooms/${code}/game-launch/claim`, {
+    method: 'POST',
+    body: JSON.stringify({ player_id: playerId }),
+  })
+}
+
 export function leaveDemoRoom(code, playerId) {
   return apiFetch(`/demo/rooms/${code}/leave`, {
     method: 'POST',

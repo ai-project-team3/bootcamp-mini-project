@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { getDemoPlayers, getDemoRoom } from '../../api/demoRooms'
+import { claimLaunchedGame, getDemoPlayers, getDemoRoom } from '../../api/demoRooms'
 import { useRoomFlow } from '../../context/RoomFlowContext'
 import { DEMO_PERSONA_TEMPLATES } from '../../data/gameDemo/gameDemoData'
 import { adaptRoomPlayersForPersonaGames } from '../../data/gameDemo/gameDemoPlayerAdapter'
@@ -8,6 +8,7 @@ import { getSharedDemoGamePath, resolveDemoAccess } from '../../data/gameDemo/ga
 import { DemoNotice } from './GameDemoControls'
 import PhoneFrame from '../layout/PhoneFrame'
 import TopBar from '../layout/TopBar'
+import { enterLaunchedGame, hasFollowedLaunch } from '../../pages/minigames/launchedGames'
 import GameDemoSessionProvider from './GameDemoSessionProvider'
 
 export default function GameDemoAccessGuard({ children }) {
@@ -41,6 +42,30 @@ export default function GameDemoAccessGuard({ children }) {
       window.clearInterval(timer)
     }
   }, [contextRoomCode, playerId, requestedRoomCode])
+
+  // A game that runs its own rooms was started for the whole group. Everyone
+  // polling the room finds out at the same time, claims their own id in the new
+  // room and walks in — nobody is asked for a nickname or a code a second time.
+  // A launch already followed is skipped, so quitting the game and coming back
+  // to this list does not shove the player straight back into it.
+  useEffect(() => {
+    const launch = room?.launch
+    if (!launch || !playerId || hasFollowedLaunch(launch.room_id)) return
+    let cancelled = false
+    claimLaunchedGame(requestedRoomCode, playerId)
+      .then((claim) => {
+        if (cancelled) return
+        const destination = enterLaunchedGame(claim)
+        if (destination) navigate(destination, { replace: true })
+      })
+      .catch(() => {
+        // Claiming can fail for someone who joined after the launch. They stay
+        // on this screen rather than being dropped out of the room.
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [navigate, playerId, requestedRoomCode, room?.launch?.room_id])
 
   useEffect(() => {
     if (!room) return

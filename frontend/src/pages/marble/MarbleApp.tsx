@@ -43,9 +43,14 @@ interface MarbleAppProps {
    * `resetGame.ts`. Without one, leaving just returns to this game's lobby.
    */
   onExit?: () => void;
+  /**
+   * The room stopped existing — usually because the host ended the game.
+   * The page decides where that leaves these players.
+   */
+  onRoomClosed?: () => void;
 }
 
-export function MarbleApp({ onToneChange, onExit }: MarbleAppProps = {}) {
+export function MarbleApp({ onToneChange, onExit, onRoomClosed }: MarbleAppProps = {}) {
   const { session, setSession, clearSession } = useMarbleSession();
   const { state, error: pollError } = useMarbleRoom(session?.roomId ?? null);
 
@@ -84,8 +89,9 @@ export function MarbleApp({ onToneChange, onExit }: MarbleAppProps = {}) {
     if (pollError && pollError.includes("404")) {
       clearSession();
       setActionError("이전 방을 찾을 수 없어요. 새로 시작해주세요.");
+      onRoomClosed?.();
     }
-  }, [pollError, clearSession]);
+  }, [pollError, clearSession, onRoomClosed]);
 
   const playHop = useCallback(
     (mover: string, start: number, steps: number, direction: 1 | -1, size: number, done: () => void) => {

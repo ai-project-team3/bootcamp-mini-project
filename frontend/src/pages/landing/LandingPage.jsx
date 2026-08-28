@@ -28,7 +28,7 @@ export default function LandingPage() {
         <Button variant="secondary" disabled>
           팀 리포트
         </Button>
-        <Button variant="ghost" onClick={() => navigate('/games')}>
+        <Button variant="ghost" onClick={() => navigate('/games/demo')}>
           게임 바로가기
         </Button>
 

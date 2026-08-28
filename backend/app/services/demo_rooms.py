@@ -33,12 +33,31 @@ class DemoRoomAuthorizationError(DemoRoomError):
     pass
 
 
+class DemoRoomLaunchError(DemoRoomError):
+    pass
+
+
 @dataclass(frozen=True)
 class DemoPlayer:
     id: str
     nickname: str
     seat_no: int
     is_host: bool
+
+
+@dataclass(frozen=True)
+class DemoLaunch:
+    """A game that runs its own room, started for everyone in this one.
+
+    `player_ids` maps a shared-room player id to that same person's id inside
+    the game's room. It never leaves the server as a whole — each player claims
+    only their own entry — so knowing the room code is not enough to play as
+    somebody else.
+    """
+
+    game_id: str
+    room_id: str
+    player_ids: dict[str, str]
 
 
 @dataclass
@@ -48,6 +67,7 @@ class DemoRoom:
     players: list[DemoPlayer] = field(default_factory=list)
     selected_game_id: str | None = None
     game_phase: str = 'HUB'
+    launch: DemoLaunch | None = None
 
 
 def demo_room_can_start(player_count: int) -> bool:
@@ -120,6 +140,45 @@ class DemoRoomStore:
                 raise DemoRoomGameError('선택된 게임 설명서가 없습니다')
             room.game_phase = 'PLAYING'
             return room
+
+    def launch_game(
+        self,
+        code: str,
+        player_id: str,
+        build: Callable[[list[DemoPlayer]], DemoLaunch],
+    ) -> DemoRoom:
+        """Start a game that keeps its own rooms, for everyone gathered here.
+
+        The room is built while the lock is held so the roster cannot change
+        between being read and being seated. `build` belongs to the caller: the
+        shared room does not know how any particular game makes a room.
+        """
+        with self._lock:
+            room = self._require_room(code)
+            self._require_host_in_progress(room, player_id)
+            launch = build(list(room.players))
+            room.selected_game_id = launch.game_id
+            room.game_phase = 'LAUNCHED'
+            room.launch = launch
+            return room
+
+    def claim_launch(self, code: str, player_id: str) -> tuple[DemoLaunch, DemoPlayer]:
+        """One player's own seat in the launched game.
+
+        Everyone polls the room and sees that a game started; this is how each
+        of them learns which player they are inside it, without ever being told
+        anyone else's id.
+        """
+        with self._lock:
+            room = self._require_room(code)
+            if room.launch is None:
+                raise DemoRoomLaunchError('아직 시작된 게임이 없습니다')
+            player = next((item for item in room.players if item.id == player_id), None)
+            if player is None:
+                raise DemoRoomAuthorizationError('방 참가자만 게임에 들어갈 수 있습니다')
+            if player_id not in room.launch.player_ids:
+                raise DemoRoomLaunchError('게임이 시작된 뒤에 들어온 참가자입니다')
+            return room.launch, player
 
     def leave_room(self, code: str, player_id: str) -> bool:
         with self._lock:

@@ -4,15 +4,15 @@ import { usePlayerSession } from "./usePlayerSession";
 
 describe("usePlayerSession", () => {
   beforeEach(() => {
-    window.localStorage.clear();
+    window.sessionStorage.clear();
   });
 
-  it("starts with no session when localStorage is empty", () => {
+  it("starts with no session when the tab has no session", () => {
     const { result } = renderHook(() => usePlayerSession());
     expect(result.current.session).toBeNull();
   });
 
-  it("persists a session to localStorage and reflects it in state", () => {
+  it("persists a session to sessionStorage and reflects it in state", () => {
     const { result } = renderHook(() => usePlayerSession());
 
     act(() => {
@@ -20,15 +20,15 @@ describe("usePlayerSession", () => {
     });
 
     expect(result.current.session).toEqual({ roomId: "r1", playerId: "p1", isHost: true });
-    expect(JSON.parse(window.localStorage.getItem("mafia_game_session")!)).toEqual({
+    expect(JSON.parse(window.sessionStorage.getItem("mafia_game_session")!)).toEqual({
       roomId: "r1",
       playerId: "p1",
       isHost: true,
     });
   });
 
-  it("a fresh hook instance picks up a session already in localStorage", () => {
-    window.localStorage.setItem(
+  it("a fresh hook instance picks up a session already in sessionStorage", () => {
+    window.sessionStorage.setItem(
       "mafia_game_session",
       JSON.stringify({ roomId: "r1", playerId: "p1", isHost: false })
     );
@@ -45,6 +45,6 @@ describe("usePlayerSession", () => {
       result.current.clearSession();
     });
     expect(result.current.session).toBeNull();
-    expect(window.localStorage.getItem("mafia_game_session")).toBeNull();
+    expect(window.sessionStorage.getItem("mafia_game_session")).toBeNull();
   });
 });
