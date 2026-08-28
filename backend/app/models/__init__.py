@@ -1,17 +1,10 @@
 from .base import Base
-from .user import User
 from .room import Room
-from .participant import Participant
-from .axis_score import AxisScore
-from .compat_grade import CompatGrade
-from .survey_response import SurveyResponse
+from .player import Player
+from .answer import Answer
+from .statement import Statement
+from .guess import Guess
+from .ability import Ability
+from .report import Report
 
-__all__ = [
-    "Base",
-    "User",
-    "Room",
-    "Participant",
-    "AxisScore",
-    "CompatGrade",
-    "SurveyResponse",
-]
+__all__ = ["Base", "Room", "Player", "Answer", "Statement", "Guess", "Ability", "Report"]

@@ -3,10 +3,10 @@ services:
     image: mariadb:11
     restart: unless-stopped
     environment:
-      MARIADB_DATABASE: eoleumttaeng
-      MARIADB_USER: eoleumttaeng
-      MARIADB_PASSWORD: eoleumttaeng
-      MARIADB_ROOT_PASSWORD: eoleumttaeng_root
+      MARIADB_DATABASE: iceddaeng
+      MARIADB_USER: iceddaeng
+      MARIADB_PASSWORD: iceddaeng
+      MARIADB_ROOT_PASSWORD: iceddaeng_root
     ports:
       - "3306:3306"
     volumes:

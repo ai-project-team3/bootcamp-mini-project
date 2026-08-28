@@ -1,0 +1,80 @@
+name: Discord GitHub activity
+
+on:
+  push:
+  pull_request:
+    types: [opened, reopened, synchronize, closed, review_requested]
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+  pull_request_review_comment:
+    types: [created, edited, deleted]
+  issues:
+    types: [opened, edited, closed, reopened]
+  issue_comment:
+    types: [created, edited, deleted]
+  discussion:
+    types: [created, edited, deleted, transferred, pinned, unpinned, labeled, unlabeled, locked, unlocked, category_changed, answered, unanswered]
+  discussion_comment:
+    types: [created, edited, deleted]
+  create:
+  delete:
+  release:
+    types: [published, edited, deleted]
+
+permissions: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send activity to Discord
+        uses: actions/github-script@v7
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        with:
+          script: |
+            const p = context.payload;
+            const event = context.eventName;
+            const repo = `${context.repo.owner}/${context.repo.repo}`;
+            const actor = p.sender?.login || '알 수 없음';
+            const link = p.compare || p.repository?.html_url || `https://github.com/${repo}`;
+            let title = `[GitHub] ${repo} · ${event}`;
+            let details = '';
+
+            if (event === 'push') {
+              const branch = (p.ref || '').replace('refs/heads/', '');
+              const commits = (p.commits || []).slice(-10).map(c =>
+                `• ${c.author?.name || c.author?.username || '알 수 없음'}: ${c.message.split('\n')[0]} ([${c.id.slice(0, 7)}](${c.url}))`
+              );
+              const extra = Math.max(0, (p.commits || []).length - commits.length);
+              title = `[GitHub] ${repo} · ${branch}에 push`;
+              details = commits.join('\n') + (extra ? `\n• 외 ${extra}개 커밋` : '');
+            } else if (event === 'pull_request' || event === 'pull_request_review' || event === 'pull_request_review_comment') {
+              const pr = p.pull_request;
+              title = `[GitHub] PR #${pr?.number || p.number || ''} · ${p.action || event}`;
+              details = `${pr?.user?.login || actor}: ${pr?.title || ''}\n${pr?.html_url || link}`;
+            } else if (event === 'issues' || event === 'issue_comment') {
+              const issue = p.issue;
+              title = `[GitHub] Issue #${issue?.number || ''} · ${p.action || event}`;
+              details = `${issue?.user?.login || actor}: ${issue?.title || ''}\n${issue?.html_url || link}`;
+            } else if (event === 'discussion' || event === 'discussion_comment') {
+              const discussion = p.discussion;
+              title = `[GitHub] Discussion #${discussion?.number || ''} · ${p.action || event}`;
+              details = `${discussion?.user?.login || actor}: ${discussion?.title || ''}\n${discussion?.html_url || link}`;
+            } else if (event === 'create' || event === 'delete') {
+              title = `[GitHub] ${event}: ${p.ref_type || 'ref'} ${p.ref || ''}`;
+              details = `${actor} · ${repo}`;
+            } else if (event === 'release') {
+              title = `[GitHub] Release ${p.action || ''}: ${p.release?.tag_name || ''}`;
+              details = `${p.release?.name || ''}\n${p.release?.html_url || link}`;
+            } else {
+              details = `${actor} · ${link}`;
+            }
+
+            const content = `${title}\n${details}\n작업자: ${actor}`.slice(0, 1900);
+            const response = await fetch(process.env.DISCORD_WEBHOOK_URL, {
+              method: 'POST',
+              headers: {'content-type': 'application/json'},
+              body: JSON.stringify({content, allowed_mentions: {parse: []}})
+            });
+            if (!response.ok) core.setFailed(`Discord webhook failed: ${response.status}`);

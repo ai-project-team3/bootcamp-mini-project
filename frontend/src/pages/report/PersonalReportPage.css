@@ -1,0 +1,148 @@
+.report-error {
+  font-size: 0.78rem;
+  color: var(--hot);
+}
+
+.report-hint {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.report-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+.report-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  padding: 8px 0;
+}
+
+.report-header-symbol {
+  font-size: 2.4rem;
+}
+
+.report-header-name {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 1.7rem;
+  margin: 4px 0 0;
+}
+
+.report-header-subtitle {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin: 2px 0 0;
+}
+
+.report-header-meta {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  margin: 6px 0 0;
+}
+
+.report-abilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.report-ability-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+}
+
+.report-comment-line {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.report-comment-line:last-child {
+  margin-bottom: 0;
+}
+
+.report-quote {
+  margin: 0 0 4px;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.report-quote-note {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.report-section-title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 0.95rem;
+  margin: 4px 0 0;
+}
+
+.report-compat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-compat-card {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 4px 10px;
+  align-items: center;
+}
+
+.report-compat-nickname {
+  font-weight: 600;
+}
+
+.report-compat-grade {
+  font-family: var(--font-mono);
+  color: var(--hot);
+  font-weight: 700;
+}
+
+.report-compat-tag {
+  grid-column: 2;
+  font-size: 0.7rem;
+  color: var(--deep);
+}
+
+.report-compat-note {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.report-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.report-self-guess {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: 4px 0 0;
+}
