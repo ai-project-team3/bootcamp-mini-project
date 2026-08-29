@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import GameDemoAccessGuard from './GameDemoAccessGuard'
-import { RoomFlowProvider, useRoomFlow } from '../../context/RoomFlowContext'
+import { GameRoomProvider, useGameRoom } from '../../context/GameRoomContext'
 import * as demoRooms from '../../api/demoRooms'
 import { readMafiaSession } from '../../pages/mafia/hooks/usePlayerSession'
 
@@ -11,7 +11,7 @@ import { readMafiaSession } from '../../pages/mafia/hooks/usePlayerSession'
  *  The guard sends anyone without a seat back to room creation, so nothing is
  *  rendered until this one is seated. */
 function SeatPlayer({ children }) {
-  const { playerId, setPlayerId, setRoomCode } = useRoomFlow()
+  const { playerId, setPlayerId, setRoomCode } = useGameRoom()
   useEffect(() => {
     setPlayerId('p1')
     setRoomCode('AB12CD')
@@ -22,7 +22,7 @@ function SeatPlayer({ children }) {
 function renderGuard() {
   return render(
     <MemoryRouter initialEntries={['/games/demo/room/AB12CD/games']}>
-      <RoomFlowProvider>
+      <GameRoomProvider>
         <SeatPlayer>
           <Routes>
             <Route
@@ -33,7 +33,7 @@ function renderGuard() {
             <Route path="/games/demo" element={<p>방 만들기 화면</p>} />
           </Routes>
         </SeatPlayer>
-      </RoomFlowProvider>
+      </GameRoomProvider>
     </MemoryRouter>,
   )
 }

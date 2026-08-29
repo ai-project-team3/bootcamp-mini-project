@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import ExitToGamesControl from '../../components/common/ExitToGamesControl'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
-import { useRoomFlow } from '../../context/RoomFlowContext'
+import { useGameRoom } from '../../context/GameRoomContext'
 import { getDemoHubPath } from '../../data/gameDemo/gameDemoModels'
 import { MafiaApp } from '../mafia/MafiaApp'
 import { hasMafiaSession, resetMafiaGame } from '../mafia/resetGame'
@@ -25,7 +25,7 @@ import './MinigamePage.css'
  */
 export default function MafiaGamePage() {
   const navigate = useNavigate()
-  const { roomCode } = useRoomFlow()
+  const { roomCode } = useGameRoom()
 
   // The host ended the game. Everyone else goes back to the room they came
   // from, still gathered, rather than being left on mafia's own entry screen.
@@ -38,7 +38,7 @@ export default function MafiaGamePage() {
       <TopBar
         title="마피아"
         showBack={false}
-        action={
+        right={
           <ExitToGamesControl
             label={roomCode ? '게임 고르기' : '게임 목록'}
             onLeave={resetMafiaGame}

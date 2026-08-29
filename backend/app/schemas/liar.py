@@ -1,0 +1,47 @@
+from typing import Optional
+
+from pydantic import BaseModel
+
+
+class LiarSeenRequest(BaseModel):
+    player_id: str
+
+
+class LiarContinueRequest(BaseModel):
+    player_id: str
+    more: bool
+
+
+class LiarAccuseRequest(BaseModel):
+    player_id: str
+    target_player_id: str
+
+
+class LiarWordGuessRequest(BaseModel):
+    player_id: str
+    word: str
+
+
+class LiarStateResponse(BaseModel):
+    round_no: int
+    total_rounds: int
+    stage: str  # WORD | SPEAK | VOTE | ACCUSE | REVEAL | DONE
+    lap: int = 1
+    my_word: Optional[str] = None
+    am_i_liar: bool = False
+    seen: int = 0
+    total: int = 0
+    speaker_player_id: Optional[str] = None
+    speaker_nickname: Optional[str] = None
+    speaker_index: int = 0
+    votes_more: int = 0
+    votes_now: int = 0
+    voted: int = 0
+    accused: int = 0
+    accused_nickname: Optional[str] = None
+    liar_nickname: Optional[str] = None
+    liar_caught: bool = False
+    major_word: Optional[str] = None
+    # 걸린 라이어가 아직 제시어를 안 냈다 — 제시어도 승패도 아직 공개 전
+    word_pending: bool = False
+    liar_won: bool = False

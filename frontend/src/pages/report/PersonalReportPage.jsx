@@ -7,6 +7,7 @@ import Badge from '../../components/common/Badge'
 import { useRoomFlow } from '../../context/RoomFlowContext'
 import { getReport } from '../../api/report'
 import { ABILITY_LABELS, ABILITY_ORDER, TYPES } from '../../data/types'
+import { shareCurrentPage } from '../../utils/share'
 import AxisRadar from './AxisRadar'
 import './PersonalReportPage.css'
 
@@ -15,6 +16,7 @@ export default function PersonalReportPage() {
   const { playerId } = useRoomFlow()
   const [report, setReport] = useState(null)
   const [error, setError] = useState(null)
+  const [shareNote, setShareNote] = useState(null)
 
   useEffect(() => {
     getReport(code).then(setReport).catch((err) => setError(err.message))
@@ -47,17 +49,33 @@ export default function PersonalReportPage() {
     label: ABILITY_LABELS[code_],
     self: me.abilities[code_],
     pre: me.impression_pre[code_],
-    post: me.impression_post[code_],
   }))
+
+  const handleShare = async () => {
+    const result = await shareCurrentPage(
+      `얼음땡 · ${me.nickname}님의 리포트`,
+      `${me.nickname}님은 "${type.name}" 유형! 얼음땡 리포트를 확인해보세요.`,
+    )
+    if (result === 'copied') setShareNote('링크를 복사했어요')
+    if (result === 'failed') setShareNote('공유에 실패했어요')
+    if (result !== 'cancelled') setTimeout(() => setShareNote(null), 2000)
+  }
 
   return (
     <PhoneFrame>
-      <TopBar title="개인 리포트" />
+      <TopBar
+        title="개인 리포트"
+        right={
+          <button type="button" className="report-share-btn" onClick={handleShare}>
+            {shareNote ?? '공유'}
+          </button>
+        }
+      />
       <div className="report-body">
         <div className="report-header" style={{ color: type.color }}>
           <span className="report-header-symbol">{type.symbol}</span>
           <h1 className="report-header-name">{type.name}</h1>
-          <p className="report-header-subtitle">{type.subtitle}</p>
+          <p className="report-header-subtitle">{me.type_subtitle || type.subtitle}</p>
           <p className="report-header-meta">
             {me.nickname} · {me.mbti || 'MBTI 미입력'}
           </p>
@@ -79,6 +97,24 @@ export default function PersonalReportPage() {
           ))}
         </Card>
 
+        {me.impression_shift && (
+          <Card className="report-shift">
+            <p className="report-shift-title">
+              {me.impression_shift.pre_label === me.impression_shift.post_label
+                ? '첫인상 그대로였습니다'
+                : '첫인상이 이렇게 바뀌었습니다'}
+            </p>
+            <p className="report-shift-row">
+              <span className="report-shift-when">처음</span>
+              {me.impression_shift.pre_label} <b>{me.impression_shift.pre_votes}표</b>
+            </p>
+            <p className="report-shift-row">
+              <span className="report-shift-when">나중</span>
+              {me.impression_shift.post_label} <b>{me.impression_shift.post_votes}표</b>
+            </p>
+          </Card>
+        )}
+
         {me.quote && (
           <Card>
             <p className="report-quote">"{me.quote}"</p>
@@ -90,9 +126,13 @@ export default function PersonalReportPage() {
         <div className="report-compat-list">
           {me.compat.map((c) => (
             <Card key={c.nickname} className="report-compat-card">
-              <span className="report-compat-nickname">{c.nickname}</span>
-              <span className="report-compat-grade">{c.grade}</span>
-              <span className="report-compat-tag">{c.tag}</span>
+              <div className="report-compat-head">
+                <span className="report-compat-nickname">{c.nickname}</span>
+                <span className="report-compat-gradetag">
+                  <span className="report-compat-grade">{c.grade}</span>
+                  <span className="report-compat-tag">{c.tag}</span>
+                </span>
+              </div>
               <span className="report-compat-note">{c.note}</span>
             </Card>
           ))}

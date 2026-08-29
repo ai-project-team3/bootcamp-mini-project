@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "test": "vitest run",
+    "test": "vitest run && npm run test:data",
+    "_comment_test:data": "src/data 아래 두 폴더는 vitest가 아니라 node:test로 쓰여 있어 vitest가 0개로 세고 지나간다. 같이 돌려야 놓치지 않는다.",
+    "test:data": "node --test src/data/afterDateDemo/afterDateDemoModels.test.js src/data/gameDemo/gameDemoModels.test.js src/data/gameDemo/gameDemoPlayerAdapter.test.js",
     "lint": "oxlint",
     "preview": "vite preview"
   },

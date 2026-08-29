@@ -28,3 +28,4 @@ tunnel.ps1
 .tunnel/
 tunnel.bat
 frontend/vite.config.tunnel.js
+icetag_bots.py

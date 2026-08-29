@@ -36,12 +36,18 @@ class LaunchablePlayer:
     nickname: str
     is_host: bool
     is_bot: bool = False
+    #: What the icebreaking run measured for this person, 0~100 per ability,
+    #: or None if they did not play it. Each game maps it to its own rules.
+    persona: dict[str, int] | None = None
 
 
-#: game id -> (nicknames, host_index, options, bots) -> (room_id, player_ids)
+#: game id -> (nicknames, host_index, options, bots, personas) -> (room_id, ids)
 _LAUNCHERS: dict[
     str,
-    Callable[[list[str], int, dict[str, str] | None, list[bool] | None], tuple[str, list[str]]],
+    Callable[
+        [list[str], int, dict[str, str] | None, list[bool] | None, list[dict[str, int] | None] | None],
+        tuple[str, list[str]],
+    ],
 ] = {
     'mafia': mafia_handoff.create_room_for,
     'marble': marble_handoff.create_room_for,
@@ -77,6 +83,7 @@ def launch(
             host_index,
             options,
             [player.is_bot for player in players],
+            [player.persona for player in players],
         )
     except (mafia_handoff.MafiaHandoffError, marble_handoff.MarbleHandoffError) as error:
         # The games speak for themselves about their own size limits.

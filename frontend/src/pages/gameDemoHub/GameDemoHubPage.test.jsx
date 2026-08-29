@@ -3,12 +3,12 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import GameDemoHubPage from './GameDemoHubPage'
 import { GameDemoContext } from '../../context/GameDemoContext'
-import { RoomFlowProvider, useRoomFlow } from '../../context/RoomFlowContext'
+import { GameRoomProvider, useGameRoom } from '../../context/GameRoomContext'
 import * as demoRooms from '../../api/demoRooms'
 
 /** Stands in for the entry screen, which is what puts the player in the room. */
 function SeatPlayer({ children }) {
-  const { playerId, setPlayerId } = useRoomFlow()
+  const { playerId, setPlayerId } = useGameRoom()
   if (playerId !== 'p1') setPlayerId('p1')
   return children
 }
@@ -22,7 +22,7 @@ function renderHub({ isHost = true, playerCount = 4 } = {}) {
   const value = { room: { code: 'AB12CD' }, players, personas: {} }
   return render(
     <MemoryRouter initialEntries={['/games/demo/room/AB12CD/games']}>
-      <RoomFlowProvider>
+      <GameRoomProvider>
         <GameDemoContext.Provider value={value}>
           <SeatPlayer>
             <Routes>
@@ -30,7 +30,7 @@ function renderHub({ isHost = true, playerCount = 4 } = {}) {
             </Routes>
           </SeatPlayer>
         </GameDemoContext.Provider>
-      </RoomFlowProvider>
+      </GameRoomProvider>
     </MemoryRouter>,
   )
 }

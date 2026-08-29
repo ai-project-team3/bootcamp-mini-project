@@ -38,7 +38,7 @@ export default function SoloPartyGamePage() {
       <TopBar
         title={meta ? `${meta.emoji} ${meta.title}` : 'Party Game'}
         onBack={() => navigate('/games')}
-        action={
+        right={
           <Button variant="ghost" className="solo-party-exit" onClick={() => navigate('/games')}>
             게임 목록
           </Button>

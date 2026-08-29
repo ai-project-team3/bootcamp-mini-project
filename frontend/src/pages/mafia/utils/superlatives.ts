@@ -5,11 +5,21 @@ export interface Superlative {
   player: ResultPlayer;
 }
 
-// backend spec §3.2's mafia weight formula, ported here for display only —
-// this never decides an actual role, it only ranks players for the "가장
-// 마피아다웠던 사람" superlative on the result screen.
+// The backend's mafia weighting (roles/weights.py), ported here for display
+// only — this never decides an actual role, it only ranks players for the
+// "가장 마피아다웠던 사람" superlative on the result screen.
 function mafiaLikeScore(persona: PersonaScores): number {
-  return 0.4 * persona.initiative + 0.35 * (100 - persona.empathy) + 0.25 * persona.caution;
+  return (
+    0.3 * persona.DOM +
+    0.25 * (100 - persona.EMP) +
+    0.2 * (100 - persona.SPD) +
+    0.25 * (100 - persona.EXP)
+  );
+}
+
+// 신중함은 따로 재는 축이 아니라 순발력의 반대다 — docs/페르소나-인계.md.
+function cautionScore(persona: PersonaScores): number {
+  return 100 - persona.SPD;
 }
 
 export function computeSuperlatives(players: ResultPlayer[]): Superlative[] {
@@ -19,7 +29,7 @@ export function computeSuperlatives(players: ResultPlayer[]): Superlative[] {
     (a, b) => mafiaLikeScore(b.persona_scores) - mafiaLikeScore(a.persona_scores)
   )[0];
   const mostCautious = [...players].sort(
-    (a, b) => b.persona_scores.caution - a.persona_scores.caution
+    (a, b) => cautionScore(b.persona_scores) - cautionScore(a.persona_scores)
   )[0];
   const twist = players.find((p) => p.assigned_by === "fallback_random");
   const survivor = players.find((p) => p.is_alive);

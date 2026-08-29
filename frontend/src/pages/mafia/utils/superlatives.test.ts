@@ -10,7 +10,7 @@ function player(overrides: Partial<ResultPlayer>): ResultPlayer {
     is_alive: true,
     assigned_score: 50,
     assigned_by: "preference",
-    persona_scores: { initiative: 50, analysis: 50, empathy: 50, caution: 50 },
+    persona_scores: { DOM: 50, SPD: 50, EXP: 50, EMP: 50, OBS: 50 },
     ...overrides,
   };
 }
@@ -23,7 +23,7 @@ describe("computeSuperlatives", () => {
   it("picks the highest mafia-formula score as 가장 마피아다웠던 사람", () => {
     const spiky = player({
       player_id: "spiky",
-      persona_scores: { initiative: 100, analysis: 50, empathy: 0, caution: 100 },
+      persona_scores: { DOM: 100, SPD: 100, EXP: 50, EMP: 0, OBS: 50 },
     });
     const flat = player({ player_id: "flat" });
     const result = computeSuperlatives([flat, spiky]);
@@ -31,10 +31,11 @@ describe("computeSuperlatives", () => {
     expect(mafiaLike?.player.player_id).toBe("spiky");
   });
 
-  it("picks the highest caution score as 가장 신중했던 사람", () => {
+  it("picks the least hasty player as 가장 신중했던 사람", () => {
+    // 신중함은 따로 재는 축이 아니라 순발력(SPD)의 반대다.
     const cautious = player({
       player_id: "cautious",
-      persona_scores: { initiative: 50, analysis: 50, empathy: 50, caution: 99 },
+      persona_scores: { DOM: 50, SPD: 1, EXP: 50, EMP: 50, OBS: 50 },
     });
     const result = computeSuperlatives([player({ player_id: "other" }), cautious]);
     const mostCautious = result.find((s) => s.title === "가장 신중했던 사람");

@@ -7,6 +7,16 @@ class DemoRoomNicknameRequest(BaseModel):
     nickname: str = Field(min_length=1, max_length=12)
 
 
+class DemoRoomCreateRequest(DemoRoomNicknameRequest):
+    """Making a room, optionally carrying a finished 얼음땡 session with it.
+
+    `source_room_code` is that session's code. The games look the group's
+    abilities up from it by nickname, so nobody re-enters anything.
+    """
+
+    source_room_code: str | None = Field(default=None, max_length=12)
+
+
 class DemoRoomStartRequest(BaseModel):
     player_id: str
 
@@ -63,6 +73,11 @@ class DemoRoomResponse(BaseModel):
     selected_game_id: str | None = None
     game_phase: str
     launch: DemoRoomLaunchResponse | None = None
+    #: Set when this room grew out of a finished 얼음땡 session, so the screens
+    #: can say the games will use what that session measured.
+    source_room_code: str | None = None
+    #: How many people here were found in that session, by nickname.
+    persona_matches: int = 0
 
 
 class DemoRoomClaimResponse(BaseModel):
@@ -72,6 +87,28 @@ class DemoRoomClaimResponse(BaseModel):
     room_id: str
     player_id: str
     is_host: bool
+
+
+class DemoRoomPersonaEntry(BaseModel):
+    """One player's persona, as the room's own games show it."""
+
+    player_id: str
+    nickname: str
+    title: str
+    traits: list[str]
+    scores: dict[str, int]
+
+
+class DemoRoomPersonasResponse(BaseModel):
+    """Everyone in this room the icebreaking session recognised.
+
+    Players it did not recognise are simply absent — the games fall back to
+    their own placeholder for those, so a group that skipped the run still
+    plays.
+    """
+
+    source_room_code: str | None = None
+    players: list[DemoRoomPersonaEntry] = Field(default_factory=list)
 
 
 class DemoRoomCreateResponse(BaseModel):

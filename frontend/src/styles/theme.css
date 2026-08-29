@@ -1,16 +1,44 @@
+/* 기획안 §13-2 — 파티 게임 팔레트.
+ *
+ * Kahoot·Jackbox가 공통으로 쓰는 방식을 그대로 가져왔다: 짙은 바탕에 큰 색면,
+ * 선택지마다 고정 색. 글을 안 읽어도 구분되는 것이 핵심이고, 그래야 화면을
+ * 오래 안 본다. */
 :root {
-  --bg: #f7f3f5;
-  --surface: #ffffff;
-  --hot: #c9256b;
-  --hot-soft: #f6dce8;
-  --deep: #1f4e5f;
-  --deep-soft: #dfeaee;
-  --gold: #a8770f;
-  --gold-soft: #f3e6c8;
-  --card: #181017;
-  --line: #e2d6dc;
-  --ink: #1a1418;
-  --ink-soft: #6f6570;
+  --bg: #0e1230;
+  --surface: #1a1f45;
+  --surface-2: #232a56;
+  --line: #313a70;
+
+  --ink: #f2f4ff;
+  --ink-soft: #a7aed6;
+
+  --hot: #ff2e88;
+  --hot-soft: #3b0f26;
+  --deep: #2e86ff;
+  --deep-soft: #12224a;
+  --gold: #ffc531;
+  --gold-soft: #3a2e0c;
+
+  --ok: #23c16b;
+  --no: #ff4757;
+
+  /* 선택지 4색 — 순서가 곧 색이다. 절대 섞지 않는다. */
+  --c1: #ff4757;
+  --c2: #2e86ff;
+  --c3: #ffc531;
+  --c4: #23c16b;
+
+  /* 문항에 답하는 큰 버튼 전용 2색 — 텔레파시/이지선다/라이어 투표가 공유한다.
+     원래 c1/c2(빨강/파랑)와 같은 색으로 되돌렸다 — 세련된 색으로 바꿨다가
+     다시 원래 색이 낫다는 피드백을 받았다. */
+  --choice-a: var(--c1);
+  --choice-b: var(--c2);
+
+  /* ○○님은 ___한 사람이다 보기 전용 색 — 남색 배경과 같은 인디고 계열이라
+     화면과 어울리면서 배경보다는 확실히 밝아 가독성이 유지된다. */
+  --trait-box: #3d4b96;
+
+  --card: #0a0d22;
 
   --font-heading: 'Black Han Sans', sans-serif;
   --font-body: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
@@ -19,17 +47,10 @@
   --radius-lg: 22px;
   --radius-md: 14px;
   --radius-sm: 9px;
+
+  --dur: 0.35s;
+  --ease-pop: cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #141014;
-    --surface: #1e181c;
-    --line: #332830;
-    --ink: #f2eaee;
-    --ink-soft: #a89aa1;
-    --hot-soft: #3a1b28;
-    --deep-soft: #17282c;
-    --gold-soft: #2c2413;
-  }
-}
+/* 한 가지 세계로 간다. 파티 화면이 밝은 바탕에서 반쯤 밝아지면 둘 다 아니게
+ * 되므로, 시스템 설정과 무관하게 이 팔레트를 유지한다. */

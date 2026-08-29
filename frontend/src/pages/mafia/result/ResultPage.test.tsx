@@ -14,7 +14,7 @@ const result: GameResult = {
       is_alive: true,
       assigned_score: 82,
       assigned_by: "preference",
-      persona_scores: { initiative: 30, analysis: 90, empathy: 40, caution: 60 },
+      persona_scores: { DOM: 30, SPD: 60, EXP: 50, EMP: 40, OBS: 90 },
     },
     {
       player_id: "p2",
@@ -23,7 +23,7 @@ const result: GameResult = {
       is_alive: false,
       assigned_score: 60,
       assigned_by: "fallback_random",
-      persona_scores: { initiative: 40, analysis: 30, empathy: 20, caution: 50 },
+      persona_scores: { DOM: 40, SPD: 50, EXP: 50, EMP: 20, OBS: 30 },
     },
   ],
 };
@@ -38,7 +38,7 @@ describe("ResultPage", () => {
     expect(await screen.findByText("시민 팀 승리!")).toBeInTheDocument();
     expect(screen.getByText("정글짐 - 경찰")).toBeInTheDocument();
     expect(screen.getByText("라이트 - 마피아")).toBeInTheDocument();
-    expect(screen.getByText(/분석력 90/)).toBeInTheDocument();
+    expect(screen.getByText(/관찰력 90/)).toBeInTheDocument();
     expect(screen.getByText(/가장 마피아다웠던 사람/)).toBeInTheDocument();
   });
 

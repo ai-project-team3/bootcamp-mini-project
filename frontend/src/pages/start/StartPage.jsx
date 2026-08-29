@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import Button from '../../components/common/Button'
@@ -10,6 +10,7 @@ import './StartPage.css'
 
 export default function StartPage() {
   const navigate = useNavigate()
+  const isEntry = useLocation().pathname === '/'
   const { setNickname, setGender, setMbti, setRoomCode, setPlayerId, setIsHost } = useRoomFlow()
   const [nicknameDraft, setNicknameDraft] = useState('')
   const [genderDraft, setGenderDraft] = useState('M')
@@ -58,7 +59,8 @@ export default function StartPage() {
 
   return (
     <PhoneFrame>
-      <TopBar onBack={() => navigate('/')} />
+      {/* 앱의 첫 화면일 때는 돌아갈 곳이 없다. */}
+      <TopBar showBack={!isEntry} onBack={() => navigate('/')} />
       <div className="start-body">
         <div className="start-hero">
           <span className="start-hero-glow" aria-hidden />

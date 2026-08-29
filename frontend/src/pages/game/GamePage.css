@@ -19,10 +19,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  color: var(--ink-soft);
-  font-size: 0.92rem;
+  gap: 18px;
+  text-align: center;
 }
+
 
 .game-waiting-count {
   font-family: var(--font-mono);
@@ -45,6 +45,7 @@
   font-size: 1.25rem;
   line-height: 1.4;
   margin: 0;
+  text-align: center;
 }
 
 .impression-choices {
@@ -108,6 +109,7 @@
   font-size: 1.2rem;
   line-height: 1.4;
   margin: 0;
+  text-align: center;
 }
 
 .answer-choices {
@@ -137,35 +139,127 @@
   gap: 14px;
 }
 
-.answer-tally {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* 집계 공개 — 기획안 §3-4. 이름 없이 몇 대 몇만 보여준다. */
+.answer-results {
+  justify-content: center;
+  gap: 22px;
+}
+
+.split {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
-.answer-tally li {
+.split-head {
   display: flex;
   justify-content: space-between;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  background: var(--bg);
-  border: 1px solid var(--line);
-  font-size: 0.88rem;
+  align-items: flex-end;
 }
 
-.answer-tally-a {
-  border-left: 3px solid var(--hot);
+.split-num {
+  font-family: var(--font-heading);
+  font-size: 3.4rem;
+  line-height: 1;
+  opacity: 0.35;
+  animation: split-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 
-.answer-tally-b {
-  border-left: 3px solid var(--deep);
+.split-num.a { color: var(--c1); }
+.split-num.b { color: var(--c2); }
+/* 내가 고른 쪽만 선명하게. 남이 뭘 골랐는지는 여전히 안 보인다. */
+.split-num.mine { opacity: 1; }
+
+.split-bar {
+  display: flex;
+  width: 100%;
+  height: 26px;
+  border-radius: 13px;
+  overflow: hidden;
+  background: var(--surface-2);
 }
 
-.answer-tally-choice {
+.split-fill {
+  display: block;
+  height: 100%;
+  transform-origin: left;
+  animation: split-grow 0.55s cubic-bezier(0.2, 1.1, 0.3, 1) both;
+}
+
+.split-fill.a { background: var(--c1); }
+.split-fill.b { background: var(--c2); animation-delay: 0.08s; transform-origin: right; }
+
+.split-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.split-label {
+  flex: 1;
+  font-size: 0.86rem;
+  line-height: 1.4;
   color: var(--ink-soft);
+  word-break: keep-all;
+}
+
+.split-labels .split-label:last-child { text-align: right; }
+
+.split-note {
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  color: var(--ink);
+  margin: 0;
+  animation: split-pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) 0.3s both;
+}
+
+.split-mine {
+  text-align: center;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.split-mine b { color: var(--hot); }
+
+@keyframes split-pop {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: inherit; transform: scale(1); }
+}
+
+@keyframes split-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* 제출 표시 — 답을 낼 때마다 하나씩 켜진다 */
+.game-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.game-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.game-dot.on {
+  background: var(--hot);
+  transform: scale(1.15);
+}
+
+.choice-a { border-left: 4px solid var(--hot); }
+.choice-b { border-left: 4px solid var(--deep); }
+
+@media (prefers-reduced-motion: reduce) {
+  .split-num,
+  .split-fill { animation: none; }
+  .game-dot { transition: none; }
 }
 
 /* 유형 맞히기 */
@@ -183,20 +277,26 @@
   font-size: 0.85rem;
   color: var(--ink-soft);
   margin: 0;
+  text-align: center;
 }
 
+/* 8개 유형 카드가 화면 높이를 그대로 채우도록 4행으로 고정하고 flex:1로
+   .typeguess-self의 남는 세로 공간을 다 가져간다. */
 .typeguess-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+  flex: 1;
 }
 
 .typeguess-type-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 14px 8px;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
   border-radius: var(--radius-md);
   border: 2px solid var(--line);
   background: var(--surface);
@@ -204,11 +304,11 @@
 }
 
 .typeguess-type-symbol {
-  font-size: 1.6rem;
+  font-size: 2.2rem;
 }
 
 .typeguess-type-name {
-  font-size: 0.8rem;
+  font-size: 0.92rem;
   text-align: center;
 }
 
@@ -221,18 +321,20 @@
 .typeguess-card-head {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
+/* 카드마다 "이게 누구 카드인지"를 이미지+이름으로 크게 보여주는 게 이 화면의
+   핵심이고, 선택 드롭다운은 그 판단을 확정하는 부수적인 조작이라 작게 둔다. */
 .typeguess-card-symbol {
-  font-size: 1.8rem;
+  font-size: 2.6rem;
 }
 
 .typeguess-card-name {
   margin: 0;
   font-family: var(--font-heading);
   font-weight: 400;
-  font-size: 1.05rem;
+  font-size: 1.35rem;
 }
 
 .typeguess-card-subtitle {
@@ -242,12 +344,14 @@
 }
 
 .typeguess-select {
-  padding: 10px;
+  padding: 6px 8px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--line);
   background: var(--bg);
   color: var(--ink);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  text-align: center;
+  text-align-last: center;
 }
 
 .typeguess-results {

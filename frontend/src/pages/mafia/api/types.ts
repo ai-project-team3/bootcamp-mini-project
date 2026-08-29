@@ -58,11 +58,23 @@ export interface MyView {
   investigation_result: InvestigationResult | null;
 }
 
+/**
+ * The five abilities the icebreaking run measures, under its own names.
+ *
+ * This game takes that vocabulary rather than translating in both directions —
+ * the run computes them, so it owns the schema (docs/페르소나-인계.md).
+ */
 export interface PersonaScores {
-  initiative: number;
-  analysis: number;
-  empathy: number;
-  caution: number;
+  /** 주도력 — 판을 먼저 벌리나 */
+  DOM: number;
+  /** 순발력 — 얼마나 빨리 결정하나 */
+  SPD: number;
+  /** 표현력 — 자기를 얼마나 드러내나 */
+  EXP: number;
+  /** 공감력 — 남을 얼마나 살피나 */
+  EMP: number;
+  /** 관찰력 — 남을 얼마나 맞히나 */
+  OBS: number;
 }
 
 export interface ResultPlayer {

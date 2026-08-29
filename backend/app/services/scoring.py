@@ -14,10 +14,16 @@ from ..models.answer import Answer
 from ..models.guess import Guess
 from ..models.player import Player
 from ..models.room import Room
-from ..models.statement import Statement
+from ..models.game_result import GameResult
+from ..models.liar_round import LiarRound
 
 SPD_FAST_MS = 3000
 SPD_SLOW_MS = 12000
+# §6 — 주도력은 문항 둘과 눈치 게임이 나눠 만든다. 문항 쪽이 자기 선택이라
+# 더 무겁고, 눈치 게임은 실제로 나섰는지를 본다.
+DOM_ANSWER_WEIGHT = 0.6
+DOM_NUNCHI_WEIGHT = 0.4
+
 TYPE_THRESHOLD = 2.5
 TYPE_TIE_MARGIN = 0.3
 
@@ -78,19 +84,6 @@ def compute_behavior_abilities(db: Session, room_id: str, players: list[Player])
     return result
 
 
-def compute_lie_correct_counts(db: Session, room_id: str) -> dict[str, int]:
-    """플레이어별 '남의 거짓말을 맞힌 횟수' (0~4)."""
-    guesses = db.query(Guess).filter(Guess.room_id == room_id, Guess.kind == "LIE").all()
-    correct: dict[str, int] = defaultdict(int)
-    for g in guesses:
-        if g.target_statement_id is None:
-            continue
-        stmt = db.get(Statement, g.target_statement_id)
-        if stmt is not None and stmt.is_lie:
-            correct[g.guesser_id] += 1
-    return correct
-
-
 def compute_type_guess_correct_counts(db: Session, room_id: str, players: list[Player]) -> dict[str, int]:
     """플레이어별 '남의 유형 카드를 맞힌 횟수' (0~4). round_no에 담긴 카드 실소유자의
     seat_no와 guess.target_player_id의 seat_no가 같으면 정답."""
@@ -108,16 +101,113 @@ def compute_type_guess_correct_counts(db: Session, room_id: str, players: list[P
     return correct
 
 
-def compute_half_obs(lie_correct: dict[str, int], player_id: str) -> float:
-    """§4-4: 거짓 찾기 정답 수가 관찰력의 절반을 만든다 — 유형 카드 노출 시점 값."""
-    return _clamp((lie_correct.get(player_id, 0) / 4) * 2.5, 0.0, 2.5)
+def compute_nunchi_scores(db: Session, room_id: str, players: list[Player]) -> dict[str, float]:
+    """§4-6 눈치 게임 등수를 0~5로. 먼저 누를수록 높다.
+
+    동시에 눌러 판을 깬 사람은 그 판에서 등수를 못 받는다. 남을 안 보고 눌렀다는
+    뜻이라 주도력이 아니라 성급함이다.
+    """
+    ranks = (
+        db.query(GameResult)
+        .filter(GameResult.room_id == room_id, GameResult.kind == "NUNCHI_RANK")
+        .all()
+    )
+    clashes = {
+        (r.player_id, r.round_no)
+        for r in db.query(GameResult)
+        .filter(GameResult.room_id == room_id, GameResult.kind == "NUNCHI_CLASH")
+        .all()
+    }
+    n = max(len(players), 1)
+    per_player: dict[str, list[float]] = defaultdict(list)
+    for r in ranks:
+        if (r.player_id, r.round_no) in clashes:
+            continue
+        # 1등 → 5.0, 꼴찌 → 0.0
+        score = 5.0 if n == 1 else 5.0 * (n - r.value) / (n - 1)
+        per_player[r.player_id].append(score)
+    return {
+        p.id: (sum(per_player[p.id]) / len(per_player[p.id]) if per_player[p.id] else 2.5)
+        for p in players
+    }
 
 
-def compute_full_obs(lie_correct: dict[str, int], type_correct: dict[str, int], player_id: str) -> float:
-    """§5: 관찰력 = (거짓 찾기 정답 + 유형 맞히기 정답) / 8 × 5 — 최종 리포트 값."""
+def compute_guess_hits(db: Session, room_id: str, players: list[Player]) -> dict[str, tuple[int, int]]:
+    """§6 관찰력 — 남을 맞힌 횟수 / 전체 기회.
+
+    기회는 네 곳에서 온다: 텔레파시 ②, ○○님은 ___한 사람, 라이어 지목,
+    유형 맞히기. 한 곳에만 기대면 몇 번 찍어 맞힌 게 값을 크게 흔든다.
+    """
+    seat_by_player = {p.id: p.seat_no for p in players}
+    hits: dict[str, int] = defaultdict(int)
+    tries: dict[str, int] = defaultdict(int)
+
+    # 텔레파시 ② — 내가 지목한 사람이 나와 같은 걸 골랐나
+    tele = db.query(Guess).filter(Guess.room_id == room_id, Guess.kind == "TELEPATHY").all()
+    choice = {(g.guesser_id, g.round_no): g.target_choice for g in tele}
+    for g in tele:
+        tries[g.guesser_id] += 1
+        if choice.get((g.target_player_id, g.round_no)) == g.target_choice:
+            hits[g.guesser_id] += 1
+
+    # ○○님은 ___한 사람 — 대상자 본인의 답과 같으면 정답
+    own = {
+        g.guesser_id: g.target_choice
+        for g in db.query(Guess).filter(Guess.room_id == room_id, Guess.kind == "TRAIT_SELF").all()
+    }
+    for g in db.query(Guess).filter(Guess.room_id == room_id, Guess.kind == "TRAIT").all():
+        tries[g.guesser_id] += 1
+        if own.get(g.target_player_id) == g.target_choice:
+            hits[g.guesser_id] += 1
+
+    # 라이어 지목
+    liar_by_round = {
+        r.round_no: r.player_id
+        for r in db.query(GameResult)
+        .filter(GameResult.room_id == room_id, GameResult.kind == "LIAR_ROLE")
+        .all()
+    }
+    for g in db.query(Guess).filter(Guess.room_id == room_id, Guess.kind == "LIAR_ACCUSE").all():
+        tries[g.guesser_id] += 1
+        if liar_by_round.get(g.round_no) == g.target_player_id:
+            hits[g.guesser_id] += 1
+
+    # 유형 맞히기 — round_no에 카드 실소유자의 seat_no가 들어 있다
+    for g in (
+        db.query(Guess)
+        .filter(Guess.room_id == room_id, Guess.kind == "TYPE", Guess.round_no.isnot(None))
+        .all()
+    ):
+        tries[g.guesser_id] += 1
+        if seat_by_player.get(g.target_player_id) == g.round_no:
+            hits[g.guesser_id] += 1
+
+    return {p.id: (hits[p.id], tries[p.id]) for p in players}
+
+
+def obs_from_hits(hits: int, tries: int) -> float:
+    """맞힐 기회가 아예 없었으면 0이 아니라 중립. 못 맞힌 게 아니라 못 재본 것."""
+    if tries <= 0:
+        return 2.5
+    return _clamp(hits / tries * 5)
+
+
+def compute_half_obs(lie_correct: dict[str, int], player_id: str, player_count: int) -> float:
+    """유형 카드를 뿌리는 시점의 임시 관찰력.
+
+    아직 유형 맞히기를 안 했으니 그 몫을 빼고 계산해야 하는데, 이 시점에는
+    앞선 세 게임의 기록만 있으면 충분하다. 인자는 하위 호환을 위해 남긴다.
+    """
+    others = max(player_count - 1, 1)
+    return _clamp((lie_correct.get(player_id, 0) / others) * 2.5, 0.0, 2.5)
+
+
+def compute_full_obs(lie_correct: dict[str, int], type_correct: dict[str, int], player_id: str, player_count: int) -> float:
+    """구 산출식. compute_guess_hits + obs_from_hits로 대체됐다."""
+    others = max(player_count - 1, 1)
     lie = lie_correct.get(player_id, 0)
     type_ = type_correct.get(player_id, 0)
-    return _clamp((lie + type_) / 8 * 5)
+    return _clamp((lie + type_) / (2 * others) * 5)
 
 
 def _tiebreak_level(value: float, spd: float) -> str:
@@ -156,12 +246,13 @@ def compute_impression_abilities(
         if g.target_player_id and g.round_no:
             counts[g.target_player_id][g.round_no] += 1
     question_ability = {q["question_no"]: q["ability"] for q in IMPRESSION_QUESTIONS}
+    max_votes = max(len(players) - 1, 1)  # 한 문항에서 받을 수 있는 최대 득표 = 나 외 인원수
     result: dict[str, dict[str, float]] = {}
     for p in players:
         abilities = {}
         for qn, ability in question_ability.items():
             votes = counts[p.id].get(qn, 0)
-            abilities[ability] = _clamp((votes / 4) * 5)
+            abilities[ability] = _clamp((votes / max_votes) * 5)
         result[p.id] = abilities
     return result
 
@@ -203,38 +294,60 @@ def assign_badges(
     db: Session,
     room: Room,
     players: list[Player],
-    lie_correct: dict[str, int],
-    type_correct: dict[str, int],
+    hits: dict[str, tuple[int, int]],
     self_guess_by_player: dict[str, Optional[str]],
-    provisional_type_by_player: dict[str, str],
+    type_by_player: dict[str, str],
 ) -> dict[str, list[str]]:
-    """§7 칭호 10종. 모든 참가자는 최소 하나를 받는다(기본값 예측대로)."""
+    """§8 칭호. 모든 참가자는 최소 하나를 받는다(기본값 예측대로)."""
     badges: dict[str, list[str]] = {p.id: [] for p in players}
 
-    # 관찰왕
-    totals = {p.id: lie_correct.get(p.id, 0) + type_correct.get(p.id, 0) for p in players}
+    # 관찰왕 — 맞힌 횟수 합계 1위
+    totals = {p.id: hits.get(p.id, (0, 0))[0] for p in players}
     best = max(totals.values(), default=0)
     if best > 0:
         for pid, v in totals.items():
             if v == best:
                 badges[pid].append("관찰왕")
 
-    # 완벽한 거짓말쟁이
-    for p in players:
-        lie_stmt = (
-            db.query(Statement)
-            .filter(Statement.room_id == room.id, Statement.player_id == p.id, Statement.is_lie.is_(True))
-            .first()
-        )
-        if lie_stmt is None:
-            continue
-        catches = (
-            db.query(Guess)
-            .filter(Guess.room_id == room.id, Guess.kind == "LIE", Guess.target_statement_id == lie_stmt.id)
-            .count()
-        )
-        if catches == 0:
-            badges[p.id].append("완벽한 거짓말쟁이")
+    # 완벽한 라이어 — 라이어였는데 안 걸림
+    for r in (
+        db.query(GameResult)
+        .filter(GameResult.room_id == room.id, GameResult.kind == "LIAR_SURVIVED")
+        .all()
+    ):
+        if r.player_id in badges and "완벽한 라이어" not in badges[r.player_id]:
+            badges[r.player_id].append("완벽한 라이어")
+
+    # 눈치왕 — 판을 깬 적이 한 번도 없음 (눈치 게임을 실제로 한 방에서만)
+    played = (
+        db.query(GameResult)
+        .filter(GameResult.room_id == room.id, GameResult.kind == "NUNCHI_RANK")
+        .count()
+    )
+    if played:
+        clashers = {
+            r.player_id
+            for r in db.query(GameResult)
+            .filter(GameResult.room_id == room.id, GameResult.kind == "NUNCHI_CLASH")
+            .all()
+        }
+        if clashers:  # 아무도 안 깼으면 전원에게 주는 게 의미가 없다
+            for p in players:
+                if p.id not in clashers:
+                    badges[p.id].append("눈치왕")
+
+    # 텔레파시 — ② 전부 적중
+    tele = db.query(Guess).filter(Guess.room_id == room.id, Guess.kind == "TELEPATHY").all()
+    if tele:
+        choice = {(g.guesser_id, g.round_no): g.target_choice for g in tele}
+        per_player: dict[str, list[bool]] = defaultdict(list)
+        for g in tele:
+            per_player[g.guesser_id].append(
+                choice.get((g.target_player_id, g.round_no)) == g.target_choice
+            )
+        for pid, results in per_player.items():
+            if pid in badges and results and all(results):
+                badges[pid].append("텔레파시")
 
     # 첫인상 배신자 / 예측대로
     pre_totals = compute_impression_totals(db, room.id, "IMPRESSION_PRE")
@@ -284,7 +397,7 @@ def assign_badges(
     # 자기 예언자
     for p in players:
         self_guess = self_guess_by_player.get(p.id)
-        if self_guess and self_guess == provisional_type_by_player.get(p.id):
+        if self_guess and self_guess == type_by_player.get(p.id):
             badges[p.id].append("자기 예언자")
 
     for p in players:
@@ -338,15 +451,16 @@ def compute_team_grade(db: Session, room: Room, players: list[Player], abilities
             if abilities[p.id][code] == best_val:
                 leaders.add(p.id)
                 break
-    dispersion_hit = len(leaders) >= 4
+    # 컷오프(기획안 원문 4명, 5인 기준)는 인원수 - 1로 일반화했다.
+    dispersion_hit = len(leaders) >= max(len(players) - 1, 1)
 
-    # 상호 이해도: 거짓 찾기 전체 정답률(상위=50% 이상)
-    lie_guesses = db.query(Guess).filter(Guess.room_id == room.id, Guess.kind == "LIE").all()
-    total_lie = len(lie_guesses)
-    correct_lie = sum(
-        1 for g in lie_guesses if g.target_statement_id and (db.get(Statement, g.target_statement_id) or Statement(is_lie=False)).is_lie
-    )
-    understanding_hit = (correct_lie / total_lie if total_lie else 0) >= 0.5
+    # 상호 이해도: 맞히기 전체 정답률(상위=40% 이상)
+    # 기회가 네 곳(텔레파시·○○님은·라이어 지목·유형 맞히기)으로 늘면서 순수
+    # 찍기의 기대값이 낮아졌다. 컷을 절반에서 40%로 내린 이유.
+    hits_map = compute_guess_hits(db, room.id, players)
+    total_tries = sum(t for _, t in hits_map.values())
+    total_hits = sum(h for h, _ in hits_map.values())
+    understanding_hit = (total_hits / total_tries if total_tries else 0) >= 0.4
 
     # 인상 변화량: 최다 득표자가 바뀐 문항 수(상위=5문항 중 3개 이상)
     pre_by_q = _tally_by_question(db, room.id, "IMPRESSION_PRE")
@@ -361,6 +475,9 @@ def compute_team_grade(db: Session, room: Room, players: list[Player], abilities
         by_q[a.question_no].append(a.choice)
     split_count = sum(1 for choices in by_q.values() if len(set(choices)) > 1)
     diversity_hit = split_count >= 5
+    # §5-7 사후 점검: 8문항 중 5개 이상에서 전원이 같은 답을 골랐다면 생성 실패일
+    # 가능성이 높다. 오류로 처리하지 않고 팀 요약 문구만 이 경우로 바꾼다.
+    unanimous_hit = (8 - split_count) >= 5
 
     hits = sum([dispersion_hit, understanding_hit, impression_hit, diversity_hit])
     rank = TEAM_GRADES_BY_HIT_COUNT[hits]
@@ -379,6 +496,9 @@ def compute_team_grade(db: Session, room: Room, players: list[Player], abilities
         summary = "역할이 자연스럽게 나뉘는 팀"
     else:
         summary = "합이 잘 맞는 팀"
+
+    if unanimous_hit:
+        summary = "이례적으로 합이 맞은 팀"
 
     return {"rank": rank, "reasons": reasons, "summary": summary}
 
@@ -406,19 +526,35 @@ def build_highlights(db: Session, room: Room, players: list[Player], badges: dic
     if deltas and max(deltas.values()) > 0:
         top_pid = max(deltas, key=lambda pid: deltas[pid])
         player = next(p for p in players if p.id == top_pid)
-        highlights.append(f"인상이 제일 많이 바뀐 사람 — {player.nickname}")
+        highlights.append(f"오늘 인상이 제일 많이 뒤집힌 사람은 {player.nickname}, 처음 본 인상은 잊어도 됩니다.")
 
-    for pid, blist in badges.items():
-        if "완벽한 거짓말쟁이" in blist:
-            player = next(p for p in players if p.id == pid)
-            lie_stmt = (
-                db.query(Statement)
-                .filter(Statement.room_id == room.id, Statement.player_id == pid, Statement.is_lie.is_(True))
-                .first()
+    survived = (
+        db.query(GameResult)
+        .filter(GameResult.room_id == room.id, GameResult.kind == "LIAR_SURVIVED")
+        .first()
+    )
+    if survived:
+        player = next((p for p in players if p.id == survived.player_id), None)
+        rnd = (
+            db.query(LiarRound)
+            .filter(LiarRound.room_id == room.id, LiarRound.round_no == survived.round_no)
+            .first()
+        )
+        if player and rnd:
+            highlights.append(
+                f'{player.nickname}이(가) 라이어였는데 끝까지 아무도 못 잡았습니다. 제시어는 "{rnd.major_word}"였는데도요.'
             )
-            if lie_stmt:
-                highlights.append(f'아무도 못 잡은 거짓말 — {player.nickname}: "{lie_stmt.text}"')
-            break
+
+    clashes = (
+        db.query(GameResult)
+        .filter(GameResult.room_id == room.id, GameResult.kind == "NUNCHI_CLASH")
+        .all()
+    )
+    if clashes:
+        names = {r.player_id for r in clashes if r.round_no == clashes[0].round_no}
+        who = [p.nickname for p in players if p.id in names]
+        if len(who) >= 2:
+            highlights.append(f"{' · '.join(who)}이(가) 동시에 눌러버리는 바람에 판이 그 자리에서 깨졌습니다.")
 
     answers = db.query(Answer).filter(Answer.room_id == room.id).all()
     by_q: dict[int, list[str]] = defaultdict(list)
@@ -431,13 +567,117 @@ def build_highlights(db: Session, room: Room, players: list[Player], badges: dic
         if a_count and b_count and abs(a_count - b_count) < best_margin:
             best_margin, best_q = abs(a_count - b_count), q
     if best_q:
-        highlights.append(f"제일 크게 갈린 문항 — {best_q}번, {by_q[best_q].count('A')} 대 {by_q[best_q].count('B')}")
+        highlights.append(
+            f"{best_q}번 문항에서 의견이 {by_q[best_q].count('A')} 대 {by_q[best_q].count('B')}로 팽팽하게 갈렸습니다."
+        )
 
-    return highlights
+    # 세 줄을 채운다. 위 후보가 다 비면 팀 카드에 장면이 하나도 안 남는다.
+    if len(highlights) < 3:
+        best = None
+        for pid, (hit, tried) in compute_guess_hits(db, room.id, players).items():
+            if tried and (best is None or hit / tried > best[1]):
+                best = (pid, hit / tried, hit, tried)
+        if best:
+            who = next((p.nickname for p in players if p.id == best[0]), None)
+            if who:
+                highlights.append(f"{who}이(가) {best[3]}번 중 {best[2]}번을 맞혀서 오늘 제일 눈치가 빨랐습니다.")
+
+    if len(highlights) < 3:
+        pre = compute_impression_totals(db, room.id, "IMPRESSION_PRE")
+        top = max(pre, key=lambda pid: pre[pid]) if pre else None
+        if top:
+            who = next((p.nickname for p in players if p.id == top), None)
+            if who:
+                highlights.append(f"첫인상에서 {who}이(가) {pre[top]}표를 몰아 받으며 제일 먼저 눈에 띄었습니다.")
+
+    return highlights[:3]
+
+
+def build_scene_line(db: Session, room: Room, player: Player, players: list[Player]) -> Optional[str]:
+    """§12 두 번째 줄 — 오늘 실제로 있었던 장면.
+
+    사전에서 뽑을 수 없는 유일한 줄이다. 그 판에서 벌어진 일을 그대로 적어야
+    하고, 없으면 없는 채로 둔다(억지로 만든 장면은 첫 줄과 세 번째 줄 사이에서
+    바로 티가 난다).
+
+    후보가 여럿이면 눈에 띄는 순서로 하나만 고른다.
+    """
+    others = max(len(players) - 1, 1)
+
+    survived = (
+        db.query(GameResult)
+        .filter(
+            GameResult.room_id == room.id,
+            GameResult.kind == "LIAR_SURVIVED",
+            GameResult.player_id == player.id,
+        )
+        .first()
+    )
+    if survived:
+        rnd = (
+            db.query(LiarRound)
+            .filter(LiarRound.room_id == room.id, LiarRound.round_no == survived.round_no)
+            .first()
+        )
+        if rnd:
+            return f'라이어였는데 아무도 못 잡았습니다. 제시어는 "{rnd.major_word}"였고요.'
+
+    clashed = (
+        db.query(GameResult)
+        .filter(
+            GameResult.room_id == room.id,
+            GameResult.kind == "NUNCHI_CLASH",
+            GameResult.player_id == player.id,
+        )
+        .count()
+    )
+    if clashed:
+        return f"눈치 게임에서 {clashed}판을 혼자 못 참고 눌러 깼습니다."
+
+    own = (
+        db.query(Guess)
+        .filter(Guess.room_id == room.id, Guess.kind == "TRAIT_SELF", Guess.guesser_id == player.id)
+        .first()
+    )
+    if own is not None:
+        guessers = (
+            db.query(Guess)
+            .filter(Guess.room_id == room.id, Guess.kind == "TRAIT", Guess.target_player_id == player.id)
+            .all()
+        )
+        if guessers:
+            right = sum(1 for g in guessers if g.target_choice == own.target_choice)
+            if right == 0:
+                return "자기가 고른 자기 설명을 아무도 못 맞혔습니다."
+            if right == len(guessers):
+                return "자기가 고른 자기 설명을 전원이 맞혔습니다. 숨긴 게 없더군요."
+
+    tele = (
+        db.query(Guess)
+        .filter(Guess.room_id == room.id, Guess.kind == "TELEPATHY", Guess.guesser_id == player.id)
+        .all()
+    )
+    if tele:
+        choice = {
+            (g.guesser_id, g.round_no): g.target_choice
+            for g in db.query(Guess).filter(Guess.room_id == room.id, Guess.kind == "TELEPATHY").all()
+        }
+        hit = sum(
+            1 for g in tele if choice.get((g.target_player_id, g.round_no)) == g.target_choice
+        )
+        if hit == len(tele):
+            return "텔레파시를 전부 맞혔습니다. 처음 본 사이라기엔 너무 잘 읽습니다."
+        if hit == 0:
+            return "텔레파시를 한 번도 못 맞혔습니다. 아직 서로를 모르는 게 맞습니다."
+
+    post = compute_impression_totals(db, room.id, "IMPRESSION_POST")
+    if post.get(player.id, 0) >= others:
+        return "끝나고 다시 물었을 때 표가 이 사람에게 몰렸습니다."
+    return None
 
 
 def build_comments(abilities: dict[str, float], impression_pre: dict[str, float]) -> list[str]:
-    """§11: 첫 줄(어긋난 지점) + 마지막 줄(뒤집어 칭찬)을 사전에서 그대로 조합."""
+    """§12: 첫 줄(어긋난 지점) + 마지막 줄(뒤집어 칭찬)을 사전에서 그대로 조합."""
     axes = ("DOM", "EXP", "EMP", "SPD")
     best_axis, best_gap, best_key = None, 0.0, None
     for axis in axes:

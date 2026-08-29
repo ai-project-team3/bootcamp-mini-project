@@ -1,12 +1,12 @@
 import { leaveDemoRoom } from '../../api/demoRooms'
 import { useGameDemo } from '../../context/GameDemoContext'
-import { useRoomFlow } from '../../context/RoomFlowContext'
+import { useGameRoom } from '../../context/GameRoomContext'
 import ExitToGamesControl from './ExitToGamesControl'
 
 /** The party games' way out: leave the demo room, then back to room creation. */
 export default function GameDemoExitControl() {
   const { room, players } = useGameDemo()
-  const { playerId, setRoomCode, setPlayerId, setIsHost } = useRoomFlow()
+  const { playerId, setRoomCode, setPlayerId, setIsHost } = useGameRoom()
   const isHost = players.find((player) => player.id === playerId)?.isHost
 
   const leave = async () => {

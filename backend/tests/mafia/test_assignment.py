@@ -13,8 +13,8 @@ def test_rank_top3_orders_by_score_descending_and_caps_at_three():
 def test_assign_roles_gives_each_player_their_top_choice_when_no_conflict():
     # spec §2.2 examples: p_01's top choice is mafia, p_02's top choice is police
     players = {
-        "p_01": PersonaScores(initiative=82, analysis=65, empathy=40, caution=55),
-        "p_02": PersonaScores(initiative=35, analysis=90, empathy=58, caution=70),
+        "p_01": PersonaScores.from_partial({"DOM": 82, "OBS": 65, "EMP": 40, "SPD": 55}),
+        "p_02": PersonaScores.from_partial({"DOM": 35, "OBS": 90, "EMP": 58, "SPD": 70}),
     }
     capacity = {"mafia": 1, "police": 1, "doctor": 0, "citizen": 0}
     result = assign_roles(players, capacity)
@@ -26,9 +26,10 @@ def test_assign_roles_gives_each_player_their_top_choice_when_no_conflict():
 
 def test_assign_roles_bumps_loser_to_second_choice_on_capacity_conflict():
     # Both players' top choice is police, second choice is doctor.
-    # A's police score (100) beats B's (90), so B must fall back to doctor.
-    player_a = PersonaScores(initiative=50, analysis=100, empathy=50, caution=100)
-    player_b = PersonaScores(initiative=50, analysis=90, empathy=50, caution=90)
+    # A's police score beats B's, so B must fall back to doctor.
+    # Police wants high OBS and a low SPD (경찰은 서두르지 않는 쪽).
+    player_a = PersonaScores.from_partial({"DOM": 50, "OBS": 100, "EMP": 50, "SPD": 0})
+    player_b = PersonaScores.from_partial({"DOM": 50, "OBS": 90, "EMP": 50, "SPD": 10})
     assert rank_top3(compute_role_scores(player_a))[0][0] == "police"
     assert rank_top3(compute_role_scores(player_b))[0][0] == "police"
 
@@ -42,8 +43,13 @@ def test_assign_roles_bumps_loser_to_second_choice_on_capacity_conflict():
 
 def test_assign_roles_never_exceeds_role_capacity():
     players = {
-        f"p{i}": PersonaScores(initiative=i * 10 % 100, analysis=(i * 7) % 100,
-                                empathy=(i * 13) % 100, caution=(i * 3) % 100)
+        f"p{i}": PersonaScores.from_partial({
+            "DOM": i * 10 % 100,
+            "OBS": (i * 7) % 100,
+            "EMP": (i * 13) % 100,
+            "SPD": (i * 3) % 100,
+            "EXP": (i * 17) % 100,
+        })
         for i in range(6)
     }
     capacity = {"mafia": 2, "police": 1, "doctor": 1, "citizen": 2}

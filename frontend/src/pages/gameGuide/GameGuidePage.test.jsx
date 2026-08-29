@@ -4,11 +4,11 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import GameGuidePage from './GameGuidePage'
 import { GameDemoContext } from '../../context/GameDemoContext'
-import { RoomFlowProvider, useRoomFlow } from '../../context/RoomFlowContext'
+import { GameRoomProvider, useGameRoom } from '../../context/GameRoomContext'
 import * as demoRooms from '../../api/demoRooms'
 
 function SeatPlayer({ children }) {
-  const { playerId, setPlayerId } = useRoomFlow()
+  const { playerId, setPlayerId } = useGameRoom()
   useEffect(() => {
     setPlayerId('p1')
   }, [setPlayerId])
@@ -24,7 +24,7 @@ function renderGuide(gameId, { isHost = true, playerCount = 4 } = {}) {
   const value = { room: { code: 'AB12CD' }, players, personas: {} }
   return render(
     <MemoryRouter initialEntries={[`/games/demo/room/AB12CD/guide/${gameId}`]}>
-      <RoomFlowProvider>
+      <GameRoomProvider>
         <GameDemoContext.Provider value={value}>
           <SeatPlayer>
             <Routes>
@@ -33,7 +33,7 @@ function renderGuide(gameId, { isHost = true, playerCount = 4 } = {}) {
             </Routes>
           </SeatPlayer>
         </GameDemoContext.Provider>
-      </RoomFlowProvider>
+      </GameRoomProvider>
     </MemoryRouter>,
   )
 }

@@ -8,11 +8,17 @@ work. Nothing was merged into another branch to produce it.
 
 ## How a player moves through the app
 
-People gather first and choose a game second. There is one room and one game
-list, and the list is inside the room:
+These games come *after* 얼음땡, not instead of it: the app opens on 얼음땡, a
+persona comes out of it, and the games that read that persona are picked up from
+the report screen (plan doc §17). They keep their own room, so the group makes
+one and gathers again with an invite code.
+
+Within that part, people gather first and choose a game second. There is one
+room and one game list, and the list is inside the room:
 
 ```
-/                          the app's end screen; 게임 바로가기 opens room creation
+/                          where 얼음땡 begins — the app opens on it
+/room/:code/hub            얼음땡's report screen; 게임 더 하기 opens room creation
 /games/demo                make a room, or join one with an invite code
 /games/demo/join/:code     what an invite link opens
 /games/demo/room/:code     the waiting room — who is here, invite code, QR
@@ -128,18 +134,53 @@ launched, so the bots keep playing on the other side of the handoff.
 
 ## One player, one tab, and a refresh that keeps the room
 
-The room flow (`context/RoomFlowContext`) and both games' sessions live in
-`sessionStorage`.
+These games keep who you are in `context/GameRoomContext` and in each game's own
+session, all in `sessionStorage`. 얼음땡 keeps its own in `RoomFlowContext`,
+which is that side's file and is left exactly as it is.
 
-Per tab, because `localStorage` is shared by every tab of a browser: two people
-testing from two tabs on one laptop would share one seat, and the second tab
-would find the first player's session and never claim its own.
+Two contexts rather than one because the storage has to differ. `localStorage`
+is shared by every tab of a browser; `sessionStorage` is per tab. These games
+hand each player a different seat — a different role in 마피아, a different token
+on the marble board — so two people testing from two tabs on one laptop have to
+be two players, and a shared store would have the second tab take over the
+first one's seat. 얼음땡 chose the browser-wide store, and that choice is theirs
+to keep.
 
 Stored at all, because a refresh used to throw the player out. The room lived
 only in React state, so reloading any room screen left the app not knowing who
 was asking, and it redirected to room creation — which read, from the outside,
 as the room having been destroyed. A reload now lands back on the same page,
 still in the room, mid-game included.
+
+## The persona the run measured
+
+얼음땡 measures five abilities — DOM 주도력 · SPD 순발력 · EXP 표현력 ·
+EMP 공감력 · OBS 관찰력, 0~100 — and the games after it play from them. The run
+computes them, so it owns the schema and the games map from it
+(docs/페르소나-인계.md).
+
+- **마피아** takes the five names as its own. Roles are dealt from them:
+  a mafia is 주도적이면서 남을 덜 살피고 서두르지 않고 말수가 적은 쪽, a police
+  는 관찰력, a doctor 는 공감력.
+- **커플 브루마블** keeps its own four stats, because they are its vocabulary
+  out loud — the board's tiles are LOGIC / EMPATHY / DRIVE / CAUTION and the
+  quiz names them. It maps: logic←OBS, empathy←EMP, drive←DOM, caution←100−SPD.
+  The quiz's trait answers (스트레스 해소법 등) are not something five numbers
+  can produce, so those stay a preset, chosen as the closest to the stats.
+
+- **너 누구야? / 너라면?** show a persona to a person rather than computing with
+  it, so they read `GET /demo/rooms/{code}/personas` — a title and traits
+  derived from each player's strongest ability, worded from the labels 얼음땡
+  already uses for its roles. Without a session behind the room they fall back
+  to the placeholder personas, and the `source` field says which it is. The
+  other party games (라이어게임, 금지어, 몸으로 말해요, 통했나?, 이름 끝말잇기,
+  카테고리 시장) use no persona at all.
+
+The group re-gathers in a fresh room with fresh ids, so people are matched **by
+nickname** (spaces and case ignored) against the session they came from — the
+report's 게임 더 하기 carries its code along as `?from=`. Anyone the run never
+saw plays with neutral 50s rather than being turned away, and the waiting room
+says how many were found.
 
 ## Bots and the clock
 

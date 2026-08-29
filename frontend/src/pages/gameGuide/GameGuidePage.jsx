@@ -13,7 +13,7 @@ import { GAME_GUIDES } from '../../data/gameDemo/gameGuideData'
 import { getDemoHubPath } from '../../data/gameDemo/gameDemoModels'
 import { launchDemoGame, startSelectedDemoGame } from '../../api/demoRooms'
 import { useGameDemo } from '../../context/GameDemoContext'
-import { useRoomFlow } from '../../context/RoomFlowContext'
+import { useGameRoom } from '../../context/GameRoomContext'
 import './GameGuidePage.css'
 
 /**
@@ -30,7 +30,7 @@ import './GameGuidePage.css'
 export default function GameGuidePage() {
   const { code, gameId } = useParams()
   const { players } = useGameDemo()
-  const { playerId } = useRoomFlow()
+  const { playerId } = useGameRoom()
   const [starting, setStarting] = useState(false)
   const [contentMode, setContentMode] = useState('general')
   const [error, setError] = useState('')
@@ -63,7 +63,7 @@ export default function GameGuidePage() {
 
   return (
     <PhoneFrame>
-      <TopBar title={`${guide.emoji} ${guide.title}`} showBack={false} action={<BackToRoomGamesControl />} />
+      <TopBar title={`${guide.emoji} ${guide.title}`} showBack={false} right={<BackToRoomGamesControl />} />
       <header className="game-guide-head">
         <Badge tone="fun">게임 설명서</Badge>
         <h1>{guide.goal}</h1>

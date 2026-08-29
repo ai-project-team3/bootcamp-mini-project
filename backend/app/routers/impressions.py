@@ -3,12 +3,12 @@ from collections import defaultdict
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..constants import MAX_PLAYERS
 from ..content.questions import IMPRESSION_QUESTION_NOS
 from ..database import get_db
 from ..models.guess import Guess
 from ..models.player import Player
 from ..models.room import Room
+from ..services.flow import next_phase
 from ..schemas.impression import (
     ImpressionQuestionResult,
     ImpressionStatusResponse,
@@ -19,7 +19,6 @@ from ..schemas.impression import (
 router = APIRouter(prefix="/rooms/{code}/impressions/{round}", tags=["impressions"])
 
 _KIND_BY_ROUND = {"pre": "IMPRESSION_PRE", "post": "IMPRESSION_POST"}
-_NEXT_PHASE = {"pre": "ANSWER", "post": "TYPE_GUESS"}
 
 
 def _get_room(code: str, db: Session) -> Room:
@@ -67,34 +66,34 @@ def submit_impression(
         .distinct()
         .count()
     )
-    if submitted == MAX_PLAYERS and room.phase == kind:
-        room.phase = _NEXT_PHASE[round]
+    if submitted == room.player_limit and room.phase == kind:
+        room.phase = next_phase(kind, room.player_limit)
         db.commit()
 
-    return _status(room.id, kind, db)
+    return _status(room, kind, db)
 
 
 @router.get("/status", response_model=ImpressionStatusResponse)
 def get_impression_status(code: str, round: str, db: Session = Depends(get_db)) -> ImpressionStatusResponse:
     kind = _kind(round)
     room = _get_room(code, db)
-    return _status(room.id, kind, db)
+    return _status(room, kind, db)
 
 
-def _status(room_id: str, kind: str, db: Session) -> ImpressionStatusResponse:
-    guesses = db.query(Guess).filter(Guess.room_id == room_id, Guess.kind == kind).all()
+def _status(room: Room, kind: str, db: Session) -> ImpressionStatusResponse:
+    guesses = db.query(Guess).filter(Guess.room_id == room.id, Guess.kind == kind).all()
     submitted = len({g.guesser_id for g in guesses})
-    revealed = submitted >= MAX_PLAYERS
+    revealed = submitted >= room.player_limit
     results = []
     if revealed:
         by_question: dict[int, dict[str, int]] = defaultdict(lambda: defaultdict(int))
         for g in guesses:
             by_question[g.round_no][g.target_player_id] += 1
-        players = {p.id: p for p in db.query(Player).filter(Player.room_id == room_id).all()}
+        players = {p.id: p for p in db.query(Player).filter(Player.room_id == room.id).all()}
         for question_no in IMPRESSION_QUESTION_NOS:
             tally = [
                 ImpressionTally(player_id=pid, nickname=players[pid].nickname if pid in players else "", votes=count)
                 for pid, count in sorted(by_question[question_no].items(), key=lambda kv: -kv[1])
             ]
             results.append(ImpressionQuestionResult(question_no=question_no, tally=tally))
-    return ImpressionStatusResponse(submitted=submitted, total=MAX_PLAYERS, revealed=revealed, results=results)
+    return ImpressionStatusResponse(submitted=submitted, total=room.player_limit, revealed=revealed, results=results)

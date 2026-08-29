@@ -3,3 +3,6 @@ __pycache__/
 .venv/
 .env
 uvicorn.log
+*.db
+uvicorn.err
+uvicorn.out

@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..constants import MAX_PLAYERS
 from ..database import get_db
 from ..models.player import Player
 from ..models.room import Room
@@ -30,7 +29,7 @@ def join_room(code: str, payload: PlayerJoinRequest, db: Session = Depends(get_d
         raise HTTPException(status_code=400, detail="이미 시작된 방입니다")
 
     current_count = db.query(Player).filter(Player.room_id == room.id).count()
-    if current_count >= MAX_PLAYERS:
+    if current_count >= room.player_limit:
         raise HTTPException(status_code=400, detail="정원이 가득 찼습니다")
 
     player = Player(

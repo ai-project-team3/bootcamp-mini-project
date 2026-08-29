@@ -1,10 +1,11 @@
 import type { PersonaScores } from "../api/types";
 
 const AXES: { key: keyof PersonaScores; label: string }[] = [
-  { key: "initiative", label: "주도성" },
-  { key: "analysis", label: "분석력" },
-  { key: "empathy", label: "공감력" },
-  { key: "caution", label: "신중함" },
+  { key: "DOM", label: "주도력" },
+  { key: "SPD", label: "순발력" },
+  { key: "EXP", label: "표현력" },
+  { key: "EMP", label: "공감력" },
+  { key: "OBS", label: "관찰력" },
 ];
 
 const SIZE = 200;

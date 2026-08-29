@@ -3,13 +3,13 @@ import Button from '../../../components/common/Button'
 import Card from '../../../components/common/Card'
 import { PROMPT_ONLY_GAME_CONTENT } from '../../../data/gameDemo/gameDemoData'
 import { buildForbiddenWordSet, getVisibleForbiddenAssignments } from '../../../data/gameDemo/gameDemoModels'
-import { useRoomFlow } from '../../../context/RoomFlowContext'
+import { useGameRoom } from '../../../context/GameRoomContext'
 import { getPrivateDemoPlayerId } from '../../../data/gameDemo/gameDemoModels'
 
 const WORD_POOLS = PROMPT_ONLY_GAME_CONTENT['forbidden-word']
 
 export default function ForbiddenWordGame({ players }) {
-  const { playerId } = useRoomFlow()
+  const { playerId } = useGameRoom()
   const [round, setRound] = useState(0)
   const activeId = getPrivateDemoPlayerId(players, playerId)
   const [visible, setVisible] = useState(false)

@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import LandingPage from '../pages/landing/LandingPage'
 import StartPage from '../pages/start/StartPage'
 import RoomCreatePage from '../pages/roomCreate/RoomCreatePage'
 import JoinPage from '../pages/join/JoinPage'
@@ -14,7 +13,6 @@ import PersonaPredictionDemoPage from '../pages/personaPredictionDemo/PersonaPre
 import PartyGamesDemoPage from '../pages/partyGamesDemo/PartyGamesDemoPage'
 import AfterDateDemoPage from '../pages/afterDateDemo/AfterDateDemoPage'
 import GamePage from '../pages/game/GamePage'
-import StatementsPage from '../pages/statements/StatementsPage'
 import ResultHubPage from '../pages/hub/ResultHubPage'
 import PersonalReportPage from '../pages/report/PersonalReportPage'
 import TeamReportPage from '../pages/report/TeamReportPage'
@@ -26,15 +24,15 @@ import MarbleGamePage from '../pages/minigames/MarbleGamePage'
 export default function AppRouter() {
   return (
     <Routes>
-      {/* 첫 화면은 얼음땡이 끝나는 화면과 같은 UI로, 게임 목록으로 바로 들어간다.
-          얼음땡 진행 흐름 자체는 /start 에 그대로 남아 있다. */}
-      <Route path="/" element={<LandingPage />} />
+      {/* 앱은 얼음땡에서 시작한다. 페르소나가 만들어진 다음에 오는 게임들
+          (마피아·브루마블·파티게임)은 리포트 화면에서 이어진다 — 기획안 §17.
+          /start 는 예전 링크가 깨지지 않도록 남겨둔 같은 화면이다. */}
+      <Route path="/" element={<StartPage />} />
       <Route path="/start" element={<StartPage />} />
       <Route path="/room/create" element={<RoomCreatePage />} />
       <Route path="/join/:code" element={<JoinPage />} />
       <Route path="/room/:code/waiting" element={<WaitingRoomPage />} />
       <Route path="/room/:code/game" element={<GamePage />} />
-      <Route path="/room/:code/statements" element={<StatementsPage />} />
       <Route path="/room/:code/hub" element={<ResultHubPage />} />
       <Route path="/room/:code/report/me" element={<PersonalReportPage />} />
       <Route path="/room/:code/report/team" element={<TeamReportPage />} />

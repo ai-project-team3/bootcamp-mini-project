@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from ..database import get_db
 
 from ..schemas.demo_room import (
     DemoPlayerResponse,
     DemoRoomClaimResponse,
+    DemoRoomCreateRequest,
     DemoRoomCreateResponse,
     DemoRoomFillRequest,
     DemoRoomGameLaunchRequest,
@@ -10,6 +14,8 @@ from ..schemas.demo_room import (
     DemoRoomLaunchResponse,
     DemoRoomLeaveResponse,
     DemoRoomNicknameRequest,
+    DemoRoomPersonaEntry,
+    DemoRoomPersonasResponse,
     DemoRoomResponse,
     DemoRoomStartRequest,
 )
@@ -27,6 +33,7 @@ from ..services.demo_rooms import (
     DemoRoomStore,
 )
 from ..services.game_launch import GameLaunchError, LaunchablePlayer, launch as launch_game
+from ..services.persona_handoff import describe, normalize_nickname, scores_by_nickname
 
 router = APIRouter(prefix='/demo/rooms', tags=['demo-rooms'])
 _store = DemoRoomStore()
@@ -36,7 +43,7 @@ def get_demo_room_store() -> DemoRoomStore:
     return _store
 
 
-def _room_response(room: DemoRoom) -> DemoRoomResponse:
+def _room_response(room: DemoRoom, persona_matches: int = 0) -> DemoRoomResponse:
     return DemoRoomResponse(
         code=room.code,
         status=room.status,
@@ -49,7 +56,19 @@ def _room_response(room: DemoRoom) -> DemoRoomResponse:
             if room.launch is not None
             else None
         ),
+        source_room_code=room.source_room_code,
+        persona_matches=persona_matches,
     )
+
+
+def _count_persona_matches(db: Session, room: DemoRoom) -> int:
+    """How many people here the 얼음땡 session recognises, so a screen can say so."""
+    if not room.source_room_code:
+        return 0
+    known = scores_by_nickname(db, room.source_room_code)
+    if not known:
+        return 0
+    return sum(1 for player in room.players if normalize_nickname(player.nickname) in known)
 
 
 def _player_response(player: DemoPlayer) -> DemoPlayerResponse:
@@ -79,10 +98,10 @@ def _raise_http(error: Exception) -> None:
 
 @router.post('', response_model=DemoRoomCreateResponse)
 def create_demo_room(
-    payload: DemoRoomNicknameRequest,
+    payload: DemoRoomCreateRequest,
     store: DemoRoomStore = Depends(get_demo_room_store),
 ) -> DemoRoomCreateResponse:
-    room, player = store.create_room(payload.nickname)
+    room, player = store.create_room(payload.nickname, payload.source_room_code)
     return DemoRoomCreateResponse(room=_room_response(room), player=_player_response(player))
 
 
@@ -90,11 +109,13 @@ def create_demo_room(
 def get_demo_room(
     code: str,
     store: DemoRoomStore = Depends(get_demo_room_store),
+    db: Session = Depends(get_db),
 ) -> DemoRoomResponse:
     try:
-        return _room_response(store.get_room(code.upper()))
+        room = store.get_room(code.upper())
     except Exception as error:
         _raise_http(error)
+    return _room_response(room, _count_persona_matches(db, room))
 
 
 @router.get('/{code}/players', response_model=list[DemoPlayerResponse])
@@ -118,6 +139,45 @@ def join_demo_room(
         return _player_response(store.join_room(code.upper(), payload.nickname))
     except Exception as error:
         _raise_http(error)
+
+
+@router.get('/{code}/personas', response_model=DemoRoomPersonasResponse)
+def list_room_personas(
+    code: str,
+    store: DemoRoomStore = Depends(get_demo_room_store),
+    db: Session = Depends(get_db),
+) -> DemoRoomPersonasResponse:
+    """What the icebreaking session measured about the people in this room.
+
+    The games played inside the room (너 누구야?, 너라면?) show a persona to a
+    person rather than computing with it, so they read this. 마피아 and 커플
+    브루마블 take the raw abilities through the launch instead — they deal
+    roles and build boards from the numbers.
+    """
+    try:
+        room = store.get_room(code.upper())
+    except Exception as error:
+        _raise_http(error)
+    if not room.source_room_code:
+        return DemoRoomPersonasResponse()
+    known = scores_by_nickname(db, room.source_room_code)
+    return DemoRoomPersonasResponse(
+        source_room_code=room.source_room_code,
+        players=[
+            DemoRoomPersonaEntry(
+                player_id=player.id,
+                nickname=player.nickname,
+                scores=known[normalize_nickname(player.nickname)],
+                **{
+                    key: value
+                    for key, value in describe(known[normalize_nickname(player.nickname)]).items()
+                    if key in ('title', 'traits')
+                },
+            )
+            for player in room.players
+            if normalize_nickname(player.nickname) in known
+        ],
+    )
 
 
 @router.post('/{code}/test-players', response_model=DemoRoomResponse)
@@ -174,18 +234,35 @@ def launch_room_game(
     code: str,
     payload: DemoRoomGameLaunchRequest,
     store: DemoRoomStore = Depends(get_demo_room_store),
+    db: Session = Depends(get_db),
 ) -> DemoRoomResponse:
     """Start a game that runs its own rooms, for everyone already gathered.
 
     Nobody re-enters a nickname or a code: the game's room is built around the
     roster of this one, and each player then claims their own seat below.
+
+    If the group came from a finished 얼음땡 session, what that session measured
+    travels with them — matched by nickname, since they gathered again under new
+    ids. Anyone it cannot match plays with neutral abilities rather than being
+    turned away.
     """
+    room_now = store.get_room(code.upper())
+    personas = (
+        scores_by_nickname(db, room_now.source_room_code)
+        if room_now.source_room_code
+        else {}
+    )
+
     def build(players: list[DemoPlayer]) -> DemoLaunch:
         launched = launch_game(
             payload.game_id,
             [
                 LaunchablePlayer(
-                    id=p.id, nickname=p.nickname, is_host=p.is_host, is_bot=p.is_bot
+                    id=p.id,
+                    nickname=p.nickname,
+                    is_host=p.is_host,
+                    is_bot=p.is_bot,
+                    persona=personas.get(normalize_nickname(p.nickname)),
                 )
                 for p in players
             ],

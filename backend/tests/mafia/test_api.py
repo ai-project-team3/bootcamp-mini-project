@@ -18,10 +18,11 @@ def _persona_payload(player_ids: list[str], seed: int) -> dict:
             {
                 "playerId": pid,
                 "personaScores": {
-                    "initiative": p.initiative,
-                    "analysis": p.analysis,
-                    "empathy": p.empathy,
-                    "caution": p.caution,
+                    "DOM": p.DOM,
+                    "SPD": p.SPD,
+                    "EXP": p.EXP,
+                    "EMP": p.EMP,
+                    "OBS": p.OBS,
                 },
             }
             for pid, p in personas.items()
@@ -121,24 +122,33 @@ def test_result_includes_persona_scores_for_the_radar_chart():
     ]
     client.post(f"/mafia/rooms/{room_id}/persona", json=_persona_payload(player_ids, seed=9))
     client.post(f"/mafia/rooms/{room_id}/start")
-    client.post(f"/mafia/rooms/{room_id}/advance")  # -> DAY_DISCUSSION
-    client.post(f"/mafia/rooms/{room_id}/advance")  # -> DAY_VOTE
-    state = client.get(f"/mafia/rooms/{room_id}/state").json()
-    target = state["players"][0]["player_id"]
-    for voter_id in player_ids:
-        client.post(f"/mafia/rooms/{room_id}/vote", json={"voter_id": voter_id, "target_id": target})
-    client.post(f"/mafia/rooms/{room_id}/advance")  # -> FINAL_DEFENSE
-    client.post(f"/mafia/rooms/{room_id}/advance")  # -> EXECUTION_VOTE
-    jurors = [pid for pid in player_ids if pid != target]
-    for voter_id in jurors:
-        client.post(f"/mafia/rooms/{room_id}/execution-vote", json={"voter_id": voter_id, "verdict": "guilty"})
-    day_result = client.post(f"/mafia/rooms/{room_id}/advance").json()
-    if day_result["phase"] == "NIGHT_ACTION":
+
+    # 마을이 매일 한 명씩 처형하도록 몰아 게임을 끝까지 진행시킨다. 누가
+    # 마피아인지는 성향에 따라 달라지므로 정해진 횟수로는 끝나지 않는다 —
+    # 아무도 투표하지 않으면 아무도 죽지 않아 낮과 밤만 반복된다.
+    for _ in range(40):
+        state = client.get(f"/mafia/rooms/{room_id}/state").json()
+        if state["phase"] == "RESULT":
+            break
+        alive = [p["player_id"] for p in state["players"] if p["is_alive"]]
+        if state["phase"] == "DAY_VOTE":
+            for voter_id in alive:
+                client.post(
+                    f"/mafia/rooms/{room_id}/vote",
+                    json={"voter_id": voter_id, "target_id": alive[0]},
+                )
+        elif state["phase"] == "EXECUTION_VOTE":
+            accused = state["accused_player_id"]
+            for voter_id in (pid for pid in alive if pid != accused):
+                client.post(
+                    f"/mafia/rooms/{room_id}/execution-vote",
+                    json={"voter_id": voter_id, "verdict": "guilty"},
+                )
         client.post(f"/mafia/rooms/{room_id}/advance")
 
     result = client.get(f"/mafia/rooms/{room_id}/result").json()
     for p in result["players"]:
-        assert set(p["persona_scores"].keys()) == {"initiative", "analysis", "empathy", "caution"}
+        assert set(p["persona_scores"].keys()) == {"DOM", "SPD", "EXP", "EMP", "OBS"}
         for value in p["persona_scores"].values():
             assert 0 <= value <= 100
 

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { returnToRoomHub } from '../../api/demoRooms'
 import { useGameDemo } from '../../context/GameDemoContext'
-import { useRoomFlow } from '../../context/RoomFlowContext'
+import { useGameRoom } from '../../context/GameRoomContext'
 import { getDemoHubPath } from '../../data/gameDemo/gameDemoModels'
 import './GameDemoExitControl.css'
 
@@ -18,7 +18,7 @@ import './GameDemoExitControl.css'
 export default function BackToRoomGamesControl({ label = '게임 목록' }) {
   const navigate = useNavigate()
   const { room, refresh } = useGameDemo()
-  const { playerId } = useRoomFlow()
+  const { playerId } = useGameRoom()
   const [leaving, setLeaving] = useState(false)
 
   const back = async () => {
