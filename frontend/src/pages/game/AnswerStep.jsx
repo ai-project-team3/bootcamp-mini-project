@@ -1,24 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ProgressBar from '../../components/common/ProgressBar'
 import { getAnswerStatus, submitAnswer } from '../../api/answers'
-import { EITHER_OR_QUESTIONS } from '../../data/eitherOrQuestions'
 
 const REVEAL_DISPLAY_MS = 2500
 const STATUS_POLL_MS = 1000
 
-export default function AnswerStep({ code, playerId, onAdvance }) {
+export default function AnswerStep({ code, playerId, questions, onAdvance }) {
   const [questionNo, setQuestionNo] = useState(1)
   const [startedAt, setStartedAt] = useState(() => Date.now())
-  const [submitted, setSubmitted] = useState(false)
+  const [myChoice, setMyChoice] = useState(null)
   const [status, setStatus] = useState(null)
   const [error, setError] = useState(null)
+  // The reveal handler must fire once. Without this the 1s poll schedules a
+  // fresh advance timer on every tick after the reveal, and on the last
+  // question that means onAdvance runs again every second.
+  const advanced = useRef(false)
 
-  const question = EITHER_OR_QUESTIONS.find((q) => q.questionNo === questionNo)
+  const question = questions.find((q) => q.questionNo === questionNo)
+  const submitted = myChoice !== null
 
   useEffect(() => {
     setStartedAt(Date.now())
-    setSubmitted(false)
+    setMyChoice(null)
     setStatus(null)
+    advanced.current = false
   }, [questionNo])
 
   useEffect(() => {
@@ -29,14 +34,12 @@ export default function AnswerStep({ code, playerId, onAdvance }) {
         .then((s) => {
           if (cancelled) return
           setStatus(s)
-          if (s.revealed) {
+          if (s.revealed && !advanced.current) {
+            advanced.current = true
             setTimeout(() => {
               if (cancelled) return
-              if (questionNo < EITHER_OR_QUESTIONS.length) {
-                setQuestionNo(questionNo + 1)
-              } else {
-                onAdvance()
-              }
+              if (questionNo < questions.length) setQuestionNo(questionNo + 1)
+              else onAdvance()
             }, REVEAL_DISPLAY_MS)
           }
         })
@@ -48,11 +51,11 @@ export default function AnswerStep({ code, playerId, onAdvance }) {
       cancelled = true
       clearInterval(timer)
     }
-  }, [submitted, code, questionNo, onAdvance])
+  }, [submitted, code, questionNo, questions.length, onAdvance])
 
   const handleChoice = (choice) => {
     const elapsedMs = Date.now() - startedAt
-    setSubmitted(true)
+    setMyChoice(choice)
     submitAnswer(code, questionNo, playerId, choice, elapsedMs).catch((err) => setError(err.message))
   }
 
@@ -60,39 +63,73 @@ export default function AnswerStep({ code, playerId, onAdvance }) {
 
   if (submitted) {
     if (!status?.revealed) {
+      const filled = status?.submitted ?? 0
+      const total = status?.total ?? 0
       return (
         <div className="game-waiting">
           <p>다른 사람들을 기다리는 중...</p>
-          <span className="game-waiting-count">{status?.submitted ?? 0}/{status?.total ?? 5}</span>
+          <div className="game-dots" aria-label={`${filled}/${total}명 제출`}>
+            {Array.from({ length: total }, (_, i) => (
+              <span key={i} className={i < filled ? 'game-dot on' : 'game-dot'} />
+            ))}
+          </div>
+          <span className="game-waiting-count">
+            {filled}/{total}
+          </span>
         </div>
       )
     }
+
+    // Plan doc §3-4 — the split shows, nobody is named. Knowing your answer
+    // will be attributed changes what you pick, and then the abilities measure
+    // the impression rather than the person.
+    const { count_a: a, count_b: b } = status
     return (
       <div className="answer-results">
         <p className="answer-situation">{question.situation}</p>
-        <ul className="answer-tally">
-          {status.results.map((r) => (
-            <li key={r.player_id} className={`answer-tally-${r.choice.toLowerCase()}`}>
-              <span>{r.nickname}</span>
-              <span className="answer-tally-choice">{r.choice === 'A' ? question.a : question.b}</span>
-            </li>
-          ))}
-        </ul>
+
+        <div className="split">
+          <div className="split-head">
+            <span className={`split-num a${myChoice === 'A' ? ' mine' : ''}`}>{a}</span>
+            <span className={`split-num b${myChoice === 'B' ? ' mine' : ''}`}>{b}</span>
+          </div>
+          <div className="split-bar">
+            {/* 만장일치일 때 진 쪽 색을 0.02만큼이라도 남기면 실제로는 표가
+                하나도 없는데 색이 섞여 보인다. 표가 있는 쪽만 그린다. */}
+            {a > 0 && <span className="split-fill a" style={{ flexGrow: a }} />}
+            {b > 0 && <span className="split-fill b" style={{ flexGrow: b }} />}
+          </div>
+          <div className="split-labels">
+            <span className="split-label">{question.a}</span>
+            <span className="split-label">{question.b}</span>
+          </div>
+        </div>
+
+        <p className="split-note">
+          {a === 0 || b === 0
+            ? '전원 같은 쪽을 골랐어요'
+            : `${Math.max(a, b)} 대 ${Math.min(a, b)}로 갈렸어요`}
+        </p>
+        <p className="split-mine">
+          내가 고른 쪽은 <b>{myChoice === 'A' ? question.a : question.b}</b>
+        </p>
       </div>
     )
   }
 
   return (
     <div className="answer-step">
-      <ProgressBar current={questionNo} total={EITHER_OR_QUESTIONS.length} />
-      <p className="answer-situation">{question.situation}</p>
-      <div className="answer-choices">
-        <button className="answer-choice-btn" onClick={() => handleChoice('A')}>
-          {question.a}
-        </button>
-        <button className="answer-choice-btn" onClick={() => handleChoice('B')}>
-          {question.b}
-        </button>
+      <ProgressBar current={questionNo} total={questions.length} />
+      <div className="step-body">
+        <p className="answer-situation">{question.situation}</p>
+        <div className="answer-choices">
+          <button className="answer-choice-btn choice-a" onClick={() => handleChoice('A')}>
+            {question.a}
+          </button>
+          <button className="answer-choice-btn choice-b" onClick={() => handleChoice('B')}>
+            {question.b}
+          </button>
+        </div>
       </div>
     </div>
   )

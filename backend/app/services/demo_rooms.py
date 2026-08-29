@@ -74,6 +74,10 @@ class DemoRoom:
     selected_game_id: str | None = None
     game_phase: str = 'HUB'
     launch: DemoLaunch | None = None
+    #: The 얼음땡 room this group came from, when they arrived from its report.
+    #: The games use it to look up the abilities that session measured, matching
+    #: people by nickname — see `services/persona_handoff`.
+    source_room_code: str | None = None
 
 
 def demo_room_can_start(player_count: int) -> bool:
@@ -90,11 +94,17 @@ class DemoRoomStore:
         self._rooms: dict[str, DemoRoom] = {}
         self._lock = Lock()
 
-    def create_room(self, nickname: str) -> tuple[DemoRoom, DemoPlayer]:
+    def create_room(
+        self, nickname: str, source_room_code: str | None = None
+    ) -> tuple[DemoRoom, DemoPlayer]:
         with self._lock:
             code = self._next_code()
             host = DemoPlayer(str(uuid.uuid4()), nickname.strip(), 1, True)
-            room = DemoRoom(code=code, players=[host])
+            room = DemoRoom(
+                code=code,
+                players=[host],
+                source_room_code=(source_room_code or None),
+            )
             self._rooms[code] = room
             return room, host
 

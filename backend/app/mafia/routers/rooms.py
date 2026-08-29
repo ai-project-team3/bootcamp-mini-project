@@ -176,12 +176,7 @@ def get_result(room_id: str):
                 "is_alive": p.is_alive,
                 "assigned_score": p.assigned_score,
                 "assigned_by": p.assigned_by,
-                "persona_scores": {
-                    "initiative": room.personas[p.player_id].initiative,
-                    "analysis": room.personas[p.player_id].analysis,
-                    "empathy": room.personas[p.player_id].empathy,
-                    "caution": room.personas[p.player_id].caution,
-                },
+                "persona_scores": room.personas[p.player_id].model_dump(),
             }
             for p in room.players.values()
         ],

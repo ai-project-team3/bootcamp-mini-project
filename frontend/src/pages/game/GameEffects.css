@@ -1,0 +1,675 @@
+/* 기획안 §13 — 새 게임 화면과 연출.
+ *
+ * 전환은 0.6초를 넘기지 않는다. 아홉 단계라 전환이 길면 그게 다 진행 시간이다.
+ * 모든 움직임은 transform/opacity로만 — 레이아웃을 흔들면 저사양 폰에서 끊긴다. */
+
+/* ── 단계 전환 — 이름이 화면을 가로질러 쓸려 들어온다 ── */
+.stage-intro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 13, 34, 0.92);
+  z-index: 20;
+  animation: intro-fade 1.4s ease forwards;
+  pointer-events: none;
+}
+
+.stage-intro span {
+  font-family: var(--font-heading);
+  font-size: 1.9rem;
+  color: var(--hot);
+  text-align: center;
+  padding: 0 20px;
+  animation: intro-slide 0.6s var(--ease-pop) both;
+}
+
+@keyframes intro-fade {
+  0%, 68% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes intro-slide {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ── 선택지 버튼 — 화면의 절반씩, 색이 곧 정보.
+   예전엔 .answer-choices/.answer-choice-btn이 둘 다 flex:1이라 남는 세로
+   공간을 버튼이 그대로 흡수했다 — 글자 한두 줄짜리 버튼이 화면 절반을
+   채우는 빈 색면이 됐다. 버튼은 이제 내용 크기만큼만 잡고, 남는 공간은
+   부모(.tele-step 등)의 justify-content:center로 가운데에 모은다. ── */
+.answer-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  align-self: stretch;
+}
+
+.answer-choice-btn {
+  min-height: 76px;
+  border: none;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.4;
+  padding: 14px 16px;
+  word-break: keep-all;
+  /* 큰 색면 한가운데에 글자를 둔다. 왼쪽 위에 붙으면 버튼이 아니라 카드처럼 보인다. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+/* 세련된 대비색 두 개 — 텔레파시/이지선다/라이어 투표가 공유한다. */
+.answer-choice-btn.choice-a { background: var(--choice-a); border-left: none; }
+.answer-choice-btn.choice-b { background: var(--choice-b); border-left: none; }
+.answer-choice-btn:active { transform: scale(0.97); filter: brightness(1.12); }
+
+/* ── 이지선다 — 텔레파시와 같은 버튼을 쓰지만 나란히 둬서 "둘 중 하나를
+   투표한다"는 느낌을 준다. 텔레파시는 위아래로 쌓아 "순서대로 두 번 고른다"는
+   느낌을 유지한다. 가로 배치에서는 buttons가 행 너비를 똑같이 나눠 가져야
+   하므로 flex:1을 여기서만 되살린다. ── */
+.answer-step .answer-choices {
+  flex-direction: row;
+}
+
+.answer-step .answer-choice-btn {
+  flex: 1;
+  min-height: 128px;
+  border-radius: var(--radius-lg);
+  border: 2px solid rgba(255, 255, 255, 0.14);
+}
+
+/* ── 텔레파시 ── */
+.tele-step,
+.tele-results,
+.trait-step,
+.trait-reveal,
+.liar-step,
+.nunchi {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 박스(선택지 버튼)가 줄어든 만큼, 남는 세로 공간은 화면 가운데로 모아서
+   위에 프롬프트 하나, 아래는 빈 여백만 남는 모양을 막는다. 진행 바가 있는
+   화면(텔레파시/이지선다/첫인상)은 진행 바까지 같이 가운데로 밀리면 안 되니
+   진행 바는 밖에 그대로 두고, 프롬프트+선택지만 .step-body로 묶어서 그 안에서
+   따로 가운데 정렬한다. */
+.tele-results,
+.trait-step {
+  justify-content: center;
+}
+
+.step-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+}
+
+.tele-results {
+  align-items: stretch;
+  text-align: center;
+}
+
+.tele-prompt {
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+}
+
+.tele-prompt b { color: var(--hot); }
+
+.tele-picks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  align-self: stretch;
+}
+
+.tele-pick {
+  padding: 20px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 600;
+  transition: transform 0.12s ease, background 0.15s ease;
+}
+
+.tele-pick:active { transform: scale(0.96); background: var(--hot); }
+
+.tele-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tele-group {
+  border-radius: var(--radius-md);
+  padding: 16px;
+  animation: card-drop 0.45s var(--ease-pop) both;
+}
+
+.tele-group.a { background: var(--c1); }
+.tele-group.b { background: var(--c2); animation-delay: 0.1s; }
+
+.tele-word {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  color: #fff;
+}
+
+.tele-names {
+  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.88rem;
+}
+
+.tele-verdict {
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  animation: pop-in 0.4s var(--ease-pop) 0.25s both;
+}
+
+.tele-verdict.hit { color: var(--ok); }
+
+.tele-hits {
+  text-align: center;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* ── ○○님은 ___한 사람이다 ── */
+.trait-prompt {
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+}
+
+.trait-prompt b { color: var(--hot); }
+
+.trait-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* 1fr이면 이 grid 전체가 flex:1이던 시절처럼 화면 남는 높이를 다 먹는다.
+     minmax로 바꿔서 카드는 내용 크기만큼만 잡되, 같은 줄 카드끼리는 여전히
+     높이가 맞는다(그리드 아이템 기본 align-items:stretch). */
+  grid-auto-rows: minmax(76px, auto);
+  gap: 10px;
+  align-content: start;
+}
+
+/* 여섯 보기를 c1~c4 등 색을 다 다르게 돌리던 걸 하나로 통일했다.
+   --trait-box는 남색 배경과 같은 계열(짙은 인디고)이라 화면과 어울리면서도
+   배경보다 확실히 밝아 경계가 또렷하고, 흰 글자와 대비가 커서 가독성도 좋다. */
+.trait-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 84px;
+  padding: 14px 8px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--trait-box);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: keep-all;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.trait-option:active { transform: scale(0.96); filter: brightness(1.15); }
+
+.trait-note,
+.trait-hits,
+.liar-hint,
+.nunchi-hint {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.trait-reveal {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.trait-target {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+}
+
+.trait-answer {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 2.1rem;
+  color: var(--gold);
+  animation: pop-in 0.45s var(--ease-pop) both;
+}
+
+/* ── 눈치 게임 ── */
+.nunchi {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: var(--radius-md);
+  margin: -6px;
+  padding: 24px 16px;
+  transition: background var(--dur) ease;
+  background: transparent;
+}
+
+.nunchi.ok { background: var(--ok); }
+.nunchi.fail { background: var(--no); animation: shake 0.4s ease; }
+
+.nunchi-round {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+}
+
+.nunchi.ok .nunchi-round,
+.nunchi.fail .nunchi-round,
+.nunchi.ok .nunchi-cap,
+.nunchi.fail .nunchi-cap,
+.nunchi.ok .nunchi-order,
+.nunchi.fail .nunchi-order {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.nunchi-big {
+  font-family: var(--font-heading);
+  font-size: 5.4rem;
+  line-height: 1;
+  margin: 8px 0 0;
+  color: var(--hot);
+  animation: pop-in 0.35s var(--ease-pop) both;
+}
+
+.nunchi.ok .nunchi-big,
+.nunchi.fail .nunchi-big { color: #fff; }
+
+.nunchi-cap {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.nunchi-order {
+  margin: 10px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+/* 진짜 버튼처럼 아래에 두께(짙은 그림자)를 깔아두고, 누르면 그 두께만큼
+   내려앉게 한다 — 눌렀다는 게 색 변화가 아니라 "들어갔다"는 움직임으로
+   보이게. */
+.nunchi-btn {
+  margin-top: 22px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  border: none;
+  background: var(--hot);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  animation: nunchi-pulse 1.8s ease-out infinite;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.nunchi-btn:active {
+  transform: translateY(8px);
+  box-shadow: 0 2px 0 0 #a8134f, 0 3px 8px rgba(0, 0, 0, 0.35);
+  animation-play-state: paused;
+}
+
+.nunchi-btn:disabled {
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  animation: none;
+  box-shadow: 0 6px 0 0 rgba(0, 0, 0, 0.28);
+  transform: translateY(2px);
+}
+
+@keyframes nunchi-pulse {
+  0% { box-shadow: 0 8px 0 0 #a8134f, 0 0 0 0 rgba(255, 46, 136, 0.5); }
+  70% { box-shadow: 0 8px 0 0 #a8134f, 0 0 0 22px rgba(255, 46, 136, 0); }
+  100% { box-shadow: 0 8px 0 0 #a8134f, 0 0 0 0 rgba(255, 46, 136, 0); }
+}
+
+/* 꼴찌/동시누름 전용 연출 — "빵" 하고 부풀었다가 네 조각으로 터져 날아간다.
+   조각 4개(스팬)를 사분면별로 clip-path로 잘라 각자 다른 대각선으로 날린다. */
+.nunchi.shattered { animation: shake 0.35s ease; }
+
+.nunchi-shatter {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 8px auto 0;
+  border-radius: 50%;
+  background: var(--no);
+  display: grid;
+  place-items: center;
+  animation: shatter-pop 0.22s ease;
+}
+
+.nunchi-shatter-face {
+  font-size: 2.6rem;
+  animation: shatter-face-fade 0.4s 0.15s ease forwards;
+}
+
+.nunchi-shard {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+}
+
+.nunchi-shard-1 {
+  clip-path: polygon(4% 4%, 54% 0, 30% 54%, 0 46%);
+  animation: shatter-shard-1 0.65s 0.15s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+.nunchi-shard-2 {
+  clip-path: polygon(54% 0, 98% 6%, 100% 52%, 40% 42%);
+  animation: shatter-shard-2 0.65s 0.15s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+.nunchi-shard-3 {
+  clip-path: polygon(0 46%, 40% 42%, 46% 96%, 2% 100%);
+  animation: shatter-shard-3 0.65s 0.15s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+.nunchi-shard-4 {
+  clip-path: polygon(40% 42%, 100% 52%, 98% 98%, 44% 100%);
+  animation: shatter-shard-4 0.65s 0.15s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+.nunchi-fail-word {
+  margin: 10px 0 0;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 2.8rem;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  animation: pop-in 0.35s var(--ease-pop) 0.15s both;
+}
+
+@keyframes shatter-pop {
+  0% { transform: scale(0.85); }
+  45% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shatter-shard-1 { to { transform: translate(-54px, -48px) rotate(-42deg); opacity: 0; } }
+@keyframes shatter-shard-2 { to { transform: translate(56px, -46px) rotate(40deg); opacity: 0; } }
+@keyframes shatter-shard-3 { to { transform: translate(-50px, 54px) rotate(-36deg); opacity: 0; } }
+@keyframes shatter-shard-4 { to { transform: translate(52px, 56px) rotate(38deg); opacity: 0; } }
+
+@keyframes shatter-face-fade {
+  to { opacity: 0; transform: scale(0.5); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nunchi.shattered,
+  .nunchi-shatter,
+  .nunchi-shard,
+  .nunchi-shatter-face,
+  .nunchi-fail-word {
+    animation: none;
+  }
+}
+
+/* ── 라이어 ── */
+.liar-step { align-items: center; justify-content: center; text-align: center; }
+
+.liar-round,
+.liar-cap {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+}
+
+.liar-peek {
+  width: 100%;
+  padding: 46px 16px;
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.liar-word {
+  width: 100%;
+  border-radius: var(--radius-md);
+  padding: 30px 16px;
+  background: var(--deep);
+  animation: pop-in 0.3s var(--ease-pop) both;
+}
+
+.liar-word.liar { background: var(--hot); }
+
+.liar-word-label {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.08em;
+}
+
+.liar-word-text {
+  margin: 8px 0 0;
+  font-family: var(--font-heading);
+  font-size: 2.4rem;
+  color: #fff;
+}
+
+.liar-word-hint {
+  margin: 8px 0 0;
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.liar-turn { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+.liar-turn-name {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1.9rem;
+  animation: pop-in 0.4s var(--ease-pop) both;
+}
+
+.liar-turn.mine .liar-turn-name { color: var(--hot); }
+
+/* 링 타이머 — 남은 시간이 테두리를 따라 줄어든다 */
+.liar-ring {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--hot) var(--p), var(--surface-2) 0);
+  transition: background 0.9s linear;
+}
+
+.liar-ring span {
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  background: var(--card);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-heading);
+  font-size: 2.4rem;
+  color: var(--ink);
+}
+
+.liar-prompt {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.liar-verdict {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  color: var(--no);
+  animation: pop-in 0.4s var(--ease-pop) both;
+}
+
+.liar-step.liar-won .liar-verdict { color: var(--gold); }
+
+.liar-answer { margin: 0; font-size: 1.1rem; }
+.liar-answer b { color: var(--hot); }
+.liar-answer-word { margin: 0; color: var(--ink-soft); font-size: 0.95rem; }
+
+.liar-winner {
+  margin: 6px 0 0;
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--gold);
+}
+
+.liar-lastchance { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+
+.liar-input {
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* ── 공통 키프레임 ── */
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes card-drop {
+  from { opacity: 0; transform: translateY(-18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+
+/* 대기 화면 — 정지 화면이 앱이 멈춘 걸로 보이지 않게 점이 숨 쉰다 */
+.game-waiting p {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.game-waiting b { color: var(--hot); }
+
+.game-dots {
+  display: flex;
+  gap: 10px;
+}
+
+.game-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  transition: background 0.25s ease, transform 0.25s var(--ease-pop);
+}
+
+.game-dot.on {
+  background: var(--hot);
+  transform: scale(1.2);
+}
+
+.game-waiting-count {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+}
+
+/* ── 첫인상 투표 — 지목 버튼도 큰 색면으로 통일 ── */
+.impression-choices {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-content: start;
+}
+
+.impression-choices button {
+  min-height: 84px;
+  border: none !important;
+  border-radius: var(--radius-md);
+  color: #fff !important;
+  font-size: 1.05rem;
+  font-weight: 700;
+  word-break: keep-all;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.impression-choices button:nth-child(4n + 1) { background: var(--c1) !important; }
+.impression-choices button:nth-child(4n + 2) { background: var(--c2) !important; }
+.impression-choices button:nth-child(4n + 3) { background: var(--c3) !important; color: #2a2000 !important; }
+.impression-choices button:nth-child(4n + 4) { background: var(--c4) !important; }
+.impression-choices button:active { transform: scale(0.96); filter: brightness(1.12); }
+
+/* 지목 대상이 한 명뿐이면 한 칸을 다 쓴다 */
+.impression-choices button:only-child { grid-column: 1 / -1; }
+
+.impression-question {
+  text-wrap: balance;
+}
+
+.impression-step {
+  justify-content: center;
+}
+
+/* 첫인상 결과 카드도 어두운 바탕에 맞춘다 */
+.impression-result-card {
+  background: var(--surface-2) !important;
+  border-color: var(--line) !important;
+  animation: card-drop 0.4s var(--ease-pop) both;
+}
+
+.impression-tally-votes {
+  font-family: var(--font-mono);
+  color: var(--hot) !important;
+  font-weight: 600;
+}

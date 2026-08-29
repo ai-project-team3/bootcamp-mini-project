@@ -9,7 +9,7 @@ import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import BackToRoomGamesControl from '../../components/common/BackToRoomGamesControl'
 import { useGameDemo } from '../../context/GameDemoContext'
-import { useRoomFlow } from '../../context/RoomFlowContext'
+import { useGameRoom } from '../../context/GameRoomContext'
 import { FLAVORED_GAME_CONTENT } from '../../data/gameDemo/gameDemoData'
 import { getPrivateDemoPlayerId, isPlayerAnswerLocked } from '../../data/gameDemo/gameDemoModels'
 import './PersonaPredictionDemoPage.css'
@@ -18,7 +18,7 @@ const PHASES = ['비공개 선택', 'ALL ANSWERS LOCKED', '예측 공개', '실�
 
 export default function PersonaPredictionDemoPage() {
   const { players, personas } = useGameDemo()
-  const { playerId } = useRoomFlow()
+  const { playerId } = useGameRoom()
   const [mode, setMode] = useState('mild')
   const [questionIndex, setQuestionIndex] = useState(0)
   const [phase, setPhase] = useState(0)
@@ -49,7 +49,7 @@ export default function PersonaPredictionDemoPage() {
 
   return (
     <PhoneFrame>
-      <TopBar title="너라면?" showBack={false} action={<BackToRoomGamesControl />} />
+      <TopBar title="너라면?" showBack={false} right={<BackToRoomGamesControl />} />
       <FlavorToggle value={mode} onChange={changeMode} />
       <ProgressBar current={phase + 1} total={PHASES.length} label={PHASES[phase]} />
 

@@ -31,5 +31,5 @@ export default function PartyGamesDemoPage() {
 
   if (!SelectedGame) return <Navigate to={hubPath} replace />
 
-  return <PhoneFrame><TopBar title="Party Games" showBack={false} action={<BackToRoomGamesControl />} /><SelectedGame players={players} /></PhoneFrame>
+  return <PhoneFrame><TopBar title="Party Games" showBack={false} right={<BackToRoomGamesControl />} /><SelectedGame players={players} /></PhoneFrame>
 }

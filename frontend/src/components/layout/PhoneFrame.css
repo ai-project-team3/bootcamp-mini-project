@@ -1,11 +1,14 @@
 .phone {
+  position: relative;
   width: 100%;
   max-width: 380px;
   min-height: 720px;
-  background: var(--surface);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--card) 100%);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
   overflow: hidden;
   display: flex;
   flex-direction: column;

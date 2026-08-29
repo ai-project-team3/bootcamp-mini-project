@@ -3,11 +3,11 @@ import Button from '../../../components/common/Button'
 import Card from '../../../components/common/Card'
 import FlavorToggle from '../../../components/common/FlavorToggle'
 import { FLAVORED_GAME_CONTENT } from '../../../data/gameDemo/gameDemoData'
-import { useRoomFlow } from '../../../context/RoomFlowContext'
+import { useGameRoom } from '../../../context/GameRoomContext'
 import { getPrivateDemoPlayerId } from '../../../data/gameDemo/gameDemoModels'
 
 export default function LiarGame({ players }) {
-  const { playerId } = useRoomFlow()
+  const { playerId } = useGameRoom()
   const [mode, setMode] = useState('mild')
   const [round, setRound] = useState(0)
   const activeId = getPrivateDemoPlayerId(players, playerId)

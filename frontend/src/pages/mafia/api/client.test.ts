@@ -25,7 +25,7 @@ describe("api client", () => {
 
     expect(result).toEqual({ room_id: "abc" });
     const [url, options] = fetchMock.mock.calls[0];
-    expect(url).toBe("http://localhost:8000/mafia/rooms");
+    expect(url).toBe("/mafia/rooms");
     expect(options.method).toBe("POST");
     expect(JSON.parse(options.body as string)).toEqual({ player_count: 4 });
   });
@@ -63,7 +63,7 @@ describe("api client", () => {
     await getRoomState("room1");
 
     const [url, options] = fetchMock.mock.calls[0];
-    expect(url).toBe("http://localhost:8000/mafia/rooms/room1/state");
+    expect(url).toBe("/mafia/rooms/room1/state");
     expect(options?.method ?? "GET").toBe("GET");
   });
 
@@ -78,7 +78,7 @@ describe("api client", () => {
 
     expect(result).toEqual({ status: "ok" });
     const [url, options] = fetchMock.mock.calls[0];
-    expect(url).toBe("http://localhost:8000/mafia/rooms/room1/execution-vote");
+    expect(url).toBe("/mafia/rooms/room1/execution-vote");
     expect(JSON.parse(options.body as string)).toEqual({ voter_id: "p1", verdict: "guilty" });
   });
 
@@ -93,7 +93,7 @@ describe("api client", () => {
 
     expect(result).toEqual({ phase: "WAITING_ROOM" });
     const [url, options] = fetchMock.mock.calls[0];
-    expect(url).toBe("http://localhost:8000/mafia/rooms/room1/restart");
+    expect(url).toBe("/mafia/rooms/room1/restart");
     expect(options.method).toBe("POST");
   });
 
@@ -108,7 +108,7 @@ describe("api client", () => {
 
     expect(result).toEqual({ phase: "DAY_DISCUSSION" });
     const [url, options] = fetchMock.mock.calls[0];
-    expect(url).toBe("http://localhost:8000/mafia/rooms/room1/advance");
+    expect(url).toBe("/mafia/rooms/room1/advance");
     expect(options.method).toBe("POST");
   });
 
@@ -123,7 +123,7 @@ describe("api client", () => {
 
     expect(result).toEqual({ player_count: 6 });
     const [url, options] = fetchMock.mock.calls[0];
-    expect(url).toBe("http://localhost:8000/mafia/rooms/room1/player-count");
+    expect(url).toBe("/mafia/rooms/room1/player-count");
     expect(JSON.parse(options.body as string)).toEqual({ player_count: 6 });
   });
 

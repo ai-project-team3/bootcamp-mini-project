@@ -30,4 +30,8 @@
   font-family: var(--font-mono);
 }
 
-.topbar-action { margin-left: auto; }
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}

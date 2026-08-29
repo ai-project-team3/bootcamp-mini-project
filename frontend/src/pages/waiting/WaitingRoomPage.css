@@ -8,7 +8,40 @@
 .wr-sub {
   font-size: 0.75rem;
   color: var(--ink-soft);
+  margin: 0 0 4px;
+}
+
+.wr-team-kind {
+  font-size: 0.72rem;
+  color: var(--deep);
+  margin: 0 0 4px;
+}
+
+.wr-regenerate-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0 0 16px;
+}
+
+.wr-regenerate-btn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px dashed var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 0.74rem;
+}
+
+.wr-regenerate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wr-regenerate-note {
+  font-size: 0.72rem;
+  color: var(--ok);
 }
 
 .wr-list {
@@ -48,4 +81,15 @@
   border: 1px solid var(--hot);
   padding: 2px 6px;
   border-radius: 999px;
+}
+
+.wr-empty {
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+  padding: 10px 2px;
+}
+
+.wr-error {
+  font-size: 0.78rem;
+  color: var(--hot);
 }

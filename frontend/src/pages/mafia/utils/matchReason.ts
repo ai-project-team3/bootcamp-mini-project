@@ -1,10 +1,11 @@
 import type { PersonaScores, ResultPlayer } from "../api/types";
 
 const AXIS_LABELS: Record<keyof PersonaScores, string> = {
-  initiative: "주도성",
-  analysis: "분석력",
-  empathy: "공감력",
-  caution: "신중함",
+  DOM: "주도력",
+  SPD: "순발력",
+  EXP: "표현력",
+  EMP: "공감력",
+  OBS: "관찰력",
 };
 
 const ROLE_LABELS: Record<ResultPlayer["role"], string> = {

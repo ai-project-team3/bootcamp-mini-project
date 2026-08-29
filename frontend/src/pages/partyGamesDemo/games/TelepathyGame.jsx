@@ -5,11 +5,11 @@ import FlavorToggle from '../../../components/common/FlavorToggle'
 import { DemoNotice } from '../../../components/common/GameDemoControls'
 import { FLAVORED_GAME_CONTENT } from '../../../data/gameDemo/gameDemoData'
 import { groupMatchingAnswers } from '../../../data/gameDemo/gameDemoModels'
-import { useRoomFlow } from '../../../context/RoomFlowContext'
+import { useGameRoom } from '../../../context/GameRoomContext'
 import { getPrivateDemoPlayerId } from '../../../data/gameDemo/gameDemoModels'
 
 export default function TelepathyGame({ players }) {
-  const { playerId } = useRoomFlow()
+  const { playerId } = useGameRoom()
   const [mode, setMode] = useState('mild')
   const [questionIndex, setQuestionIndex] = useState(0)
   const activeId = getPrivateDemoPlayerId(players, playerId)

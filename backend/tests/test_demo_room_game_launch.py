@@ -13,6 +13,7 @@ from app.mafia.store import store as mafia_store
 from app.marble.store import store as marble_store
 from app.routers import demo_rooms
 from app.schemas.demo_room import (
+    DemoRoomCreateRequest,
     DemoRoomFillRequest,
     DemoRoomGameLaunchRequest,
     DemoRoomGameSelectRequest,
@@ -34,7 +35,7 @@ class DemoRoomGameLaunchTest(unittest.TestCase):
 
     def _room_of(self, nicknames: list[str]):
         created = demo_rooms.create_demo_room(
-            DemoRoomNicknameRequest(nickname=nicknames[0]), self.store
+            DemoRoomCreateRequest(nickname=nicknames[0]), self.store
         )
         players = [created.player]
         for nickname in nicknames[1:]:
@@ -225,7 +226,7 @@ class DemoRoomTestPlayersTest(unittest.TestCase):
 
     def _host(self):
         return demo_rooms.create_demo_room(
-            DemoRoomNicknameRequest(nickname='방장'), self.store
+            DemoRoomCreateRequest(nickname='방장'), self.store
         ).player
 
     def _fill(self, player_id: str, count: int = 1):
@@ -309,7 +310,7 @@ class DemoRoomReturnToHubTest(unittest.TestCase):
 
     def _started_room(self):
         host = demo_rooms.create_demo_room(
-            DemoRoomNicknameRequest(nickname='방장'), self.store
+            DemoRoomCreateRequest(nickname='방장'), self.store
         ).player
         guest = demo_rooms.join_demo_room(
             'ABC123', DemoRoomNicknameRequest(nickname='참가자'), self.store

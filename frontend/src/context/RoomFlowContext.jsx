@@ -2,58 +2,42 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 const RoomFlowContext = createContext(null)
 
-/**
- * Where the room flow keeps who you are.
- *
- * Persisted to `sessionStorage`, because a refresh used to throw the player
- * out: the room lived only in React state, so reloading any room screen left
- * the app with no idea who was asking and it redirected to room creation —
- * which read, from the outside, as the room having been destroyed. Reloading
- * now lands back on the same page, still in the room.
- *
- * `sessionStorage` and not `localStorage` for the same reason the games use it:
- * it is per tab, so two players testing from two tabs on one machine stay two
- * players. See `pages/mafia/hooks/usePlayerSession`.
- */
-const STORAGE_KEY = 'roomFlow.session'
+const KEY = 'icetag.session'
 
-const EMPTY = {
-  nickname: '',
-  gender: 'M',
-  mbti: '',
-  roomCode: null,
-  playerId: null,
-  isHost: true,
+// Private-mode Safari and locked-down browsers throw on localStorage access
+// rather than returning null, so every touch is guarded. Losing persistence is
+// survivable; a thrown error on first render is not.
+function read() {
+  try {
+    const raw = localStorage.getItem(KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
 }
 
-function readStored() {
+function write(value) {
   try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY)
-    return raw ? { ...EMPTY, ...JSON.parse(raw) } : EMPTY
+    localStorage.setItem(KEY, JSON.stringify(value))
   } catch {
-    // A corrupt or unavailable store should not stop the app from starting.
-    return EMPTY
+    /* storage unavailable — the session still works, it just won't survive a refresh */
   }
 }
 
 export function RoomFlowProvider({ children }) {
-  const [stored] = useState(readStored)
-  const [nickname, setNickname] = useState(stored.nickname)
-  const [gender, setGender] = useState(stored.gender)
-  const [mbti, setMbti] = useState(stored.mbti)
-  const [roomCode, setRoomCode] = useState(stored.roomCode)
-  const [playerId, setPlayerId] = useState(stored.playerId)
-  const [isHost, setIsHost] = useState(stored.isHost)
+  const saved = useMemo(() => read(), [])
+  const [nickname, setNickname] = useState(saved?.nickname ?? '')
+  const [gender, setGender] = useState(saved?.gender ?? 'M')
+  const [mbti, setMbti] = useState(saved?.mbti ?? '')
+  const [roomCode, setRoomCode] = useState(saved?.roomCode ?? null)
+  const [playerId, setPlayerId] = useState(saved?.playerId ?? null)
+  const [isHost, setIsHost] = useState(saved?.isHost ?? true)
 
+  // Plan doc §2 — without this a refresh drops playerId and that player can
+  // never rejoin, which strands everyone else waiting on a submission that
+  // will not arrive.
   useEffect(() => {
-    try {
-      window.sessionStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ nickname, gender, mbti, roomCode, playerId, isHost }),
-      )
-    } catch {
-      // Non-fatal: the flow just will not survive a refresh.
-    }
+    write({ nickname, gender, mbti, roomCode, playerId, isHost })
   }, [nickname, gender, mbti, roomCode, playerId, isHost])
 
   const value = useMemo(

@@ -13,6 +13,7 @@ game's models or store itself.
 import uuid
 
 from app.mafia.constants import ALLOWED_PLAYER_COUNTS
+from app.mafia.models.persona import PersonaScores
 from app.mafia.models.room import Player, Room
 from app.mafia.store import store
 from app.mafia.utils.room_code import generate_room_code
@@ -37,6 +38,7 @@ def create_room_for(
     host_index: int = 0,
     options: dict[str, str] | None = None,
     bots: list[bool] | None = None,
+    personas: list[dict[str, int] | None] | None = None,
 ) -> tuple[str, list[str]]:
     """Seat a whole group in a new mafia room.
 
@@ -45,20 +47,32 @@ def create_room_for(
     `options` is the per-game settings the host chose; mafia's room size comes
     from the group itself, so there is nothing here for it to read yet. `bots`
     marks, per nickname, the seats the demo filled rather than a person.
+
+    `personas` carries what the icebreaking run measured, per nickname. Roles
+    are dealt from it, so a group arriving from a finished session skips the
+    "성향 데이터 채우기" step entirely; anyone without one is filled in neutral.
     """
     check_player_count(len(nicknames))
     if not 0 <= host_index < len(nicknames):
         raise MafiaHandoffError("방장을 찾을 수 없어요")
 
     flags = bots or [False] * len(nicknames)
+    scores = personas or [None] * len(nicknames)
     room = Room(room_id=_new_room_id(), player_count=len(nicknames))
     player_ids: list[str] = []
-    for nickname, is_bot in zip(nicknames, flags):
+    for nickname, is_bot, persona in zip(nicknames, flags, scores):
         player_id = str(uuid.uuid4())
         room.players[player_id] = Player(
             player_id=player_id, nickname=nickname, is_bot=is_bot
         )
+        if persona is not None:
+            room.personas[player_id] = PersonaScores.from_partial(persona)
         player_ids.append(player_id)
+    # Roles are dealt only when every seat has abilities, so a partial handoff
+    # would stall the room. Fill the rest in neutral rather than half-arrive.
+    if room.personas and len(room.personas) < len(player_ids):
+        for player_id in player_ids:
+            room.personas.setdefault(player_id, PersonaScores.from_partial({}))
     room.host_player_id = player_ids[host_index]
     store.create(room)
     return room.room_id, player_ids

@@ -32,13 +32,49 @@ test('room players keep their ids and nicknames while demo personas cycle by sea
   assert.equal(result.personas['room-3'].title, '해결사')
 })
 
-test('every catalog game has a playable guide', () => {
+test('every game the room can pick has a playable guide', () => {
   const guides = guideData.GAME_GUIDES
-  assert.equal(Object.keys(guides).length, 8)
-  for (const id of ['persona-impostor', 'persona-prediction', 'name-chain', 'category-market', 'liar', 'charades', 'forbidden-word', 'telepathy']) {
+  // 방에서 고를 수 있는 모든 게임 — 방 안에서 하는 8개와, 자기 방을 따로
+  // 만드는 마피아·커플 브루마블. 어느 쪽이든 시작 전에 규칙을 먼저 보여준다.
+  const everyGame = [
+    'persona-impostor', 'persona-prediction', 'name-chain', 'category-market',
+    'liar', 'charades', 'forbidden-word', 'telepathy',
+    'mafia', 'marble',
+  ]
+  assert.equal(Object.keys(guides).length, everyGame.length)
+  for (const id of everyGame) {
     assert.equal(guides[id].id, id)
     assert.ok(guides[id].goal)
     assert.ok(guides[id].steps.length >= 3)
     assert.ok(guides[id].rules.length >= 2)
   }
+})
+
+test('a player the icebreaking session measured gets their own persona', () => {
+  const measured = {
+    'room-2': { title: '중간을 찾는 사람', traits: ['공감', '조율'], scores: { EMP: 90 } },
+  }
+
+  const { personas } = adapter.adaptRoomPlayersForPersonaGames(ROOM_PLAYERS, PERSONA_TEMPLATES, measured)
+
+  assert.equal(personas['room-2'].title, '중간을 찾는 사람')
+  assert.deepEqual(personas['room-2'].traits, ['공감', '조율'])
+  assert.equal(personas['room-2'].source, 'icebreaking')
+})
+
+test('a player it did not measure still gets something to play with', () => {
+  const measured = {
+    'room-2': { title: '중간을 찾는 사람', traits: ['공감'], scores: {} },
+  }
+
+  const { personas } = adapter.adaptRoomPlayersForPersonaGames(ROOM_PLAYERS, PERSONA_TEMPLATES, measured)
+
+  assert.equal(personas['room-1'].source, 'demo')
+  assert.equal(personas['room-1'].title, PERSONA_TEMPLATES[0].title)
+})
+
+test('with nothing measured every persona is a placeholder, as before', () => {
+  const { personas } = adapter.adaptRoomPlayersForPersonaGames(ROOM_PLAYERS, PERSONA_TEMPLATES)
+
+  assert.ok(Object.values(personas).every((p) => p.source === 'demo'))
 })

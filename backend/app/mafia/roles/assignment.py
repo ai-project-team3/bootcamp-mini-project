@@ -59,7 +59,7 @@ def fill_remaining_with_fallback(
     for role, count in list(remaining.items()):
         while count > 0 and unassigned:
             if role == "mafia":
-                pick = min(unassigned, key=lambda pid: (players[pid].empathy, rng.random()))
+                pick = min(unassigned, key=lambda pid: (players[pid].EMP, rng.random()))
             else:
                 pick = rng.choice(unassigned)
             role_score = compute_role_scores(players[pick])[role]

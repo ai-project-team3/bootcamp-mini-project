@@ -56,11 +56,13 @@
   font-size: 4.8rem;
   line-height: 1;
   margin: 0;
-  background: linear-gradient(180deg, #2fa8d6 0%, #0d5c86 55%, #073a56 100%);
+  /* 짙은 바탕으로 옮기면서 아래쪽이 배경에 묻혀 글자가 반쯤 사라졌다.
+     밝은 쪽으로 뒤집고 발광을 얹는다. */
+  background: linear-gradient(180deg, #eafaff 0%, #7fd8f5 52%, #2fa8d6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.6), 0 8px 22px rgba(7, 58, 86, 0.45);
+  filter: drop-shadow(0 0 18px rgba(120, 210, 240, 0.45));
   letter-spacing: 1px;
 }
 
@@ -125,4 +127,45 @@
   font-size: 0.75rem;
   color: var(--hot);
   margin: 0;
+}
+
+.start-seg {
+  display: flex;
+  gap: 6px;
+}
+
+.start-seg-btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.start-seg-btn.is-on {
+  border-color: var(--hot);
+  background: var(--hot-soft);
+  color: var(--hot);
+  font-weight: 600;
+}
+
+.start-error {
+  font-size: 0.76rem;
+  color: var(--hot);
+}
+
+.start-join {
+  margin-top: 10px;
+  padding: 10px 0;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 0.82rem;
+  text-decoration: underline;
+  cursor: pointer;
 }

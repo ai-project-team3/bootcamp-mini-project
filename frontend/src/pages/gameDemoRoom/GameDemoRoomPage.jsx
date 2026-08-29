@@ -6,7 +6,7 @@ import GameDemoRoomHero from '../../components/common/GameDemoRoomHero'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import RoomWaitingLayout from '../../components/room/RoomWaitingLayout'
-import { useRoomFlow } from '../../context/RoomFlowContext'
+import { useGameRoom } from '../../context/GameRoomContext'
 import {
   canStartDemoRoom,
   DEMO_ROOM_MAX_PLAYERS,
@@ -18,8 +18,9 @@ const POLL_INTERVAL_MS = 1500
 export default function GameDemoRoomPage() {
   const { code } = useParams()
   const navigate = useNavigate()
-  const { isHost, playerId, roomCode } = useRoomFlow()
+  const { isHost, playerId, roomCode } = useGameRoom()
   const [players, setPlayers] = useState([])
+  const [room, setRoom] = useState(null)
   const [error, setError] = useState('')
   const [starting, setStarting] = useState(false)
   const [filling, setFilling] = useState(false)
@@ -29,11 +30,12 @@ export default function GameDemoRoomPage() {
     let cancelled = false
     const poll = async () => {
       try {
-        const [room, nextPlayers] = await Promise.all([getDemoRoom(code), getDemoPlayers(code)])
+        const [nextRoom, nextPlayers] = await Promise.all([getDemoRoom(code), getDemoPlayers(code)])
         if (cancelled) return
+        setRoom(nextRoom)
         setPlayers(nextPlayers)
         setError('')
-        if (room.status === 'IN_PROGRESS') {
+        if (nextRoom.status === 'IN_PROGRESS') {
           navigate(`/games/demo/room/${code}/games`, { replace: true })
         }
       } catch (err) {
@@ -105,6 +107,13 @@ export default function GameDemoRoomPage() {
           isMe: player.id === playerId,
         }))}
         error={error}
+        notes={room?.source_room_code ? (
+          <p>
+            {room.persona_matches > 0
+              ? `얼음땡에서 나온 성향으로 진행해요 · ${room.persona_matches}/${players.length}명 연결됨`
+              : '얼음땡에서 쓰던 닉네임과 같아야 그때 나온 성향이 따라와요.'}
+          </p>
+        ) : null}
         hostTools={isHost ? (
           <>
             <button

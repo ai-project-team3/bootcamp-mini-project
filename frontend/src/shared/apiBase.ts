@@ -1,21 +1,18 @@
 /**
  * Where the backend lives.
  *
- * The games are played by several people on their own phones around one table,
- * so the page is usually opened over the LAN (e.g. http://192.168.0.5:5173) —
- * not on localhost. Hardcoding "localhost" would make every device call itself
- * and fail. Default to the host that served the page, on the API port, and let
- * `VITE_API_BASE` override it for a real deployment.
+ * Same origin by default — `vite.config.js` proxies /demo, /mafia and /marble
+ * to the API, exactly as it does the rest of the app (`src/api/client.js`).
+ * That is what lets one address be enough: several people play on their own
+ * phones around one table, and a second port would mean a second address to
+ * share, CORS to keep in step, and invite links built from
+ * `window.location.origin` pointing somewhere the API is not.
+ *
+ * `VITE_API_BASE` overrides it when the backend really is somewhere else.
  */
-const API_PORT = "8000";
-
 export function resolveApiBase(): string {
   const configured = import.meta.env?.VITE_API_BASE;
-  if (configured) return configured.replace(/\/$/, "");
-  if (typeof window !== "undefined" && window.location?.hostname) {
-    return `${window.location.protocol}//${window.location.hostname}:${API_PORT}`;
-  }
-  return `http://localhost:${API_PORT}`;
+  return configured ? configured.replace(/\/$/, "") : "";
 }
 
 export const API_BASE = resolveApiBase();

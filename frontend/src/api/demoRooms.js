@@ -1,9 +1,17 @@
 import { apiFetch } from './client'
 
-export function createDemoRoom(nickname) {
+/**
+ * Make a room.
+ *
+ * `sourceRoomCode` is the 얼음땡 session this group just finished, when they
+ * came here from its report. The games look each player's abilities up from it
+ * by nickname, so nobody re-enters anything — see the backend's
+ * `services/persona_handoff`.
+ */
+export function createDemoRoom(nickname, sourceRoomCode = null) {
   return apiFetch('/demo/rooms', {
     method: 'POST',
-    body: JSON.stringify({ nickname }),
+    body: JSON.stringify({ nickname, source_room_code: sourceRoomCode }),
   })
 }
 
@@ -13,6 +21,18 @@ export function getDemoRoom(code) {
 
 export function getDemoPlayers(code) {
   return apiFetch(`/demo/rooms/${code}/players`)
+}
+
+/**
+ * What the 얼음땡 session measured about the people in this room.
+ *
+ * Read by the games that *show* a persona to a person — 너 누구야?, 너라면?.
+ * 마피아 and 커플 브루마블 take the raw abilities through the launch instead,
+ * because they compute with the numbers rather than display them. Comes back
+ * empty when the group did not arrive from a finished session.
+ */
+export function getDemoRoomPersonas(code) {
+  return apiFetch(`/demo/rooms/${code}/personas`)
 }
 
 export function joinDemoRoom(code, nickname) {

@@ -10,7 +10,7 @@ function player(overrides: Partial<ResultPlayer>): ResultPlayer {
     is_alive: true,
     assigned_score: 82,
     assigned_by: "preference",
-    persona_scores: { initiative: 30, analysis: 90, empathy: 40, caution: 60 },
+    persona_scores: { DOM: 30, SPD: 60, EXP: 50, EMP: 40, OBS: 90 },
     ...overrides,
   };
 }
@@ -18,7 +18,7 @@ function player(overrides: Partial<ResultPlayer>): ResultPlayer {
 describe("buildMatchReason", () => {
   it("cites the highest-scoring axis for a preference-based assignment", () => {
     const reason = buildMatchReason(player({ role: "police" }));
-    expect(reason).toContain("분석력 90");
+    expect(reason).toContain("관찰력 90");
     expect(reason).toContain("경찰");
   });
 

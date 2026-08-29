@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { claimLaunchedGame, getDemoPlayers, getDemoRoom } from '../../api/demoRooms'
-import { useRoomFlow } from '../../context/RoomFlowContext'
+import { claimLaunchedGame, getDemoPlayers, getDemoRoom, getDemoRoomPersonas } from '../../api/demoRooms'
+import { useGameRoom } from '../../context/GameRoomContext'
 import { DEMO_PERSONA_TEMPLATES } from '../../data/gameDemo/gameDemoData'
 import { adaptRoomPlayersForPersonaGames } from '../../data/gameDemo/gameDemoPlayerAdapter'
 import { getSharedDemoGamePath, resolveDemoAccess } from '../../data/gameDemo/gameDemoModels'
@@ -16,17 +16,25 @@ export default function GameDemoAccessGuard({ children }) {
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { roomCode: contextRoomCode, playerId } = useRoomFlow()
+  const { roomCode: contextRoomCode, playerId } = useGameRoom()
   const requestedRoomCode = pathRoomCode ?? searchParams.get('room') ?? ''
   const [room, setRoom] = useState(null)
   const [session, setSession] = useState(null)
   const [failed, setFailed] = useState(false)
 
   const read = useCallback(
-    () => Promise.all([getDemoRoom(requestedRoomCode), getDemoPlayers(requestedRoomCode)])
-      .then(([nextRoom, roomPlayers]) => {
+    () => Promise.all([
+      getDemoRoom(requestedRoomCode),
+      getDemoPlayers(requestedRoomCode),
+      // What the 얼음땡 session measured, when the group came from one. It is
+      // fetched alongside the roster so the persona games open with the real
+      // people rather than placeholders; an empty answer costs nothing.
+      getDemoRoomPersonas(requestedRoomCode).catch(() => ({ players: [] })),
+    ])
+      .then(([nextRoom, roomPlayers, measured]) => {
+        const byPlayer = Object.fromEntries((measured.players ?? []).map((p) => [p.player_id, p]))
         setRoom(nextRoom)
-        setSession(adaptRoomPlayersForPersonaGames(roomPlayers, DEMO_PERSONA_TEMPLATES))
+        setSession(adaptRoomPlayersForPersonaGames(roomPlayers, DEMO_PERSONA_TEMPLATES, byPlayer))
         return nextRoom
       }),
     [requestedRoomCode],

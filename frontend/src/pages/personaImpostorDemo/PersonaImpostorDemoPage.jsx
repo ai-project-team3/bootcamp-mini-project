@@ -8,7 +8,7 @@ import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import BackToRoomGamesControl from '../../components/common/BackToRoomGamesControl'
 import { useGameDemo } from '../../context/GameDemoContext'
-import { useRoomFlow } from '../../context/RoomFlowContext'
+import { useGameRoom } from '../../context/GameRoomContext'
 import {
   FLAVORED_GAME_CONTENT,
   IMPOSTOR_QUESTIONS_PER_ROUND,
@@ -20,7 +20,7 @@ import './PersonaImpostorDemoPage.css'
 const PHASES = ['역할 확인', '상황 선택', '의심과 질문', '최종 투표', 'REVEAL']
 export default function PersonaImpostorDemoPage() {
   const { players, personas } = useGameDemo()
-  const { playerId } = useRoomFlow()
+  const { playerId } = useGameRoom()
   const impostorId = players[0].id
   const stolenOwnerId = players[1].id
   const [mode, setMode] = useState('mild')
@@ -99,7 +99,7 @@ export default function PersonaImpostorDemoPage() {
 
   return (
     <PhoneFrame>
-      <TopBar title="너 누구야?" showBack={false} action={<BackToRoomGamesControl />} />
+      <TopBar title="너 누구야?" showBack={false} right={<BackToRoomGamesControl />} />
       <FlavorToggle value={mode} onChange={changeMode} />
       <ProgressBar current={phase + 1} total={PHASES.length} label={progressLabel} />
 

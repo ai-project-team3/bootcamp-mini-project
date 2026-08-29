@@ -9,7 +9,7 @@ passed in and defaults to 일반 모드.
 import uuid
 
 from app.marble.models.room import MAX_PLAYERS, MIN_PLAYERS, ContentMode, Player, Room
-from app.marble.persona.provider import MockPersonaProvider
+from app.marble.persona.provider import MockPersonaProvider, persona_from_icebreaking
 from app.marble.store import store
 from app.marble.utils.room_code import generate_room_code
 
@@ -36,6 +36,7 @@ def create_room_for(
     host_index: int = 0,
     options: dict[str, str] | None = None,
     bots: list[bool] | None = None,
+    personas: list[dict[str, int] | None] | None = None,
 ) -> tuple[str, list[str]]:
     """Seat a whole group in a new marble room.
 
@@ -61,11 +62,18 @@ def create_room_for(
         max_players=len(nicknames),
     )
     flags = bots or [False] * len(nicknames)
+    scores = personas or [None] * len(nicknames)
     player_ids: list[str] = []
-    for nickname, is_bot in zip(nicknames, flags):
+    for nickname, is_bot, persona in zip(nicknames, flags, scores):
         player_id = str(uuid.uuid4())
         player = Player(player_id=player_id, nickname=nickname, is_bot=is_bot)
-        player.persona = persona_provider.get_persona(player_id, nickname)
+        # The board is generated from these, so a group arriving from a finished
+        # 얼음땡 session plays a board made of what they actually did.
+        player.persona = (
+            persona_from_icebreaking(player_id, nickname, persona)
+            if persona is not None
+            else persona_provider.get_persona(player_id, nickname)
+        )
         room.players[player_id] = player
         room.turn_order.append(player_id)
         player_ids.append(player_id)

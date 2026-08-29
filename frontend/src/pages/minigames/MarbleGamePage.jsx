@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import ExitToGamesControl from '../../components/common/ExitToGamesControl'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
-import { useRoomFlow } from '../../context/RoomFlowContext'
+import { useGameRoom } from '../../context/GameRoomContext'
 import { getDemoHubPath } from '../../data/gameDemo/gameDemoModels'
 import { MarbleApp } from '../marble/MarbleApp'
 import { hasMarbleSession, resetMarbleGame } from '../marble/resetGame'
@@ -24,7 +24,7 @@ import './MinigamePage.css'
  */
 export default function MarbleGamePage() {
   const navigate = useNavigate()
-  const { roomCode } = useRoomFlow()
+  const { roomCode } = useGameRoom()
   const [tone, setTone] = useState('light')
   const exitPath = getDemoHubPath(roomCode)
 
@@ -44,7 +44,7 @@ export default function MarbleGamePage() {
       <TopBar
         title="커플 브루마블"
         showBack={false}
-        action={
+        right={
           <ExitToGamesControl
             label={roomCode ? '게임 고르기' : '게임 목록'}
             onLeave={resetMarbleGame}

@@ -6,9 +6,9 @@ from app.mafia.roles.assignment import assign_roles, fill_remaining_with_fallbac
 
 def test_fallback_prefers_lowest_empathy_for_mafia():
     players = {
-        "a": PersonaScores(initiative=50, analysis=50, empathy=90, caution=50),
-        "b": PersonaScores(initiative=50, analysis=50, empathy=50, caution=50),
-        "c": PersonaScores(initiative=50, analysis=50, empathy=70, caution=50),
+        "a": PersonaScores.from_partial({"DOM": 50, "OBS": 50, "EMP": 90, "SPD": 50}),
+        "b": PersonaScores.from_partial({"DOM": 50, "OBS": 50, "EMP": 50, "SPD": 50}),
+        "c": PersonaScores.from_partial({"DOM": 50, "OBS": 50, "EMP": 70, "SPD": 50}),
     }
     assigned: dict[str, RoleAssignment] = {}
     remaining = {"mafia": 1}
@@ -24,8 +24,8 @@ def test_fallback_prefers_lowest_empathy_for_mafia():
 
 def test_fallback_fills_non_mafia_roles_randomly():
     players = {
-        "a": PersonaScores(initiative=50, analysis=50, empathy=50, caution=50),
-        "b": PersonaScores(initiative=50, analysis=50, empathy=50, caution=50),
+        "a": PersonaScores.from_partial({"DOM": 50, "OBS": 50, "EMP": 50, "SPD": 50}),
+        "b": PersonaScores.from_partial({"DOM": 50, "OBS": 50, "EMP": 50, "SPD": 50}),
     }
     assigned: dict[str, RoleAssignment] = {}
     remaining = {"citizen": 2}
@@ -43,9 +43,9 @@ def test_assign_roles_triggers_mafia_fallback_when_nobody_prefers_it():
     # score below doctor/citizen/police, so mafia never appears in anyone's
     # top-3 preference and must be force-filled (spec §3.6 exception).
     players = {
-        "p1": PersonaScores(initiative=10, analysis=50, empathy=95, caution=10),
-        "p2": PersonaScores(initiative=10, analysis=50, empathy=85, caution=10),
-        "p3": PersonaScores(initiative=10, analysis=50, empathy=75, caution=10),
+        "p1": PersonaScores.from_partial({"DOM": 10, "OBS": 50, "EMP": 95, "SPD": 10}),
+        "p2": PersonaScores.from_partial({"DOM": 10, "OBS": 50, "EMP": 85, "SPD": 10}),
+        "p3": PersonaScores.from_partial({"DOM": 10, "OBS": 50, "EMP": 75, "SPD": 10}),
     }
     capacity = {"mafia": 1, "doctor": 1, "citizen": 1, "police": 0}
 

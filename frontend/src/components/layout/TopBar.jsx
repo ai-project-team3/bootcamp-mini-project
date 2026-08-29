@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import './TopBar.css'
 
-export default function TopBar({ title, onBack, showBack = true, action }) {
+export default function TopBar({ title, onBack, showBack = true, right }) {
   const navigate = useNavigate()
 
   const handleBack = () => {
@@ -19,7 +19,7 @@ export default function TopBar({ title, onBack, showBack = true, action }) {
         <span className="topbar-back-spacer" />
       )}
       {title && <span className="topbar-title">{title}</span>}
-      {action && <span className="topbar-action">{action}</span>}
+      {right && <div className="topbar-right">{right}</div>}
     </div>
   )
 }

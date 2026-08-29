@@ -8,7 +8,7 @@ import TopBar from '../../components/layout/TopBar'
 import { selectDemoGame } from '../../api/demoRooms'
 import Button from '../../components/common/Button'
 import { useGameDemo } from '../../context/GameDemoContext'
-import { useRoomFlow } from '../../context/RoomFlowContext'
+import { useGameRoom } from '../../context/GameRoomContext'
 import { ROOM_GAME_GROUPS, roomGamesInGroup } from '../../data/gamesHub/roomGameCatalog'
 import { playerCountBlocker } from '../../data/gamesHub/standaloneGames'
 import './GameDemoHubPage.css'
@@ -31,7 +31,7 @@ import './GameDemoHubPage.css'
 export default function GameDemoHubPage() {
   const { code: roomCode = '' } = useParams()
   const { players } = useGameDemo()
-  const { playerId } = useRoomFlow()
+  const { playerId } = useGameRoom()
   const [openGroups, setOpenGroups] = useState({ 'Persona Games': true, 'Party Games': true })
   const [pendingGame, setPendingGame] = useState(null)
   const [selecting, setSelecting] = useState(false)
@@ -65,7 +65,7 @@ export default function GameDemoHubPage() {
       <TopBar
         title={roomCode ? `게임 고르기 · ${roomCode}` : '게임 목록'}
         showBack={false}
-        action={<GameDemoExitControl />}
+        right={<GameDemoExitControl />}
       />
       <header className="demo-hub-head">
         <span>ROOM GAMES</span>
