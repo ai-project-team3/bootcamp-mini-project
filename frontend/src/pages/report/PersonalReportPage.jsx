@@ -12,6 +12,15 @@ import { shareCurrentPage } from '../../utils/share'
 import AxisRadar from './AxisRadar'
 import './PersonalReportPage.css'
 
+// 같은 문항으로 불렸다고 "그대로"는 아니다. 3표에서 1표로 줄었는데 그대로라고
+// 하면 화면이 거짓말을 한다 — 문항이 같은지와 표가 어떻게 움직였는지를 같이 읽는다.
+function shiftTitle(shift) {
+  if (shift.pre_label !== shift.post_label) return '첫인상이 이렇게 바뀌었습니다'
+  if (shift.post_votes > shift.pre_votes) return '첫인상이 더 굳어졌습니다'
+  if (shift.post_votes < shift.pre_votes) return '같은 인상인데, 표는 줄었습니다'
+  return '첫인상 그대로였습니다'
+}
+
 export default function PersonalReportPage() {
   const { code } = useParams()
   const { playerId } = useRoomFlow()
@@ -100,11 +109,7 @@ export default function PersonalReportPage() {
 
         {me.impression_shift && (
           <Card className="report-shift">
-            <p className="report-shift-title">
-              {me.impression_shift.pre_label === me.impression_shift.post_label
-                ? '첫인상 그대로였습니다'
-                : '첫인상이 이렇게 바뀌었습니다'}
-            </p>
+            <p className="report-shift-title">{shiftTitle(me.impression_shift)}</p>
             <p className="report-shift-row">
               <span className="report-shift-when">처음</span>
               {me.impression_shift.pre_label} <b>{me.impression_shift.pre_votes}표</b>

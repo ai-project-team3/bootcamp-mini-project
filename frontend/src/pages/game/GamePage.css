@@ -161,8 +161,9 @@
   font-family: var(--font-heading);
   font-size: 3.4rem;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
   opacity: 0.35;
-  animation: split-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  animation: split-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) backwards;
 }
 
 .split-num.a { color: var(--c1); }
@@ -183,7 +184,7 @@
   display: block;
   height: 100%;
   transform-origin: left;
-  animation: split-grow 0.55s cubic-bezier(0.2, 1.1, 0.3, 1) both;
+  animation: split-grow 0.55s cubic-bezier(0.2, 1.1, 0.3, 1) backwards;
 }
 
 .split-fill.a { background: var(--c1); }
@@ -211,7 +212,7 @@
   font-size: 1.4rem;
   color: var(--ink);
   margin: 0;
-  animation: split-pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) 0.3s both;
+  animation: split-pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) 0.3s backwards;
 }
 
 .split-mine {
@@ -223,14 +224,16 @@
 
 .split-mine b { color: var(--hot); }
 
+/* from만 두고 끝은 비워둔다. `to`에 scale(1)을 적어 두고 fill-mode를 both로
+   걸면 다 끝난 뒤에도 transform이 남아, 두 막대가 각각 다른 레이어로 래스터
+   되면서 높이가 한두 픽셀씩 어긋나 보인다. 그리고 `to { opacity: inherit }`은
+   .split-num의 0.35 흐림을 덮어써서 "내가 고른 쪽만 선명하게"가 안 먹었다. */
 @keyframes split-pop {
   from { opacity: 0; transform: scale(0.5); }
-  to { opacity: inherit; transform: scale(1); }
 }
 
 @keyframes split-grow {
   from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
 }
 
 /* 제출 표시 — 답을 낼 때마다 하나씩 켜진다 */

@@ -8,7 +8,7 @@ const REVEAL_MS = 3000
 const POLL_MS = 1000
 
 // 기획안 §4-3 — 탭 두 번. ①은 내 취향, ②는 나와 같은 걸 고를 것 같은 사람.
-export default function TelepathyStep({ code, playerId, onAdvance }) {
+export default function TelepathyStep({ code, playerId, onHold, onAdvance }) {
   const [roundNo, setRoundNo] = useState(1)
   const [round, setRound] = useState(null)
   const [players, setPlayers] = useState([])
@@ -47,6 +47,7 @@ export default function TelepathyStep({ code, playerId, onAdvance }) {
           setStatus(s)
           if (s.revealed && !advanced.current) {
             advanced.current = true
+            onHold?.()
             setTimeout(() => {
               if (!cancelled) advance()
             }, REVEAL_MS)
@@ -59,7 +60,7 @@ export default function TelepathyStep({ code, playerId, onAdvance }) {
       cancelled = true
       clearInterval(timer)
     }
-  }, [submitted, code, roundNo, advance])
+  }, [submitted, code, roundNo, advance, onHold])
 
   const submit = () => {
     submitTelepathy(code, roundNo, playerId, choice, target)
@@ -78,6 +79,7 @@ export default function TelepathyStep({ code, playerId, onAdvance }) {
     )
     return (
       <div className="tele-results">
+        <p className="tele-topic">{round.topic}</p>
         <div className="tele-groups">
           <div className="tele-group a">
             <p className="tele-word">{round.a}</p>
@@ -117,6 +119,7 @@ export default function TelepathyStep({ code, playerId, onAdvance }) {
       <div className="step-body">
         {!choice ? (
           <>
+            <p className="tele-topic">{round.topic}</p>
             <p className="tele-prompt">나는?</p>
             <div className="answer-choices">
               <button className="answer-choice-btn choice-a" onClick={() => setChoice('A')}>
@@ -132,7 +135,7 @@ export default function TelepathyStep({ code, playerId, onAdvance }) {
             {/* 여기가 되돌릴 수 없는 탭이 두 번 연달아 있던 자리다. 고른 것을
                 화면에 남기고, 확정은 아래 버튼 하나로만 되게 한다. */}
             <button className="tele-mine" onClick={() => { setChoice(null); setTarget(null) }}>
-              <span>나는 <b>{choice === 'A' ? round.a : round.b}</b></span>
+              <span>{round.topic} <b>{choice === 'A' ? round.a : round.b}</b></span>
               <span className="tele-redo">다시 고르기</span>
             </button>
             <p className="tele-prompt">나랑 같은 걸 고를 사람은?</p>

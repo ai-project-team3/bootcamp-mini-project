@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import ProgressBar from '../../components/common/ProgressBar'
-import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import { getPlayers } from '../../api/players'
 import { getImpressionStatus, submitImpression } from '../../api/impressions'
@@ -66,47 +65,23 @@ export default function ImpressionStep({ code, playerId, round, questions, onAdv
   if (error) return <p className="game-error">{error}</p>
 
   if (submitted) {
-    if (!status?.revealed) {
-      return (
-        <div className="game-waiting">
-          <p>다른 사람들을 기다리는 중...</p>
-          <span className="game-waiting-count">{status?.submitted ?? 0}/{status?.total ?? players.length}</span>
-        </div>
-      )
-    }
+    // 집계표는 여기서 보여주지 않는다. 3초 스쳐가는 표는 읽히지도 않고,
+    // 무엇보다 이 결과를 지금 알면 뒤 게임에서 그 인상에 맞춰 움직이게 된다.
+    // 전후 비교는 리포트에서 한 번에 푼다.
     return (
-      <div className="impression-results">
-        {status.results.map((r) => (
-          <Card key={r.question_no} className="impression-result-card">
-            <p className="impression-result-q">
-              {questions.find((q) => q.questionNo === r.question_no)?.text}
-            </p>
-            <ul className="impression-tally">
-              {r.tally.map((t) => (
-                <li key={t.player_id}>
-                  <span>{t.nickname}</span>
-                  <span className="impression-tally-votes">{t.votes}표</span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        ))}
+      <div className="game-waiting">
+        <p>{status?.revealed ? '다 모였습니다' : '다른 사람들을 기다리는 중...'}</p>
+        <span className="game-waiting-count">
+          {status?.submitted ?? 0}/{status?.total ?? players.length}
+        </span>
+        <p className="game-waiting-note">누가 누구를 골랐는지는 리포트에서 확인합니다</p>
       </div>
     )
   }
 
   return (
     <div className="impression-step">
-      <div className="impression-top">
-        <button
-          className="impression-back"
-          onClick={() => setQuestionIndex(questionIndex - 1)}
-          disabled={questionIndex === 0}
-        >
-          ← 이전
-        </button>
-        <ProgressBar current={questionIndex + 1} total={questions.length} />
-      </div>
+      <ProgressBar current={questionIndex + 1} total={questions.length} />
       {round === 'post' && questionIndex === 0 && (
         <p className="impression-note">
           게임을 하고 나서 생각이 바뀌었는지 봅니다. 처음과 같아도 괜찮습니다
@@ -127,11 +102,22 @@ export default function ImpressionStep({ code, playerId, round, questions, onAdv
           ))}
         </div>
       </div>
-      {isLast && (
-        <Button disabled={!picks[question.questionNo]} onClick={handleSubmit}>
-          제출하기
-        </Button>
-      )}
+      {/* 되돌아가기는 진행바 옆이 아니라 선택지 아래에 둔다. 진행 표시와
+          조작 버튼이 한 줄에 섞이면 둘 다 무엇인지 알아보기 어렵다. */}
+      <div className="impression-foot">
+        <button
+          className="impression-back"
+          onClick={() => setQuestionIndex(questionIndex - 1)}
+          disabled={questionIndex === 0}
+        >
+          ← 이전 문항
+        </button>
+        {isLast && (
+          <Button disabled={!picks[question.questionNo]} onClick={handleSubmit}>
+            제출하기
+          </Button>
+        )}
+      </div>
     </div>
   )
 }

@@ -108,23 +108,28 @@ export default function StartPage() {
           maxLength={4}
         />
 
-        <label className="start-label" htmlFor="join-code">초대코드로 참가 (선택)</label>
-        <div className="start-join-row">
-          <input
-            id="join-code"
-            className="start-input"
-            placeholder="예: AB12CD"
-            value={codeDraft}
-            onChange={(e) => setCodeDraft(e.target.value)}
-            maxLength={6}
-          />
-          <Button variant="secondary" onClick={handleJoin} disabled={busy}>
-            참가
-          </Button>
+        {/* 초대코드로 들어가는 것과 방을 새로 여는 것은 서로 다른 갈래다.
+            줄만 나란히 두면 위 칸을 채워야 아래 버튼이 눌리는 것처럼 읽힌다. */}
+        <div className="start-join">
+          <label className="start-label" htmlFor="join-code">받은 초대코드가 있다면</label>
+          <div className="start-join-row">
+            <input
+              id="join-code"
+              className="start-input"
+              placeholder="예: AB12CD"
+              value={codeDraft}
+              onChange={(e) => setCodeDraft(e.target.value)}
+              maxLength={6}
+            />
+            <Button variant="secondary" onClick={handleJoin} disabled={busy}>
+              참가
+            </Button>
+          </div>
         </div>
 
         {error && <p className="start-error">{error}</p>}
       </div>
+      <div className="start-or"><span>또는</span></div>
       <Button onClick={handleCreate} disabled={busy}>
         {busy ? '만드는 중...' : '방 만들기'}
       </Button>

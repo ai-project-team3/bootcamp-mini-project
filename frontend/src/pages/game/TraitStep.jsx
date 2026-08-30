@@ -3,15 +3,18 @@ import Button from '../../components/common/Button'
 import { getTraitOptions, getTraitTurn, submitTraitGuess, submitTraitSelf } from '../../api/trait'
 
 const POLL_MS = 1200
-const REVEAL_MS = 3000
+const REVEAL_MS = 4000
 
 // 기획안 §4-5 — 전원이 자기 답을 먼저 고르고, 그다음 한 명씩 돌아가며
 // 나머지가 그 사람의 답을 맞힌다.
-export default function TraitStep({ code, playerId, onAdvance }) {
+export default function TraitStep({ code, playerId, onHold, onAdvance }) {
   const [options, setOptions] = useState(null)
   const [selfDone, setSelfDone] = useState(false)
   const [myIndex, setMyIndex] = useState(null)
   const [pick, setPick] = useState(null)
+  // 방금 끝난 사람의 정답을 몇 초 붙잡아 둔다 — 다음 차례 정보는 이미 와 있다.
+  const [holdReveal, setHoldReveal] = useState(null)
+  const heldFor = useRef(null)
   const [selfStatus, setSelfStatus] = useState(null)
   const [turn, setTurn] = useState(null)
   const [guessed, setGuessed] = useState(false)
@@ -42,8 +45,20 @@ export default function TraitStep({ code, playerId, onAdvance }) {
             }
             return t
           })
+          if (t.reveal_nickname && heldFor.current !== t.reveal_nickname) {
+            heldFor.current = t.reveal_nickname
+            setHoldReveal({
+              nickname: t.reveal_nickname,
+              index: t.reveal_index,
+              guessers: t.reveal_correct_guessers ?? [],
+            })
+            setTimeout(() => {
+              if (!cancelled) setHoldReveal(null)
+            }, REVEAL_MS)
+          }
           if (t.done && !advanced.current) {
             advanced.current = true
+            onHold?.()
             setTimeout(() => {
               if (!cancelled) onAdvance()
             }, REVEAL_MS)
@@ -57,7 +72,7 @@ export default function TraitStep({ code, playerId, onAdvance }) {
       cancelled = true
       clearInterval(timer)
     }
-  }, [selfDone, code, onAdvance])
+  }, [selfDone, code, onHold, onAdvance])
 
   const chooseSelf = (index) => {
     setMyIndex(index)
@@ -121,6 +136,20 @@ export default function TraitStep({ code, playerId, onAdvance }) {
   }
 
   const isMyTurn = turn.target_player_id === playerId
+
+  if (holdReveal) {
+    return (
+      <div className="trait-reveal">
+        <p className="trait-target">{holdReveal.nickname}님은</p>
+        <p className="trait-answer">{options[holdReveal.index] ?? '???'}</p>
+        <p className="trait-hits">
+          {holdReveal.guessers.length > 0
+            ? `맞힌 사람 — ${holdReveal.guessers.join(' · ')}`
+            : '아무도 못 맞혔습니다'}
+        </p>
+      </div>
+    )
+  }
 
   if (turn.revealed) {
     return (

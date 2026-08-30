@@ -24,7 +24,7 @@ const CONFETTI_BITS = spray(CONFETTI_COUNT, 3)
 // 기획안 §4-6 — 버튼 하나. 먼저 누른 순서대로 살고, 붙어서 누른 둘과 끝까지
 // 안 누른 한 명이 걸린다. 화면에 볼 게 없다는 것이 전부다 — 답이 여기 없으니
 // 남을 봐야 이긴다.
-export default function NunchiStep({ code, playerId, onAdvance }) {
+export default function NunchiStep({ code, playerId, onHold, onAdvance }) {
   const [state, setState] = useState(null)
   const [error, setError] = useState(null)
   const advanced = useRef(false)
@@ -46,6 +46,9 @@ export default function NunchiStep({ code, playerId, onAdvance }) {
           if (s.stage === 'RESULT' && lastShown.current !== s.round_no) {
             lastShown.current = s.round_no
             setResult({ failed: s.i_failed })
+            // 마지막 판이면 서버 단계가 이미 넘어가 있다. 연출이 끝날 때까지
+            // 화면을 붙잡지 않으면 폭발도 폭죽도 못 보고 지나간다.
+            onHold?.()
             if (navigator.vibrate) navigator.vibrate(s.i_failed ? [90, 70, 90] : 35)
           }
           if (s.finished && !advanced.current) {
@@ -63,7 +66,7 @@ export default function NunchiStep({ code, playerId, onAdvance }) {
       cancelled = true
       clearInterval(timer)
     }
-  }, [code, playerId, onAdvance])
+  }, [code, playerId, onHold, onAdvance])
 
   useEffect(() => {
     if (state?.stage === 'RUNNING') {

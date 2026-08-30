@@ -365,6 +365,16 @@ def _state(room: Room, rnd: LiarRound | None, db: Session, player_id: str) -> Li
         my_word=(rnd.minor_word if am_liar else rnd.major_word) if player_id else None,
         am_i_liar=am_liar,
         seen=_seen_count(room, rnd, db),
+        i_am_seen=bool(player_id)
+        and db.query(GameResult)
+        .filter(
+            GameResult.room_id == room.id,
+            GameResult.kind == SEEN,
+            GameResult.round_no == rnd.round_no,
+            GameResult.player_id == player_id,
+        )
+        .first()
+        is not None,
         total=room.player_limit,
         speaker_player_id=speaker.id if speaker else None,
         speaker_nickname=speaker.nickname if speaker else None,

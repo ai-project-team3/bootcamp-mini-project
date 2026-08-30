@@ -87,9 +87,12 @@ export default function AxisRadar({ axes }) {
           strokeDasharray="4 3"
         />
       </svg>
+      {/* "오늘의 나 / 처음에 본 나"로는 무엇과 무엇을 비교하는 그림인지
+          읽히지 않는다. 하나는 게임 중에 실제로 한 행동에서 나온 값이고,
+          다른 하나는 아무것도 하기 전에 남들이 찍어준 값이다. */}
       <div className="radar-legend">
-        <span><i className="radar-dot radar-dot-self" /> 오늘의 나</span>
-        <span><i className="radar-dot radar-dot-pre" /> 처음에 본 나</span>
+        <span><i className="radar-dot radar-dot-self" /> 게임에서 나온 나</span>
+        <span><i className="radar-dot radar-dot-pre" /> 남들이 처음 본 나</span>
       </div>
     </div>
   )

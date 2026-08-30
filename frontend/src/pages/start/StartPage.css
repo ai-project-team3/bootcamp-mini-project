@@ -169,3 +169,37 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* 초대코드 칸을 하나의 덩어리로 묶고, 방 만들기와 사이를 벌린다. 붙어 있으면
+   위 칸을 채워야 아래 버튼이 눌리는 것처럼 읽힌다. */
+.start-join {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.start-join .start-label { margin: 0; }
+
+.start-or {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0 2px;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+}
+
+.start-or::before,
+.start-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}

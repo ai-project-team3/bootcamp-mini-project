@@ -78,14 +78,14 @@ def get_turn(code: str, db: Session = Depends(get_db)) -> TraitTurnResponse:
 
     players = get_players(room.id, db)
     others_count = max(room.player_limit - 1, 0)
+    previous = None
     for target in players:
-        done_for_target = (
-            db.query(Guess)
-            .filter(Guess.room_id == room.id, Guess.kind == GUESS, Guess.target_player_id == target.id)
-            .count()
-        )
+        done_for_target = _guess_count(room, target.id, db)
         if done_for_target < others_count:
-            return TraitTurnResponse(
+            # 앞사람이 방금 끝났고 이 사람에게는 아직 아무도 안 냈으면, 앞사람의
+            # 정답을 계속 보여준다. 안 그러면 답이 공개되는 화면이 낸 사람에게만
+            # 잠깐 스쳤다가 다음 차례로 넘어가서 아무도 못 읽는다.
+            pending = TraitTurnResponse(
                 done=False,
                 options=options,
                 target_player_id=target.id,
@@ -94,10 +94,28 @@ def get_turn(code: str, db: Session = Depends(get_db)) -> TraitTurnResponse:
                 total=others_count,
                 revealed=False,
             )
+            if previous is not None and done_for_target == 0:
+                # 앞사람이 방금 끝났고 이 사람에게는 아직 아무도 안 냈다. 앞사람의
+                # 정답을 다음 차례 정보와 함께 실어 보낸다 — 화면이 몇 초 보여준
+                # 뒤 스스로 넘어간다.
+                done_reveal = _revealed(room, previous, options, db, done=False)
+                pending.reveal_nickname = done_reveal.nickname
+                pending.reveal_index = done_reveal.correct_index
+                pending.reveal_correct_guessers = done_reveal.correct_guessers
+            return pending
+        previous = target
     last = players[-1] if players else None
     if last is None:
         return TraitTurnResponse(done=True, options=options)
     return _revealed(room, last, options, db, done=True)
+
+
+def _guess_count(room: Room, target_id: str, db: Session) -> int:
+    return (
+        db.query(Guess)
+        .filter(Guess.room_id == room.id, Guess.kind == GUESS, Guess.target_player_id == target_id)
+        .count()
+    )
 
 
 @router.post("/{target_player_id}/guess", response_model=TraitTurnResponse)
