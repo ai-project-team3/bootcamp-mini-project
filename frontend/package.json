@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc -b && vite build",
+    "test": "vitest run && npm run test:data",
+    "_comment_test:data": "src/data 아래 두 폴더는 vitest가 아니라 node:test로 쓰여 있어 vitest가 0개로 세고 지나간다. 같이 돌려야 놓치지 않는다.",
+    "test:data": "node --test src/data/afterDateDemo/afterDateDemoModels.test.js src/data/gameDemo/gameDemoModels.test.js src/data/gameDemo/gameDemoPlayerAdapter.test.js",
     "lint": "oxlint",
     "preview": "vite preview"
   },
@@ -16,10 +19,15 @@
     "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
+    "jsdom": "^26.0.0",
     "oxlint": "^1.79.0",
-    "vite": "^8.2.2"
+    "typescript": "^5.6.3",
+    "vite": "^8.2.2",
+    "vitest": "^3.2.4"
   }
 }

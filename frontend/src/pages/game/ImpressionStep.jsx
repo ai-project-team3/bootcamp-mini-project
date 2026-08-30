@@ -94,13 +94,15 @@ export default function ImpressionStep({ code, playerId, round, questions, onAdv
   return (
     <div className="impression-step">
       <ProgressBar current={questionIndex + 1} total={questions.length} />
-      <h2 className="impression-question">{question.text}</h2>
-      <div className="impression-choices">
-        {others.map((p) => (
-          <Button key={p.id} variant="secondary" onClick={() => handlePick(p.id)}>
-            {p.nickname}
-          </Button>
-        ))}
+      <div className="step-body">
+        <h2 className="impression-question">{question.text}</h2>
+        <div className="impression-choices">
+          {others.map((p) => (
+            <Button key={p.id} variant="secondary" onClick={() => handlePick(p.id)}>
+              {p.nickname}
+            </Button>
+          ))}
+        </div>
       </div>
     </div>
   )

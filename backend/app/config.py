@@ -32,5 +32,25 @@ class Settings(BaseSettings):
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",")]
 
+    @property
+    def cors_origin_regex(self) -> str:
+        """Also allow any private-network origin.
+
+        Everyone plays on their own phone, so the frontend is usually reached
+        over the LAN at the host machine's address rather than on localhost.
+        Listing every possible address is impractical; a pattern covers the
+        private ranges and loopback. Set CORS_ORIGINS explicitly for a public
+        deployment, where this should be narrowed to the real domain.
+        """
+        return (
+            r"^https?://("
+            r"localhost"
+            r"|127\.\d+\.\d+\.\d+"
+            r"|10\.\d+\.\d+\.\d+"
+            r"|192\.168\.\d+\.\d+"
+            r"|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+"
+            r")(:\d+)?$"
+        )
+
 
 settings = Settings()

@@ -29,12 +29,16 @@
   background: var(--gold);
 }
 
-.radar-dot-post {
-  background: var(--deep);
-}
-
 .radar-axis-label {
   font-size: 9px;
   fill: var(--ink-soft);
   font-family: var(--font-body);
+}
+
+.radar-bg {
+  fill: var(--deep);
+  fill-opacity: 0.15;
+  stroke: var(--deep);
+  stroke-opacity: 0.4;
+  stroke-width: 1;
 }

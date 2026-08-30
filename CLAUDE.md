@@ -27,6 +27,32 @@
 - Schema changes go through `app/init_db.py` (`Base.metadata.create_all`) during early development. Once the schema stabilizes, migrate to Alembic instead of hand-running `init_db`.
 - Config/secrets go through `app/config.py` (`pydantic-settings`) reading from `.env`. Never hardcode connection strings or credentials in code.
 
+# Add-on Minigames (mafia, couple marble)
+
+The two minigames under `backend/app/mafia|marble/` and
+`frontend/src/pages/mafia|marble/` are the 기획안 §17 "페르소나 이후 게임" part.
+They are guests inside this app and must never disturb it:
+
+- **Every route is namespaced** `/mafia/` or `/marble/`. The app already owns
+  `/rooms` and the demo owns `/demo/rooms`.
+- **Every CSS selector is scoped** under the game's root class (`.mafia-app`,
+  `.pm-app`) and **every @keyframes is prefixed**. Neither game may style
+  `html`, `body` or `#root`, or write to `document.documentElement` — an
+  unscoped rule breaks the host's screens with no merge conflict to warn anyone.
+- Each game keeps the app's skeleton *inside its own package*: `models/`,
+  `schemas/`, `routers/`, `utils/` plus its rule packages. One folder per
+  screen, holding the component, its co-located CSS and its test.
+- **Chrome follows the app, palette follows the game.** Both games sit in
+  `PhoneFrame` + `TopBar` like every other screen, so navigation feels the
+  same. Inside that frame the mafia game keeps its dark night palette, and
+  couple marble stays light in 일반 모드 and dark in 19금 모드.
+- Client ids are never trusted: `utils/deps.py` resolves room and player before
+  anything else, and role-restricted actions check the actor's role.
+- These are the only TypeScript files in the app. Vite compiles `.tsx`
+  alongside `.jsx` with no extra setup; `tsc -b` type-checks only them.
+- Tests: `backend/tests/mafia|marble/` (pytest) and co-located `*.test.tsx`
+  (vitest). Run with `cd backend && pytest` and `cd frontend && npm test`.
+
 # Scope Discipline
 
 - Don't implement game/scoring logic (survey grading, axis calculation, type/badge/compat determination, LLM report generation) ahead of an explicit request — those rules are still being finalized in the plan doc. Stubbed endpoints must return clearly-labeled mock data (see `app/routers/reports.py`) rather than a half-implemented version of the real algorithm.

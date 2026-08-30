@@ -19,6 +19,7 @@ export default function WaitingRoomPage() {
   const [error, setError] = useState(null)
   const [starting, setStarting] = useState(false)
   const [regenerating, setRegenerating] = useState(false)
+  const [regenerateNote, setRegenerateNote] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -60,14 +61,17 @@ export default function WaitingRoomPage() {
 
   const handleRegenerate = async () => {
     setRegenerating(true)
+    setRegenerateNote(null)
     setError(null)
     try {
       const updated = await regenerateQuestions(code, playerId)
       setRoom(updated)
+      setRegenerateNote('새 문항을 만들었어요')
     } catch (err) {
       setError(err.message)
     } finally {
       setRegenerating(false)
+      setTimeout(() => setRegenerateNote(null), 2500)
     }
   }
 
@@ -81,6 +85,20 @@ export default function WaitingRoomPage() {
           : '호스트가 시작하기를 기다리는 중이에요'}
       </p>
       {room?.team_kind && <p className="wr-team-kind">{room.team_kind}팀으로 잡았습니다</p>}
+
+      {isHost && (
+        <div className="wr-regenerate-row">
+          <button
+            type="button"
+            className="wr-regenerate-btn"
+            onClick={handleRegenerate}
+            disabled={regenerating || starting}
+          >
+            {regenerating ? '문항 다시 만드는 중...' : '↻ 문항 다시 만들기'}
+          </button>
+          {regenerateNote && <span className="wr-regenerate-note">{regenerateNote}</span>}
+        </div>
+      )}
 
       {error && <p className="wr-error">{error}</p>}
 
