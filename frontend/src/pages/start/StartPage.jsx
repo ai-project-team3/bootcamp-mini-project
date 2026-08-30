@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import Button from '../../components/common/Button'
-import IceCritter from '../../components/common/IceCritter'
+import IceScene from '../../components/common/IceScene'
 import IceLogo from '../../components/common/IceLogo'
 import { useRoomFlow } from '../../context/RoomFlowContext'
 import { getRoom } from '../../api/rooms'
@@ -83,12 +83,10 @@ export default function StartPage() {
       <TopBar showBack={!isEntry} onBack={() => navigate('/')} />
       <div className="start-body">
         <header className="start-hero">
-          {/* 눈밭 — 로고가 얹혀 있는 바닥. 잘리지 않아야 테두리가 안 생긴다. */}
+          {/* 눈빛 — 로고 아래에서 피어오르는 바닥의 반사. 잘리지 않아야
+              테두리가 안 생긴다. */}
           <span className="start-snow" aria-hidden />
-          {/* 펭귄만 따로 가둔다. 화면 밖으로 나가는 게 연출이라 여기서만 자른다. */}
-          <div className="start-rink" aria-hidden>
-            <IceCritter />
-          </div>
+          <IceScene />
           <h1 className="start-wordmark">
             <IceLogo />
           </h1>

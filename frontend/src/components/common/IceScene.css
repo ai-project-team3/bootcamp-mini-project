@@ -1,0 +1,137 @@
+/* 빙하와 그 위에서 얼음을 부수는 펭귄.
+ *
+ * 모든 움직임이 같은 3.4초 위에 놓인다. 하나라도 다른 길이를 쓰면 내리치는
+ * 순간과 부스러기가 서서히 어긋난다. */
+
+.icescene {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100px;
+  pointer-events: none;
+}
+
+/* ── 빙하 ───────────────────────────────────────────────────────────────── */
+
+.icescene-floe {
+  position: absolute;
+  /* 양옆으로 넘겨 끝이 안 보이게 한다 — 끝이 보이면 얼음판이 아니라 카드다. */
+  left: -6%;
+  right: -6%;
+  bottom: 0;
+  width: 112%;
+  height: 100px;
+}
+
+/* 내리친 자리에 갈라지는 금. 펭귄 발밑에 맞춰 둔다. */
+.icescene-cracks {
+  position: absolute;
+  left: 50%;
+  bottom: 44px;
+  width: 120px;
+  height: 40px;
+  margin-left: -60px;
+  opacity: 0;
+  animation: icescene-cracks 3.4s ease-out infinite;
+}
+
+/* ── 펭귄 ───────────────────────────────────────────────────────────────── */
+
+.icescene-penguin {
+  position: absolute;
+  left: 50%;
+  bottom: 54px;
+  margin-left: -33px;
+  transform-origin: 50% 100%;
+  animation: icescene-slam 3.4s cubic-bezier(0.3, 0, 0.2, 1) infinite;
+  /* 어두운 몸이 남색 바탕에 묻히지 않게 가장자리에 옅은 빛. */
+  filter: drop-shadow(0 0 7px rgba(150, 200, 240, 0.3));
+}
+
+/* 날개는 각자 자기 어깨를 축으로 돈다. fill-box가 없으면 SVG 전체를 기준으로
+   삼아서 팔이 화면 밖으로 날아간다. */
+.icescene-wing {
+  transform-box: fill-box;
+  animation: icescene-swing 3.4s cubic-bezier(0.3, 0, 0.2, 1) infinite;
+}
+
+.icescene-wing-l { transform-origin: 100% 25%; }
+.icescene-wing-r { transform-origin: 0% 25%; animation-name: icescene-swing-r; }
+
+/* 치켜들었다가 내리친다. 올릴 때는 느리게, 내릴 때는 순식간에 —
+   그 차이가 힘으로 읽힌다.
+   부호를 조심할 것: 왼쪽 날개는 **양수**가 위로 올라간다. 반대로 걸면 팔이
+   몸 뒤로 접혀서 아무것도 안 보인다(처음에 그렇게 만들었다). 그리고 쉴 때도
+   0도가 아니라 살짝 벌려 둔다 — 딱 붙으면 팔이 있는지도 모른다. */
+@keyframes icescene-swing {
+  0%, 6% { transform: rotate(12deg); }
+  32% { transform: rotate(78deg); }
+  40% { transform: rotate(-16deg); }
+  46% { transform: rotate(-4deg); }
+  62%, 100% { transform: rotate(12deg); }
+}
+
+@keyframes icescene-swing-r {
+  0%, 6% { transform: rotate(-12deg); }
+  32% { transform: rotate(-78deg); }
+  40% { transform: rotate(16deg); }
+  46% { transform: rotate(4deg); }
+  62%, 100% { transform: rotate(-12deg); }
+}
+
+/* 몸은 젖혔다가 찍어 누른다. 맞는 순간 살짝 납작해져야 충격이 보인다. */
+@keyframes icescene-slam {
+  0%, 6% { transform: translateY(0) scaleY(1) rotate(0deg); }
+  32% { transform: translateY(-5px) scaleY(1.03) rotate(-3deg); }
+  40% { transform: translateY(3px) scaleY(0.9) rotate(2deg); }
+  48% { transform: translateY(0) scaleY(1.02) rotate(0deg); }
+  62% { transform: translateY(0) scaleY(1) rotate(0deg); }
+  /* 사이사이 숨 쉬듯 한 번 */
+  80% { transform: translateY(-1.5px) scaleY(1.01) rotate(0deg); }
+  100% { transform: translateY(0) scaleY(1) rotate(0deg); }
+}
+
+@keyframes icescene-cracks {
+  0%, 38% { opacity: 0; transform: scale(0.7); }
+  41% { opacity: 0.95; transform: scale(1); }
+  58% { opacity: 0.55; transform: scale(1.04); }
+  72%, 100% { opacity: 0; transform: scale(1.06); }
+}
+
+/* ── 부스러기 ───────────────────────────────────────────────────────────── */
+
+.icescene-chip {
+  position: absolute;
+  left: 50%;
+  bottom: 56px;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: #eafbff;
+  box-shadow: 0 0 6px rgba(190, 240, 255, 0.9);
+  opacity: 0;
+  animation: icescene-chip 3.4s cubic-bezier(0.15, 0.75, 0.35, 1) infinite;
+}
+
+.icescene-chip-1 { --cx: -34px; --cy: -26px; }
+.icescene-chip-2 { --cx: -18px; --cy: -36px; }
+.icescene-chip-3 { --cx: 2px; --cy: -40px; }
+.icescene-chip-4 { --cx: 20px; --cy: -34px; }
+.icescene-chip-5 { --cx: 36px; --cy: -22px; }
+
+@keyframes icescene-chip {
+  0%, 38% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
+  40% { opacity: 1; transform: translate3d(0, 0, 0) scale(0.7); }
+  56% { opacity: 0; transform: translate3d(var(--cx), var(--cy), 0) scale(1) rotate(140deg); }
+  57%, 100% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
+}
+
+/* 움직임을 줄이라고 했으면 빙하 위에 가만히 서 있는다. */
+@media (prefers-reduced-motion: reduce) {
+  .icescene-penguin,
+  .icescene-wing,
+  .icescene-cracks { animation: none; }
+  .icescene-cracks { opacity: 0; }
+  .icescene-chip { display: none; }
+}
