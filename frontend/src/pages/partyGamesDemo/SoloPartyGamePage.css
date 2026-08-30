@@ -1,0 +1,8 @@
+/* The top-bar action is a full-width Button by default; here it only needs to
+   be a small label beside the title. */
+.solo-party-exit {
+  width: auto;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}

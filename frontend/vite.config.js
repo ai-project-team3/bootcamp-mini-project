@@ -10,6 +10,11 @@ const API = process.env.VITE_PROXY_TARGET ?? 'http://localhost:8000'
 
 export default defineConfig({
   plugins: [react()],
+  // The JSX runtime for plain .jsx files. The React plugin sets this up for the
+  // dev server and the build, but not for the transform vitest runs through, so
+  // a .jsx component rendered from a test hit `React is not defined`. Setting it
+  // here covers every path the same way.
+  esbuild: { jsx: 'automatic' },
   server: {
     // 0.0.0.0으로 열어 같은 네트워크의 폰에서 들어올 수 있게 한다.
     host: true,
@@ -18,6 +23,18 @@ export default defineConfig({
     proxy: {
       '/rooms': { target: API, changeOrigin: true },
       '/health': { target: API, changeOrigin: true },
+      // 부가 미니게임도 같은 규칙을 따른다. 이 셋이 없으면 주소 하나만
+      // 공유한다는 약속이 마피아·브루마블에서만 깨진다.
+      '/demo': { target: API, changeOrigin: true },
+      '/mafia': { target: API, changeOrigin: true },
+      '/marble': { target: API, changeOrigin: true },
     },
+  },
+  // The two add-on minigames under src/pages/mafia|marble ship vitest suites.
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/test/setup.ts',
+    passWithNoTests: true,
   },
 })

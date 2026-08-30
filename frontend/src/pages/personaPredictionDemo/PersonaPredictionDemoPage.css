@@ -1,0 +1,88 @@
+.prediction-persona {
+  border-color: var(--deep);
+  background: var(--deep-soft);
+}
+
+.prediction-persona h2 {
+  margin: 12px 0 5px;
+}
+
+.prediction-persona p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+}
+
+.prediction-role {
+  margin: 0;
+  color: var(--hot);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.prediction-question {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.prediction-private-cover {
+  display: grid;
+  min-height: 145px;
+  place-items: center;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.prediction-lock {
+  padding: 45px 15px;
+  text-align: center;
+}
+
+.prediction-lock > span {
+  font-size: 3rem;
+}
+
+.prediction-lock h1 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.prediction-answer {
+  display: grid;
+  gap: 5px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.75rem;
+}
+
+.prediction-answer span {
+  color: var(--hot);
+}
+
+.prediction-actual {
+  padding: 32px 18px;
+  background: var(--deep-soft);
+  color: var(--ink);
+  text-align: center;
+}
+
+.prediction-actual p {
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.prediction-bubble {
+  margin: 8px 0;
+  padding: 11px;
+  border-radius: 4px 13px 13px;
+  background: var(--deep-soft);
+  font-size: 0.75rem;
+}
+
+.prediction-bubble.mine {
+  margin-left: 20px;
+  border-radius: 13px 4px 13px;
+  background: var(--hot-soft);
+}

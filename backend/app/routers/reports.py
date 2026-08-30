@@ -280,6 +280,10 @@ def _write_report_text(
                 "hits": got,
                 "tries": tried,
                 "badges": pr.badges,
+                "compat": [
+                    {"nickname": c.nickname, "grade": c.grade, "tag": c.tag, "note": c.note}
+                    for c in pr.compat
+                ],
             }
         )
     context = report_gen.build_context(room.context_line, payload, team["rank"])
@@ -287,7 +291,7 @@ def _write_report_text(
     if result is None:
         return None
 
-    by_nick = {c.nickname: [c.line1, c.line2, c.line3] for c in result.players}
+    by_nick = {c.nickname: c.paragraphs for c in result.players}
     for pr in player_reports:
         if pr.nickname in by_nick:
             pr.comment_lines = by_nick[pr.nickname]

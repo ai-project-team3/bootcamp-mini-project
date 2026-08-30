@@ -1,0 +1,29 @@
+.game-room-hero {
+  padding: 34px 0 24px;
+}
+
+.game-room-hero.compact {
+  padding-top: 20px;
+}
+
+.game-room-hero > span {
+  color: var(--hot);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.game-room-hero h1 {
+  margin: 10px 0;
+  color: var(--ink);
+  font-family: var(--font-heading);
+  font-size: 34px;
+  line-height: 1.18;
+}
+
+.game-room-hero p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+}

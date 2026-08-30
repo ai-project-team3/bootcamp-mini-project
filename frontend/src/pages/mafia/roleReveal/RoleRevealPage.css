@@ -1,0 +1,47 @@
+/* ===== Role badge ===== */
+.mafia-app .role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius);
+  align-self: flex-start;
+}
+
+.mafia-app .role-badge--mafia {
+  color: var(--mafia);
+  background: var(--mafia-bg);
+  border: 1px solid rgba(193, 71, 58, 0.4);
+}
+
+.mafia-app .role-badge--police {
+  color: var(--police);
+  background: var(--police-bg);
+  border: 1px solid rgba(76, 127, 190, 0.4);
+}
+
+.mafia-app .role-badge--doctor {
+  color: var(--doctor);
+  background: var(--doctor-bg);
+  border: 1px solid rgba(95, 174, 114, 0.4);
+}
+
+.mafia-app .role-badge--citizen {
+  color: var(--citizen);
+  background: var(--citizen-bg);
+  border: 1px solid rgba(144, 152, 174, 0.4);
+}
+
+/* ===== Role portrait ===== */
+.mafia-app .role-portrait {
+  width: 100%;
+  max-width: 220px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-card);
+  align-self: center;
+  object-fit: cover;
+}

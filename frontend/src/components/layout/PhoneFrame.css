@@ -20,3 +20,43 @@
   flex-direction: column;
   padding: 20px 18px 28px;
 }
+
+/* Dark shell for screens with a dark palette of their own. Keeping the frame
+   in the app's light surface would ring a bright border around a night scene. */
+.phone--dark {
+  background: #0b0e16;
+  border-color: #2a3346;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.phone--dark .topbar-title,
+.phone--dark .topbar-back {
+  color: #edeff4;
+}
+
+/* The games paint their own background edge to edge inside the shell. */
+.phone--dark .phone-body {
+  padding: 0;
+}
+
+/* ===== Phones =====
+   On a handset the app is the whole screen. The desktop framing — the centred
+   card, its rounded border, and the padding around it — leaves dead space and a
+   "phone inside a phone" look, so below this width the shell goes edge to edge.
+   These live here, after the base rules, so import order cannot flip them. */
+@media (max-width: 560px) {
+  #root {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .phone {
+    max-width: none;
+    min-height: 100vh;
+    /* dvh accounts for the browser's collapsing address bar. */
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

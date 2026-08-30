@@ -1,0 +1,309 @@
+/* The shared room-creation and waiting-room look.
+ *
+ * These rules came out of the party-game demo's two pages so that every game
+ * in the app — the party games, 마피아 and 커플 브루마블 — makes and waits in a
+ * room that looks the same. The games differ only in the options they hang in
+ * the slots below (`.game-room-options`).
+ */
+
+/* The room screens fill their host from the top down. Both games mount this
+ * inside a shell that centres a short title card, which on a room screen only
+ * pushes the content into dead space at the top of the phone. */
+.game-room-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-self: stretch;
+}
+
+/* Token overrides for a game with a night palette (마피아 always, 브루마블 in
+ * 19금 모드). The values match the mafia game's own night theme so the shared
+ * room looks native inside it. */
+.game-room-shell--dark {
+  /* --bg is what a Card paints itself with, so leaving it out left a white
+     card carrying pale text nobody could read. */
+  --bg: #141a26;
+  --surface: #1c2436;
+  --line: #2a3346;
+  --ink: #edeff4;
+  --ink-soft: #8d96ac;
+  --hot-soft: #3a1b28;
+}
+
+/* ===== Making a room ===== */
+.game-room-entry-card {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+}
+
+.game-room-entry-card label {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.game-room-entry-card input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-transform: none;
+}
+
+.game-room-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.game-room-divider::before,
+.game-room-divider::after {
+  height: 1px;
+  flex: 1;
+  background: var(--line);
+  content: '';
+}
+
+/* ===== Per-game options =====
+ * A game drops its own settings in here — 마피아's 인원수, 브루마블's 모드.
+ * The primitives below keep those settings looking native to this card
+ * instead of each game bringing its own control style. */
+.game-room-options {
+  display: grid;
+  gap: 14px;
+  margin: 2px 0;
+}
+
+.game-room-option-group {
+  display: grid;
+  gap: 8px;
+}
+
+.game-room-option-group > .game-room-option-label {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.game-room-option-note {
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.game-room-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.game-room-chip {
+  min-width: 46px;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.game-room-chip[aria-pressed='true'] {
+  border-color: var(--hot);
+  background: var(--hot-soft);
+  color: var(--hot);
+}
+
+.game-room-chip:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.game-room-modes {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.game-room-mode {
+  display: grid;
+  gap: 3px;
+  padding: 14px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+}
+
+.game-room-mode[aria-pressed='true'] {
+  border-color: var(--hot);
+  background: var(--hot-soft);
+}
+
+.game-room-mode-icon {
+  font-size: 18px;
+}
+
+.game-room-mode b {
+  font-size: 13px;
+}
+
+.game-room-mode small {
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+/* ===== Waiting for people ===== */
+.game-room-invite-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.game-room-invite-card > div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.game-room-invite-card small {
+  color: var(--ink-soft);
+}
+
+.game-room-invite-card strong {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 26px;
+  letter-spacing: .08em;
+}
+
+.game-room-invite-card button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--hot);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+/* The invite URL in plain sight. Over the LAN the page is not a secure context
+   and the clipboard API is unavailable, so a player has to be able to read or
+   long-press the address instead of relying on the copy button. */
+.game-room-invite-url {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  word-break: break-all;
+  user-select: all;
+}
+
+.game-room-player-section {
+  margin: 24px 0;
+}
+
+.game-room-player-section h2 {
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.game-room-tally {
+  margin-left: auto;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.game-room-player-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.game-room-player-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.game-room-player-list li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.game-room-player-list em,
+.game-room-player-list small {
+  margin-left: auto;
+  color: var(--hot);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.game-room-player-list em + small {
+  margin-left: 0;
+}
+
+/* A seat nobody has taken yet. Showing the empty chairs tells the room how
+   many more people it is still waiting for. */
+.game-room-player-list li.game-room-seat-empty {
+  border-style: dashed;
+  background: none;
+  color: var(--ink-soft);
+}
+
+.game-room-notes {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 14px;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.game-room-note-ready {
+  color: var(--hot);
+  font-weight: 700;
+}
+
+.game-room-host-tools {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 420px) {
+  .game-room-invite-card {
+    gap: 12px;
+  }
+
+  .game-room-invite-card svg {
+    width: 100px;
+    height: 100px;
+  }
+
+  .game-room-modes {
+    grid-template-columns: 1fr;
+  }
+}

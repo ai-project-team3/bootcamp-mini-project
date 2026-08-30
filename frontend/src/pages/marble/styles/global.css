@@ -1,0 +1,973 @@
+@import "./theme.css";
+
+.pm-app,
+.pm-app * {
+  box-sizing: border-box;
+}
+
+.pm-app {
+  margin: 0;
+  background: radial-gradient(circle at 50% -10%, var(--pm-bg-vignette), var(--pm-bg) 60%);
+  color: var(--pm-text);
+  font-family: var(--pm-font-body);
+  min-height: 100vh;
+  /* Korean must not break mid-word; keep-all wraps on spaces/particles instead. */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.pm-app {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: var(--pm-space-6) var(--pm-space-4) var(--pm-space-7);
+}
+
+/* Rendered silk/velvet texture, held well back so it enriches the page
+   without ever competing with the cards on top of it. */
+.pm-app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: var(--pm-bg-texture);
+  background-size: cover;
+  background-position: center;
+  opacity: var(--pm-bg-texture-opacity);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pm-app > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pm-shell {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pm-space-5);
+}
+
+.pm-heading {
+  font-family: var(--pm-font-display);
+  font-weight: 700;
+  color: var(--pm-text);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.pm-eyebrow {
+  font-family: var(--pm-font-body);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pm-accent-strong);
+  margin: 0 0 var(--pm-space-2);
+}
+
+.pm-card {
+  background: var(--pm-surface);
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius);
+  box-shadow: var(--pm-shadow-card);
+  padding: var(--pm-space-5);
+}
+
+.pm-button {
+  font-family: var(--pm-font-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: var(--pm-radius-pill);
+  border: 1px solid var(--pm-border-strong);
+  background: var(--pm-surface-raised);
+  color: var(--pm-text);
+  padding: var(--pm-space-3) var(--pm-space-5);
+  cursor: pointer;
+  transition: transform var(--pm-transition), box-shadow var(--pm-transition), background var(--pm-transition);
+}
+
+.pm-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--pm-shadow-pop);
+}
+
+.pm-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pm-button--primary {
+  background: linear-gradient(135deg, var(--pm-accent), var(--pm-accent-strong));
+  color: var(--pm-accent-ink);
+  border-color: transparent;
+}
+
+.pm-button--ghost {
+  background: transparent;
+}
+
+.pm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pm-space-1);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: var(--pm-space-1) var(--pm-space-3);
+  border-radius: var(--pm-radius-pill);
+  background: var(--pm-surface-raised);
+  border: 1px solid var(--pm-border);
+  color: var(--pm-text-muted);
+}
+
+@media (max-width: 520px) {
+  .pm-app {
+    padding: var(--pm-space-4) var(--pm-space-3) var(--pm-space-6);
+  }
+  .pm-card {
+    padding: var(--pm-space-4);
+  }
+}
+
+/* Board frame: a warm bevelled surround so the tiles sit *in* a board rather
+   than floating on a white card. */
+.pm-board-card {
+  background: linear-gradient(160deg, var(--pm-frame), var(--pm-frame-deep));
+  border-color: var(--pm-frame-edge);
+  padding: var(--pm-space-4);
+  box-shadow: var(--pm-shadow-card), inset 0 1px 0 var(--pm-tile-gloss);
+}
+
+.pm-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: var(--pm-space-2);
+  aspect-ratio: 1 / 1;
+  width: 100%;
+}
+
+/* The board's middle 2x2 is the dice arena — a recessed felt well, the way a
+   physical board reads, rather than an empty hole in the grid. */
+.pm-board__center {
+  grid-row: 2 / span 2;
+  grid-column: 2 / span 2;
+  background: radial-gradient(circle at 50% 35%, var(--pm-hub-glow), var(--pm-hub-bg) 70%);
+  border: 1px solid var(--pm-hub-edge);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pm-space-3);
+  text-align: center;
+  padding: var(--pm-space-4);
+  box-shadow: inset 0 3px 10px var(--pm-hub-inset), inset 0 -1px 0 var(--pm-tile-gloss);
+}
+
+.pm-dice-arena {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--pm-space-3);
+  width: 100%;
+}
+
+.pm-dice__button {
+  font-size: 0.85rem;
+  padding: var(--pm-space-2) var(--pm-space-4);
+  white-space: nowrap;
+}
+
+.pm-dice__caption {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--pm-text-muted);
+}
+
+.pm-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pm-tile {
+  position: relative;
+  border-radius: 14px;
+  border: 1px solid var(--pm-tile-edge, var(--pm-border));
+  background: linear-gradient(160deg, var(--pm-tile-bg, var(--pm-surface)), var(--pm-tile-bg-deep, var(--pm-tile-bg, var(--pm-surface))));
+  color: var(--pm-tile-fg, var(--pm-text-muted));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-align: center;
+  padding: var(--pm-space-1);
+  /* Raised plastic-tile feel: soft drop shadow + a bright inner top edge. */
+  box-shadow: 0 3px 0 var(--pm-tile-edge, var(--pm-border)), 0 6px 12px -4px var(--pm-tile-drop),
+    inset 0 1px 0 var(--pm-tile-gloss);
+  transition: box-shadow var(--pm-transition), transform var(--pm-transition);
+}
+
+.pm-tile__icon {
+  width: 62%;
+  max-width: 46px;
+  aspect-ratio: 1;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.22));
+  pointer-events: none;
+}
+
+.pm-tile__label {
+  line-height: 1.1;
+}
+
+.pm-tile--start { --pm-tile-fg: var(--pm-start-fg); --pm-tile-bg: var(--pm-start-bg); --pm-tile-edge: var(--pm-start-edge); }
+.pm-tile--logic { --pm-tile-fg: var(--pm-logic-fg); --pm-tile-bg: var(--pm-logic-bg); --pm-tile-edge: var(--pm-logic-edge); }
+.pm-tile--empathy { --pm-tile-fg: var(--pm-empathy-fg); --pm-tile-bg: var(--pm-empathy-bg); --pm-tile-edge: var(--pm-empathy-edge); }
+.pm-tile--drive { --pm-tile-fg: var(--pm-drive-fg); --pm-tile-bg: var(--pm-drive-bg); --pm-tile-edge: var(--pm-drive-edge); }
+.pm-tile--caution { --pm-tile-fg: var(--pm-caution-fg); --pm-tile-bg: var(--pm-caution-bg); --pm-tile-edge: var(--pm-caution-edge); }
+.pm-tile--chance { --pm-tile-fg: var(--pm-chance-fg); --pm-tile-bg: var(--pm-chance-bg); --pm-tile-edge: var(--pm-chance-edge); }
+
+/* Up to eight pieces can share one tile. They are pinned inside the tile and
+   overlap like a stack of chips rather than running off the board. */
+.pm-tile__occupants {
+  position: absolute;
+  bottom: 3px;
+  left: 2px;
+  right: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1px;
+  pointer-events: none;
+}
+
+/* Every piece after the first slides back over the one before it. */
+.pm-tile__occupants > .pm-token + .pm-token {
+  margin-left: -60%;
+}
+
+/* A crowded tile shrinks its pieces so the pile still reads as separate marbles. */
+.pm-tile__occupants:has(> .pm-token:nth-child(4)) .pm-token {
+  width: 26px;
+  height: 26px;
+}
+
+.pm-tile__occupants:has(> .pm-token:nth-child(6)) .pm-token {
+  width: 21px;
+  height: 21px;
+}
+
+/* Rendered glass-marble playing piece, with a contact shadow grounding it on the tile. */
+.pm-token {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  font-size: 0;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.4));
+  transition: transform 160ms ease;
+}
+
+@keyframes pm-token-hop {
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-8px) scale(1.12); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.pm-token--hopping {
+  animation: pm-token-hop 220ms ease-out;
+  z-index: 2;
+}
+
+@media (max-width: 520px) {
+  .pm-tile {
+    font-size: 0.54rem;
+  }
+  .pm-tile__icon {
+    max-width: 30px;
+  }
+  .pm-token {
+    width: 24px;
+    height: 24px;
+  }
+  .pm-dice-stage {
+    width: 60px;
+    height: 60px;
+  }
+  .pm-dice__button {
+    font-size: 0.75rem;
+    padding: var(--pm-space-2) var(--pm-space-3);
+  }
+}
+
+/* The die is a blank rendered cube; its pips are drawn on top so the face always
+   shows exactly the rolled value. The badge sits on the stage, not on the die,
+   so it never tumbles with it. */
+.pm-dice-stage {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  perspective: 420px;
+}
+
+.pm-dice {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.32));
+}
+
+.pm-dice__art {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Pip grid overlaid on the die's front face. */
+.pm-dice__face {
+  position: absolute;
+  inset: 22%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 8%;
+}
+
+.pm-dice__pip {
+  border-radius: 50%;
+  background: transparent;
+}
+
+.pm-dice__pip--on {
+  background: radial-gradient(circle at 35% 30%, #f08a7a, var(--pm-dice-pip) 70%);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.25);
+}
+
+.pm-dice__badge {
+  position: absolute;
+  right: -10px;
+  bottom: -6px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border-radius: var(--pm-radius-pill);
+  background: linear-gradient(150deg, var(--pm-accent), var(--pm-accent-strong));
+  color: var(--pm-accent-ink);
+  border: 2px solid var(--pm-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pm-font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* A thrown die: it leaves the surface, tumbles on two axes, drops back and
+   settles with a short bounce — rather than spinning flat like a coin. */
+@keyframes pm-dice-throw {
+  0% {
+    transform: translateY(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
+  }
+  20% {
+    transform: translateY(-34px) rotateX(180deg) rotateY(120deg) rotateZ(40deg) scale(1.12);
+  }
+  45% {
+    transform: translateY(-46px) rotateX(400deg) rotateY(300deg) rotateZ(120deg) scale(1.16);
+  }
+  70% {
+    transform: translateY(0) rotateX(680deg) rotateY(520deg) rotateZ(200deg) scale(1);
+  }
+  82% {
+    transform: translateY(-12px) rotateX(710deg) rotateY(560deg) rotateZ(230deg) scale(1.04);
+  }
+  92% {
+    transform: translateY(0) rotateX(720deg) rotateY(580deg) rotateZ(245deg) scale(0.98);
+  }
+  100% {
+    transform: translateY(0) rotateX(720deg) rotateY(600deg) rotateZ(250deg) scale(1);
+  }
+}
+
+.pm-dice--rolling {
+  animation: pm-dice-throw 900ms cubic-bezier(0.25, 0.6, 0.3, 1);
+}
+
+/* The face must stay legible while the cube tumbles. */
+.pm-dice--rolling .pm-dice__face {
+  opacity: 0.65;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-dice--rolling {
+    animation: none;
+  }
+}
+
+/* One row for a couple, a wrapping grid once the table grows — eight cards
+   side by side would squeeze each to nothing and push the board off screen. */
+.pm-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  align-items: stretch;
+  gap: var(--pm-space-3);
+}
+
+.pm-player-card {
+  min-width: 0;
+  border-radius: 14px;
+  border: 1px solid var(--pm-border);
+  background: linear-gradient(160deg, var(--pm-surface-raised), var(--pm-surface));
+  padding: var(--pm-space-3) var(--pm-space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--pm-space-3);
+  box-shadow: 0 2px 0 var(--pm-border), 0 6px 14px -8px var(--pm-tile-drop);
+  transition: box-shadow var(--pm-transition), border-color var(--pm-transition), transform var(--pm-transition);
+}
+
+.pm-player-card--active {
+  border-color: var(--pm-accent);
+  box-shadow: 0 0 0 2px var(--pm-accent) inset, var(--pm-shadow-pop);
+  transform: translateY(-2px);
+}
+
+.pm-player-card__token {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
+}
+
+.pm-player-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.pm-player-card__name {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--pm-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pm-player-card__hearts {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* CSS-drawn hearts so the empty state stays visible on every theme, which an
+   outline emoji does not. */
+.pm-heart {
+  width: 11px;
+  height: 11px;
+  background: var(--pm-heart-empty);
+  clip-path: path("M5.5 10.5 1 6a2.9 2.9 0 0 1 4.5-3.6A2.9 2.9 0 0 1 10 6z");
+  transition: background var(--pm-transition);
+}
+
+.pm-heart--on {
+  background: var(--pm-heart);
+}
+
+/* Lap progress toward the finish line, which replaced the score hearts once the
+   race became the win condition. */
+.pm-progress {
+  display: block;
+  width: 100%;
+  height: 7px;
+  border-radius: var(--pm-radius-pill);
+  background: var(--pm-heart-empty);
+  overflow: hidden;
+}
+
+.pm-progress__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--pm-radius-pill);
+  transition: width 320ms cubic-bezier(0.3, 0.8, 0.3, 1);
+}
+
+.pm-progress__fill--0 { background: var(--pm-player-a); }
+.pm-progress__fill--1 { background: var(--pm-player-b); }
+.pm-progress__fill--2 { background: var(--pm-player-c); }
+.pm-progress__fill--3 { background: var(--pm-player-d); }
+.pm-progress__fill--4 { background: var(--pm-player-e); }
+.pm-progress__fill--5 { background: var(--pm-player-f); }
+.pm-progress__fill--6 { background: var(--pm-player-g); }
+.pm-progress__fill--7 { background: var(--pm-player-h); }
+
+.pm-player-card__laps {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--pm-text-faint);
+}
+
+.pm-gameover__token {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  margin: 0 auto var(--pm-space-2);
+  display: block;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
+}
+
+.pm-gameover__steps {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--pm-text-muted);
+}
+
+.pm-player-card__score {
+  font-family: var(--pm-font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--pm-text);
+}
+
+.pm-turn-indicator {
+  text-align: center;
+  color: var(--pm-text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.pm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 5, 9, 0.72);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--pm-space-4);
+  z-index: 20;
+}
+
+.pm-modal {
+  width: 100%;
+  max-width: 440px;
+  background: var(--pm-surface);
+  border: 1px solid var(--pm-border-strong);
+  border-radius: var(--pm-radius);
+  box-shadow: var(--pm-shadow-card);
+  padding: var(--pm-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pm-space-4);
+  animation: pm-modal-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes pm-modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.pm-modal__question {
+  font-family: var(--pm-font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.pm-modal__choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--pm-space-2);
+}
+
+.pm-choice {
+  text-align: left;
+  font-family: var(--pm-font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: var(--pm-space-3);
+  border-radius: var(--pm-radius-sm);
+  border: 1px solid var(--pm-border);
+  background: var(--pm-surface-raised);
+  color: var(--pm-text);
+  cursor: pointer;
+  transition: border-color var(--pm-transition), transform var(--pm-transition);
+}
+
+.pm-choice:hover:not(:disabled) {
+  border-color: var(--pm-accent);
+  transform: translateY(-1px);
+}
+
+.pm-choice:disabled {
+  cursor: default;
+}
+
+.pm-choice--correct {
+  border-color: var(--pm-success);
+  background: rgba(111, 191, 133, 0.16);
+}
+
+.pm-choice--incorrect {
+  border-color: var(--pm-danger);
+  background: rgba(217, 105, 92, 0.16);
+}
+
+.pm-modal__feedback {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.pm-modal__feedback--correct { color: var(--pm-success); }
+.pm-modal__feedback--incorrect { color: var(--pm-danger); }
+
+.pm-modal__card {
+  border-radius: var(--pm-radius-sm);
+  padding: var(--pm-space-3);
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.pm-modal__card--benefit {
+  background: rgba(232, 196, 104, 0.16);
+  border: 1px solid var(--pm-gold);
+  color: var(--pm-gold);
+}
+
+.pm-modal__card--forfeit {
+  background: rgba(216, 89, 117, 0.16);
+  border: 1px solid var(--pm-heart);
+  color: var(--pm-heart);
+}
+
+@media (max-width: 480px) {
+  .pm-modal__choices {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pm-gameover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--pm-space-5);
+  text-align: center;
+}
+
+.pm-gameover__trophy {
+  font-size: 2.6rem;
+}
+
+.pm-gameover__scores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--pm-space-4);
+  width: 100%;
+}
+
+.pm-gameover__score-card {
+  min-width: 0;
+  border-radius: var(--pm-radius-sm);
+  border: 1px solid var(--pm-border);
+  background: var(--pm-surface-raised);
+  padding: var(--pm-space-4);
+}
+
+.pm-gameover__score-card--winner {
+  border-color: var(--pm-gold);
+  box-shadow: 0 0 0 1px var(--pm-gold) inset;
+}
+
+.pm-gameover__score-value {
+  font-family: var(--pm-font-display);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.pm-gameover__summary {
+  border-left: 3px solid var(--pm-accent);
+  padding-left: var(--pm-space-4);
+  text-align: left;
+  color: var(--pm-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.pm-gameover__actions {
+  display: flex;
+  gap: var(--pm-space-3);
+}
+
+.pm-switch-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pm-space-3);
+  flex-wrap: wrap;
+}
+
+.pm-switch-panel__label {
+  font-size: 0.82rem;
+  color: var(--pm-text-faint);
+}
+
+/* TODO: API 연동 시 이 컴포넌트 및 사용처를 제거 */
+
+.pm-loading {
+  text-align: center;
+  color: var(--pm-text-muted);
+  padding: var(--pm-space-7) 0;
+}
+
+/* Title screen sits centered in the viewport rather than pinned to the top. */
+.pm-shell--center {
+  min-height: calc(100vh - var(--pm-space-6) - var(--pm-space-7));
+  justify-content: center;
+}
+
+@media (max-width: 480px) {
+  .pm-mode-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Waiting room ===== */
+.pm-waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--pm-space-4);
+  text-align: center;
+  padding: var(--pm-space-6) var(--pm-space-5);
+}
+
+.pm-waiting__seat-token {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* An empty chair's token, greyed out until someone takes the seat. The seat
+   list is the app's shared one now, so this hangs off its empty-seat class. */
+.game-room-seat-empty .pm-waiting__seat-token {
+  opacity: 0.28;
+  filter: grayscale(1);
+}
+
+.pm-waiting__you {
+  font-style: normal;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: var(--pm-radius-pill);
+  background: var(--pm-accent);
+  color: var(--pm-accent-ink);
+}
+
+.pm-waiting__cta {
+  width: 100%;
+}
+
+.pm-waiting__hint {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--pm-text-muted);
+}
+
+.pm-waiting__error {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--pm-danger);
+}
+
+/* ===== Lobby tabs ===== */
+.pm-tabs {
+  display: flex;
+  gap: var(--pm-space-1);
+  padding: 4px;
+  border-radius: var(--pm-radius-pill);
+  background: var(--pm-surface-raised);
+  border: 1px solid var(--pm-border);
+}
+
+/* ===== Join form ===== */
+.pm-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pm-space-2);
+  width: 100%;
+  text-align: left;
+}
+
+@media (max-width: 480px) and (min-width: 421px) {
+  .pm-waiting__seats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Seat picker (lobby) ===== */
+.pm-seat-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* ===== Waiting-room headcount ===== */
+.pm-waiting__tally {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 14px 0 4px;
+}
+
+/* Seats wrap once a room holds more than a couple of people. */
+.pm-waiting__seats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+/* ===== Narrow screens =====
+   The game is played on phones held in one hand, so nothing may rely on a
+   viewport wider than a small handset. These rules keep the shell, the seat
+   picker and the score cards inside a ~320px screen. */
+
+/* Nothing in this game may push the page sideways. */
+.pm-app {
+  overflow-x: hidden;
+}
+
+.pm-shell {
+  min-width: 0;
+}
+
+@media (max-width: 420px) {
+  .pm-shell {
+    gap: var(--pm-space-4);
+  }
+
+  /* Seven size buttons will not fit on one line; let them wrap and shrink. */
+  .pm-seat {
+    flex: 1 1 36px;
+    min-width: 36px;
+    padding: 8px 0;
+    font-size: 0.9rem;
+  }
+
+  .pm-seat-picker__options {
+    gap: 6px;
+  }
+
+  /* Two score cards per row. A table of eight in one column would push the
+     board a whole screen down. */
+  .pm-dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--pm-space-2);
+  }
+
+  .pm-player-card__name {
+    font-size: 0.85rem;
+  }
+
+  .pm-player-card__score {
+    font-size: 1.1rem;
+  }
+
+  .pm-player-card {
+    padding: var(--pm-space-2) var(--pm-space-3);
+    gap: var(--pm-space-2);
+  }
+
+  .pm-player-card__token {
+    width: 28px;
+    height: 28px;
+  }
+
+  .pm-gameover__scores {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .pm-waiting__tally-count {
+    font-size: 1.3rem;
+  }
+
+  /* Eight seats in one column is a long scroll before the start button. */
+  .pm-waiting__seats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--pm-space-2);
+  }
+}
+
+@media (max-width: 340px) {
+  .pm-seat {
+    flex: 1 1 30px;
+    min-width: 30px;
+    font-size: 0.85rem;
+  }
+}
+
+/* ===== Board wrapper =====
+   The board is a strict 4x4 grid, so the roll button and turn caption sit in a
+   wrapper below it rather than inside the hub, which is only half as wide and
+   used to have them spilling out over the tiles. */
+.pm-board-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pm-space-3);
+  width: 100%;
+}
+
+/* The grid keeps its own square via aspect-ratio; without this the column
+   flex parent stretches it and the tiles stop being square. */
+.pm-board-wrap > .pm-board {
+  /* A flex item's automatic minimum size is its content, which would let the
+     hub's contents stretch the grid taller than wide. Releasing it lets
+     aspect-ratio keep the board square. */
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+.pm-board__footer {
+  display: flex;
+  justify-content: center;
+}
+
+.pm-dice-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--pm-space-2);
+  width: 100%;
+}
+
+.pm-dice-controls .pm-dice__button {
+  width: 100%;
+  max-width: 260px;
+}

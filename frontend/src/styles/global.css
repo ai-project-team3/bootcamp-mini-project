@@ -11,6 +11,10 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
+  /* 한글은 어절 사이에 공백이 있는데 기본 word-break는 그 안에서도 끊는다.
+     어절 중간이 아니라 어절 경계에서만 줄바꿈되게 한다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 #root {
@@ -28,6 +32,15 @@ button {
 
 a {
   color: inherit;
+}
+
+/* Form errors on the room screens. Lives here rather than beside one screen
+   because the hub, the guide and the room layouts all raise the same message. */
+.game-room-error {
+  margin: 10px 0;
+  color: var(--hot);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 /* 배경에 은은한 빛 두 개. 정지 화면이 앱이 멈춘 걸로 보이지 않게 한다. */
@@ -60,4 +73,18 @@ body::before {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* 유형 마크 — 이미지가 있으면 이미지, 없으면 이모지로 대신 그린다.
+   리포트와 유형 맞히기 두 화면이 같이 쓴다. */
+.type-mark {
+  display: block;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.type-mark-emoji {
+  display: block;
+  line-height: 1;
+  text-align: center;
 }

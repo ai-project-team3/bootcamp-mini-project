@@ -8,6 +8,7 @@ import TypeMark from '../../components/common/TypeMark'
 import { useRoomFlow } from '../../context/RoomFlowContext'
 import { getReport } from '../../api/report'
 import { ABILITY_LABELS, ABILITY_ORDER, TYPES } from '../../data/types'
+import { shareCurrentPage } from '../../utils/share'
 import AxisRadar from './AxisRadar'
 import './PersonalReportPage.css'
 
@@ -16,6 +17,7 @@ export default function PersonalReportPage() {
   const { playerId } = useRoomFlow()
   const [report, setReport] = useState(null)
   const [error, setError] = useState(null)
+  const [shareNote, setShareNote] = useState(null)
 
   useEffect(() => {
     getReport(code).then(setReport).catch((err) => setError(err.message))
@@ -48,12 +50,28 @@ export default function PersonalReportPage() {
     label: ABILITY_LABELS[code_],
     self: me.abilities[code_],
     pre: me.impression_pre[code_],
-    post: me.impression_post[code_],
   }))
+
+  const handleShare = async () => {
+    const result = await shareCurrentPage(
+      `얼음땡 · ${me.nickname}님의 리포트`,
+      `${me.nickname}님은 "${type.name}" 유형! 얼음땡 리포트를 확인해보세요.`,
+    )
+    if (result === 'copied') setShareNote('링크를 복사했어요')
+    if (result === 'failed') setShareNote('공유에 실패했어요')
+    if (result !== 'cancelled') setTimeout(() => setShareNote(null), 2000)
+  }
 
   return (
     <PhoneFrame>
-      <TopBar title="개인 리포트" />
+      <TopBar
+        title="개인 리포트"
+        right={
+          <button type="button" className="report-share-btn" onClick={handleShare}>
+            {shareNote ?? '공유'}
+          </button>
+        }
+      />
       <div className="report-body">
         <div className="report-header" style={{ color: type.color }}>
           <TypeMark type={type} size={96} className="report-header-mark" />
@@ -109,9 +127,13 @@ export default function PersonalReportPage() {
         <div className="report-compat-list">
           {me.compat.map((c) => (
             <Card key={c.nickname} className="report-compat-card">
-              <span className="report-compat-nickname">{c.nickname}</span>
-              <span className="report-compat-grade">{c.grade}</span>
-              <span className="report-compat-tag">{c.tag}</span>
+              <div className="report-compat-head">
+                <span className="report-compat-nickname">{c.nickname}</span>
+                <span className="report-compat-gradetag">
+                  <span className="report-compat-grade">{c.grade}</span>
+                  <span className="report-compat-tag">{c.tag}</span>
+                </span>
+              </div>
               <span className="report-compat-note">{c.note}</span>
             </Card>
           ))}

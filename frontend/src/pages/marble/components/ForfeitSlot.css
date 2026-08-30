@@ -1,0 +1,92 @@
+/* Compact draw reel for the adult-mode dare target.
+   Sized to sit inside the quiz modal on a phone without pushing anything off
+   screen: three short rows, no artwork, no fixed aspect ratio.
+   Every selector is prefixed `pm-`, matching the rest of this game. */
+
+.pm-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.pm-slot-window {
+  position: relative;
+  width: 100%;
+  max-width: 190px;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid var(--pm-border);
+  background: var(--pm-surface);
+  box-shadow: inset 0 4px 8px -6px rgba(0, 0, 0, 0.45),
+    inset 0 -4px 8px -6px rgba(0, 0, 0, 0.45);
+}
+
+.pm-slot-strip {
+  will-change: transform;
+}
+
+.pm-slot-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--pm-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 8px;
+}
+
+/* Fade the rows leaving the window so the reel reads as a cylinder. */
+.pm-slot-mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 33.34%;
+  pointer-events: none;
+}
+
+.pm-slot-mask--top {
+  top: 0;
+  background: linear-gradient(to bottom, var(--pm-surface), transparent);
+}
+
+.pm-slot-mask--bottom {
+  bottom: 0;
+  background: linear-gradient(to top, var(--pm-surface), transparent);
+}
+
+/* The win line: the middle row of three. */
+.pm-slot-marker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 33.33%;
+  height: 33.34%;
+  pointer-events: none;
+  border-top: 1px solid var(--pm-accent);
+  border-bottom: 1px solid var(--pm-accent);
+  opacity: 0.3;
+}
+
+.pm-slot--settled .pm-slot-marker {
+  opacity: 1;
+}
+
+.pm-slot--settled .pm-slot-cell {
+  color: var(--pm-accent);
+}
+
+.pm-slot-caption {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--pm-text-muted);
+}
+
+.pm-slot--settled .pm-slot-caption {
+  font-weight: 700;
+  color: var(--pm-accent);
+}

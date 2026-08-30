@@ -1,0 +1,47 @@
+/* ===== Design tokens — "심야 시민 회의" (Night Council) ===== */
+.mafia-app {
+  --bg: #0b0e16;
+  --bg-vignette: #050609;
+  --surface: #141a26;
+  --surface-raised: #1c2436;
+  --border: #2a3346;
+  --border-strong: #3a4560;
+
+  --text: #edeff4;
+  --text-muted: #8d96ac;
+  --text-faint: #5c6478;
+
+  --accent: #e3b04b;
+  --accent-strong: #f0c468;
+  --accent-ink: #241a05;
+
+  --mafia: #c1473a;
+  --mafia-bg: #2a1613;
+  --police: #4c7fbe;
+  --police-bg: #131c2a;
+  --doctor: #5fae72;
+  --doctor-bg: #14211a;
+  --citizen: #9098ae;
+  --citizen-bg: #1a1e29;
+
+  --danger: #d9695c;
+  --success: #6fbf85;
+
+  --font-display: "Fraunces", "Noto Serif KR", ui-serif, serif;
+  --font-body: "Sora", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 24px 60px -24px rgba(0, 0, 0, 0.65), 0 2px 0 rgba(255, 255, 255, 0.02) inset;
+}

@@ -162,6 +162,31 @@ backend/app/
 궁합 S/A/B와 팀 등급 4지표의 "상위" 컷오프도 기획안에 수치가 없어
 `services/scoring.py`에 임의로 정해뒀다.
 
+## 부가 미니게임 — 마피아 · 커플 브루마블
+
+기획안 §17의 "페르소나 이후 게임"에 해당하는 별도 파트입니다. 본 게임(얼음땡)과
+코드가 섞이지 않도록 각자 폴더 안에 격리되어 있습니다.
+
+| 게임 | 인원 | 경로 | 코드 |
+|---|---|---|---|
+| **마피아** | 4~8인 | `/games/mafia` | `backend/app/mafia/`, `frontend/src/pages/mafia/` |
+| **커플 브루마블** | 2~8인 | `/games/marble` | `backend/app/marble/`, `frontend/src/pages/marble/` |
+
+- API는 `/mafia/...`, `/marble/...` 로 네임스페이스되어 본 게임의 `/rooms`, 데모의
+  `/demo/rooms` 와 겹치지 않습니다.
+- CSS는 각 게임의 루트 클래스(`.mafia-app`, `.pm-app`) 아래로 스코프되어 있어
+  공용 디자인 토큰과 서로 영향을 주지 않습니다.
+- 성향 데이터는 어댑터(`persona/provider.py`)를 통해 들어옵니다. 실제 페르소나 API가
+  준비되면 그 구현체만 교체하면 되고 게임 로직은 그대로입니다.
+- 두 게임 모두 인메모리 방 저장소를 쓰며 DB를 사용하지 않습니다.
+
+### 미니게임 테스트
+
+```bash
+cd backend && pytest        # 데모룸 + 두 미니게임
+cd frontend && npm test     # 두 미니게임 (vitest)
+```
+
 ## 다른 파트와의 관계
 
 이 브랜치는 **아이스브레이킹**을 담당한다. 페르소나가 만들어진 다음은 다른 브랜치다.

@@ -7,11 +7,13 @@
 __pycache__/
 *.pyc
 .venv/
+.pytest_cache/
 
 # Node
 node_modules/
 dist/
 dist-ssr/
+frontend/tsconfig.tsbuildinfo
 
 # OS / editor
 .DS_Store
@@ -20,3 +22,10 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 *.log
+
+# Local-only tunnel helper (temporary public URLs for phone testing)
+tunnel.ps1
+.tunnel/
+tunnel.bat
+frontend/vite.config.tunnel.js
+icetag_bots.py
