@@ -111,8 +111,15 @@ def generate(context: str, expected_nicknames: set[str]) -> Optional[GeneratedRe
     if not settings.gemini_api_key:
         return None
 
-    from google import genai
-    from google.genai import types
+    # SDK가 설치돼 있지 않으면 여기서 멈추지 않고 기본 세트로 물러난다.
+    # requirements에는 있지만 환경에 안 깔려 있을 수 있고, 그때 화면이 죽는
+    # 것과 문장이 밋밋한 것 중에서는 후자가 낫다.
+    try:
+        from google import genai
+        from google.genai import types
+    except ImportError:
+        logger.warning("google-genai is not installed; falling back")
+        return None
 
     prompt = (
         "아래는 처음 만난 사람들이 방금 끝낸 18분짜리 아이스브레이킹의 기록이다.\n"
