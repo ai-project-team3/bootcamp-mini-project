@@ -36,6 +36,9 @@ export function guessLiarWord(code, playerId, word) {
   })
 }
 
-export function nextLiarRound(code) {
-  return apiFetch(`/rooms/${code}/liar/next`, { method: 'POST' })
+export function nextLiarRound(code, playerId) {
+  return apiFetch(`/rooms/${code}/liar/next`, {
+    method: 'POST',
+    body: JSON.stringify({ player_id: playerId }),
+  })
 }

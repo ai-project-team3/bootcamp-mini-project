@@ -13,15 +13,56 @@ import {
 
 const POLL_MS = 900
 const SPEAK_SECONDS = 15
-const WORD_PEEK_MS = 3000
+
+// 손을 대고 있는 동안만 제시어를 보여주고 떼면 가린다. 3초짜리 타이머로
+// 보여주고 마는 방식이면, 말을 해야 하는 이 게임에서 "내 단어 뭐였지"의 답이
+// 화면에 없다 — 단어를 확인하는 일은 언제든 다시 할 수 있어야 한다.
+function WordHold({ word, isLiar, hint, onFirstPeek }) {
+  const [held, setHeld] = useState(false)
+  const peeked = useRef(false)
+
+  const start = (e) => {
+    e.preventDefault()
+    setHeld(true)
+    if (!peeked.current) {
+      peeked.current = true
+      onFirstPeek?.()
+    }
+  }
+  const stop = () => setHeld(false)
+
+  return (
+    <button
+      type="button"
+      className={`liar-hold${held ? ' held' : ''}${held && isLiar ? ' liar' : ''}`}
+      onPointerDown={start}
+      onPointerUp={stop}
+      onPointerLeave={stop}
+      onPointerCancel={stop}
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      {held ? (
+        <>
+          <span className="liar-hold-label">{isLiar ? '당신만 다른 단어입니다' : '제시어'}</span>
+          <span className="liar-hold-word">{word ?? '???'}</span>
+        </>
+      ) : (
+        <>
+          <span className="liar-hold-lock">🔒</span>
+          <span className="liar-hold-label">{hint ?? '꾹 누르고 있는 동안 보입니다'}</span>
+        </>
+      )}
+    </button>
+  )
+}
 
 // 기획안 §4-7 — 넷은 "치킨", 한 명만 "피자". 말은 입으로 하고 화면은 차례만
 // 넘긴다. 음성은 어디에서도 다루지 않는다.
 export default function LiarStep({ code, playerId, onAdvance }) {
   const [state, setState] = useState(null)
   const [players, setPlayers] = useState([])
-  const [peeking, setPeeking] = useState(false)
   const [voted, setVoted] = useState(false)
+  const [accusePick, setAccusePick] = useState(null)
   const [accused, setAccused] = useState(false)
   const [wordDraft, setWordDraft] = useState('')
   const [left, setLeft] = useState(SPEAK_SECONDS)
@@ -42,6 +83,8 @@ export default function LiarStep({ code, playerId, onAdvance }) {
             if (prev?.stage !== s.stage || prev?.round_no !== s.round_no) {
               setVoted(false)
               setAccused(false)
+              setAccusePick(null)
+              setWordDraft('')
             }
             return s
           })
@@ -81,16 +124,11 @@ export default function LiarStep({ code, playerId, onAdvance }) {
     return () => clearInterval(timer)
   }, [isSpeaker, code, state?.speaker_player_id, state?.lap])
 
-  const peek = () => {
-    setPeeking(true)
-    markLiarSeen(code, playerId).then(setState).catch((err) => setError(err.message))
-    setTimeout(() => setPeeking(false), WORD_PEEK_MS)
-  }
-
   if (error) return <p className="game-error">{error}</p>
   if (!state) return <p className="game-hint">불러오는 중...</p>
 
   const others = players.filter((p) => p.id !== playerId)
+  const lastLap = state.last_lap === true
 
   if (state.stage === 'WORD') {
     return (
@@ -98,21 +136,19 @@ export default function LiarStep({ code, playerId, onAdvance }) {
         <p className="liar-round">
           {state.round_no} / {state.total_rounds}판
         </p>
-        {peeking ? (
-          <div className={`liar-word${state.am_i_liar ? ' liar' : ''}`}>
-            <p className="liar-word-label">{state.am_i_liar ? '당신만 다른 단어입니다' : '제시어'}</p>
-            <p className="liar-word-text">{state.my_word}</p>
-            <p className="liar-word-hint">3초 뒤 사라집니다</p>
-          </div>
-        ) : (
-          <button className="liar-peek" onClick={peek}>
-            눌러서 제시어 확인
-          </button>
-        )}
+        <p className="liar-prompt">제시어를 확인하세요</p>
+        <WordHold
+          word={state.my_word}
+          isLiar={state.am_i_liar}
+          hint="꾹 누르고 있는 동안만 보입니다"
+          onFirstPeek={() => markLiarSeen(code, playerId).then(setState).catch(() => {})}
+        />
         <p className="liar-cap">
           {state.seen} / {state.total}명 확인
         </p>
-        <p className="liar-hint">옆 사람이 못 보게 가리고 확인하세요</p>
+        <p className="liar-hint">
+          한 명만 다른 단어를 받습니다. 돌아가며 한마디씩 하고, 라이어를 지목합니다
+        </p>
       </div>
     )
   }
@@ -121,7 +157,7 @@ export default function LiarStep({ code, playerId, onAdvance }) {
     return (
       <div className="liar-step">
         <p className="liar-round">
-          {state.lap}바퀴째
+          {state.lap}바퀴째{lastLap ? ' (마지막)' : ''}
         </p>
         {isSpeaker ? (
           <div className="liar-turn mine">
@@ -140,6 +176,8 @@ export default function LiarStep({ code, playerId, onAdvance }) {
             <p className="liar-hint">화면 말고 사람을 보세요</p>
           </div>
         )}
+        {/* 말하는 동안에도 자기 단어는 언제든 다시 볼 수 있어야 한다. */}
+        <WordHold word={state.my_word} isLiar={state.am_i_liar} hint="내 제시어 확인" />
       </div>
     )
   }
@@ -179,7 +217,10 @@ export default function LiarStep({ code, playerId, onAdvance }) {
             </button>
           </div>
         )}
-        <p className="liar-hint">더 돌면 정보가 늘지만 라이어에게도 시간을 줍니다</p>
+        <p className="liar-hint">
+          많은 쪽으로 갑니다. 더 돌면 정보가 늘지만 라이어에게도 시간을 줍니다
+        </p>
+        <WordHold word={state.my_word} isLiar={state.am_i_liar} hint="내 제시어 확인" />
       </div>
     )
   }
@@ -198,20 +239,28 @@ export default function LiarStep({ code, playerId, onAdvance }) {
             </div>
           </div>
         ) : (
-          <div className="tele-picks">
-            {others.map((p) => (
-              <button
-                key={p.id}
-                className="tele-pick"
-                onClick={() => {
-                  setAccused(true)
-                  accuseLiar(code, playerId, p.id).then(setState)
-                }}
-              >
-                {p.nickname}
-              </button>
-            ))}
-          </div>
+          <>
+            <div className="tele-picks">
+              {others.map((p) => (
+                <button
+                  key={p.id}
+                  className={`tele-pick${accusePick === p.id ? ' picked' : ''}`}
+                  onClick={() => setAccusePick(p.id)}
+                >
+                  {p.nickname}
+                </button>
+              ))}
+            </div>
+            <Button
+              disabled={!accusePick}
+              onClick={() => {
+                setAccused(true)
+                accuseLiar(code, playerId, accusePick).then(setState)
+              }}
+            >
+              지목하기
+            </Button>
+          </>
         )}
       </div>
     )
@@ -236,7 +285,12 @@ export default function LiarStep({ code, playerId, onAdvance }) {
               onChange={(e) => setWordDraft(e.target.value)}
               placeholder="제시어"
             />
-            <Button onClick={() => guessLiarWord(code, playerId, wordDraft).then(setState)}>제출</Button>
+            <Button
+              disabled={!wordDraft.trim()}
+              onClick={() => guessLiarWord(code, playerId, wordDraft).then(setState)}
+            >
+              제출
+            </Button>
           </div>
         ) : (
           <p className="liar-hint">{state.liar_nickname}님이 제시어를 맞히는 중...</p>
@@ -245,9 +299,20 @@ export default function LiarStep({ code, playerId, onAdvance }) {
         <>
           <p className="liar-answer-word">제시어는 “{state.major_word}”였습니다</p>
           <p className="liar-winner">{state.liar_won ? '라이어 승' : '시민 승'}</p>
-          <Button onClick={() => nextLiarRound(code).then(setState)}>
-            {state.round_no >= state.total_rounds ? '끝내기' : '다음 판'}
-          </Button>
+          {state.i_am_ready ? (
+            <div className="game-waiting">
+              <p>다른 사람들을 기다리는 중...</p>
+              <div className="game-dots">
+                {Array.from({ length: state.total }, (_, i) => (
+                  <span key={i} className={i < state.ready ? 'game-dot on' : 'game-dot'} />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Button onClick={() => nextLiarRound(code, playerId).then(setState)}>
+              {state.round_no >= state.total_rounds ? '끝내기' : '다음 판'}
+            </Button>
+          )}
         </>
       )}
     </div>
