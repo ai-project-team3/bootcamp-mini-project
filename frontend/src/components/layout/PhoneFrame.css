@@ -25,9 +25,15 @@
   flex-direction: column;
   padding: 20px 18px 28px;
   /* 어느 화면이 길어지든 껍데기 안에서 스크롤된다 — 폰에서 드래그해서 내리는
-     그 동작이다. 화면마다 따로 스크롤 컨테이너를 두지 않아도 되게 여기서 받는다. */
+     그 동작이다. 화면마다 따로 스크롤 컨테이너를 두지 않아도 되게 여기서 받는다.
+     가로는 아예 자른다: overflow-y만 지정하면 overflow-x가 auto로 계산돼서,
+     배경 그림이 폰 밖으로 조금만 나가도 가로 막대가 생긴다. */
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* 막대는 보이지 않게. 폰 화면에 스크롤바가 그어져 있으면 앱이 아니라
+     웹페이지로 보인다. 스크롤은 그대로 된다. */
+  scrollbar-width: none;
 }
 
 /* Dark shell for screens with a dark palette of their own. Keeping the frame
@@ -71,3 +77,5 @@
     box-shadow: none;
   }
 }
+
+.phone-body::-webkit-scrollbar { width: 0; height: 0; }
