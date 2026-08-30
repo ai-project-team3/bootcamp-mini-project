@@ -55,6 +55,13 @@ def phase(code: str) -> str:
     return client.get(f"/rooms/{code}").json()["phase"]
 
 
+def st_liar_id(code: str) -> str:
+    """REVEAL 화면에서 라이어의 player_id. 닉네임만 공개되므로 되짚는다."""
+    st = client.get(f"/rooms/{code}/liar/state").json()
+    players = client.get(f"/rooms/{code}/players").json()
+    return next((p["id"] for p in players if p["nickname"] == st["liar_nickname"]), players[0]["id"])
+
+
 def run(n: int) -> None:
     print(f"\n=== {n}명 ===")
 
@@ -202,7 +209,16 @@ def run(n: int) -> None:
                             json={"player_id": me, "target_player_id": others[0]},
                         )
                 elif stage == "REVEAL":
-                    client.post(f"/rooms/{code}/liar/next")
+                    if st.get("word_pending"):
+                        # 걸린 라이어에게 남은 한 번. 안 내면 나머지가 멈춘다.
+                        client.post(
+                            f"/rooms/{code}/liar/word-guess",
+                            json={"player_id": st_liar_id(code), "word": "틀린답"},
+                        )
+                        continue
+                    # 이제 전원이 각자 넘어가야 다음 판이 열린다.
+                    for me in ids:
+                        client.post(f"/rooms/{code}/liar/next", json={"player_id": me})
                 else:
                     break
             check("라이어 종료", True)

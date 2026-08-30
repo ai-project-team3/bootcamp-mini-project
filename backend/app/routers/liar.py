@@ -2,7 +2,9 @@
 
 넷은 "치킨", 한 명만 "피자"를 받는다. 시계 방향으로 한 마디씩 하고, 한 바퀴가
 끝나면 **한 바퀴 더 돌지 지금 지목할지**를 다수결로 정한다. 그 투표가 이
-게임의 핵심이다 — 더 돌면 정보가 늘지만 라이어에게도 시간을 준다.
+게임의 핵심이다 — 더 돌면 정보가 늘지만 라이어에게도 시간을 준다. 단 마지막
+바퀴(MAX_LAPS)를 돌고 나면 묻지 않는다. 고를 수 없는 것을 고르게 하면 표가
+무시된 것처럼 보인다.
 
 음성은 어디에서도 다루지 않는다. 말은 입으로 하고 화면은 차례만 넘긴다.
 """
@@ -22,6 +24,7 @@ from ..models.room import Room
 from ..schemas.liar import (
     LiarAccuseRequest,
     LiarContinueRequest,
+    LiarNextRequest,
     LiarSeenRequest,
     LiarStateResponse,
     LiarWordGuessRequest,
@@ -35,6 +38,7 @@ MAX_LAPS = 2  # 상한 3:30을 지키려면 "한 바퀴 더"는 한 번까지
 SEEN = "LIAR_SEEN"
 ROLE = "LIAR_ROLE"
 SURVIVED = "LIAR_SURVIVED"
+READY = "LIAR_READY"
 
 
 def _round(room: Room, db: Session, create: bool = True) -> LiarRound | None:
@@ -131,7 +135,10 @@ def next_speaker(code: str, db: Session = Depends(get_db)) -> LiarStateResponse:
     if idx + 1 < len(seats):
         rnd.speaker_seat = seats[idx + 1]
     else:
-        rnd.stage = "VOTE"
+        # 마지막 바퀴였으면 "한 바퀴 더"가 이미 불가능하다. 그런데도 투표를
+        # 물으면 전원이 더 돌자고 해도 지목으로 넘어가서, 표가 무시된 것처럼
+        # 보인다. 물을 수 없는 것은 묻지 않는다.
+        rnd.stage = "ACCUSE" if rnd.lap >= MAX_LAPS else "VOTE"
         rnd.speaker_seat = seats[0] if seats else 1
     db.commit()
     return _state(room, rnd, db, "")
@@ -254,17 +261,52 @@ def word_guess(code: str, payload: LiarWordGuessRequest, db: Session = Depends(g
 
 
 @router.post("/next", response_model=LiarStateResponse)
-def next_round(code: str, db: Session = Depends(get_db)) -> LiarStateResponse:
+def next_round(code: str, payload: LiarNextRequest, db: Session = Depends(get_db)) -> LiarStateResponse:
+    """넘어갈 준비가 됐다고 표시한다. 판은 전원이 표시해야 넘어간다.
+
+    예전에는 아무나 한 번 누르면 방 전체가 넘어갔다. 결과와 제시어가 뜨는
+    화면인데, 먼저 누른 한 사람 때문에 나머지가 그걸 못 보고 지나갔다.
+    """
     room = get_room(code, db)
     rnd = _round(room, db)
     if rnd.stage != "REVEAL":
-        return _state(room, rnd, db, "")
+        return _state(room, rnd, db, payload.player_id)
+
+    already = (
+        db.query(GameResult)
+        .filter(
+            GameResult.room_id == room.id,
+            GameResult.kind == READY,
+            GameResult.round_no == rnd.round_no,
+            GameResult.player_id == payload.player_id,
+        )
+        .first()
+    )
+    if already is None:
+        db.add(
+            GameResult(
+                room_id=room.id, player_id=payload.player_id, kind=READY, round_no=rnd.round_no, value=1.0
+            )
+        )
+        db.commit()
+
+    if _ready_count(room, rnd, db) < room.player_limit:
+        return _state(room, rnd, db, payload.player_id)
+
     if rnd.round_no >= LIAR_ROUNDS:
         if room.phase == "LIAR":
             room.phase = next_phase("LIAR", room.player_limit)
             db.commit()
-        return _state(room, rnd, db, "")
-    return _state(room, _open(room, db, rnd.round_no + 1), db, "")
+        return _state(room, rnd, db, payload.player_id)
+    return _state(room, _open(room, db, rnd.round_no + 1), db, payload.player_id)
+
+
+def _ready_count(room: Room, rnd: LiarRound, db: Session) -> int:
+    return (
+        db.query(GameResult)
+        .filter(GameResult.room_id == room.id, GameResult.kind == READY, GameResult.round_no == rnd.round_no)
+        .count()
+    )
 
 
 def _seen_count(room: Room, rnd: LiarRound, db: Session) -> int:
@@ -319,6 +361,7 @@ def _state(room: Room, rnd: LiarRound | None, db: Session, player_id: str) -> Li
         total_rounds=LIAR_ROUNDS,
         stage=rnd.stage,
         lap=rnd.lap,
+        last_lap=rnd.lap >= MAX_LAPS,
         my_word=(rnd.minor_word if am_liar else rnd.major_word) if player_id else None,
         am_i_liar=am_liar,
         seen=_seen_count(room, rnd, db),
@@ -336,4 +379,15 @@ def _state(room: Room, rnd: LiarRound | None, db: Session, player_id: str) -> Li
         major_word=rnd.major_word if rnd.stage == "REVEAL" and not pending else None,
         word_pending=pending,
         liar_won=liar_won,
+        ready=_ready_count(room, rnd, db),
+        i_am_ready=bool(player_id)
+        and db.query(GameResult)
+        .filter(
+            GameResult.room_id == room.id,
+            GameResult.kind == READY,
+            GameResult.round_no == rnd.round_no,
+            GameResult.player_id == player_id,
+        )
+        .first()
+        is not None,
     )

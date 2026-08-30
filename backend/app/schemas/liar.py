@@ -17,6 +17,10 @@ class LiarAccuseRequest(BaseModel):
     target_player_id: str
 
 
+class LiarNextRequest(BaseModel):
+    player_id: str
+
+
 class LiarWordGuessRequest(BaseModel):
     player_id: str
     word: str
@@ -27,6 +31,8 @@ class LiarStateResponse(BaseModel):
     total_rounds: int
     stage: str  # WORD | SPEAK | VOTE | ACCUSE | REVEAL | DONE
     lap: int = 1
+    # 이번이 마지막 바퀴인가. 화면이 MAX_LAPS를 따로 알 필요가 없게 여기서 알린다.
+    last_lap: bool = False
     my_word: Optional[str] = None
     am_i_liar: bool = False
     seen: int = 0
@@ -45,3 +51,6 @@ class LiarStateResponse(BaseModel):
     # 걸린 라이어가 아직 제시어를 안 냈다 — 제시어도 승패도 아직 공개 전
     word_pending: bool = False
     liar_won: bool = False
+    # 결과 화면에서 넘어갈 준비가 된 사람 수. 각자 자기 속도로 넘어간다.
+    ready: int = 0
+    i_am_ready: bool = False

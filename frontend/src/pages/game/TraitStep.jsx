@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import Button from '../../components/common/Button'
 import { getTraitOptions, getTraitTurn, submitTraitGuess, submitTraitSelf } from '../../api/trait'
 
 const POLL_MS = 1200
@@ -9,6 +10,8 @@ const REVEAL_MS = 3000
 export default function TraitStep({ code, playerId, onAdvance }) {
   const [options, setOptions] = useState(null)
   const [selfDone, setSelfDone] = useState(false)
+  const [myIndex, setMyIndex] = useState(null)
+  const [pick, setPick] = useState(null)
   const [selfStatus, setSelfStatus] = useState(null)
   const [turn, setTurn] = useState(null)
   const [guessed, setGuessed] = useState(false)
@@ -33,7 +36,10 @@ export default function TraitStep({ code, playerId, onAdvance }) {
         .then((t) => {
           if (cancelled) return
           setTurn((prev) => {
-            if (prev?.target_player_id !== t.target_player_id) setGuessed(false)
+            if (prev?.target_player_id !== t.target_player_id) {
+              setGuessed(false)
+              setPick(null)
+            }
             return t
           })
           if (t.done && !advanced.current) {
@@ -54,6 +60,7 @@ export default function TraitStep({ code, playerId, onAdvance }) {
   }, [selfDone, code, onAdvance])
 
   const chooseSelf = (index) => {
+    setMyIndex(index)
     submitTraitSelf(code, playerId, index)
       .then((r) => {
         setSelfStatus(r)
@@ -62,9 +69,9 @@ export default function TraitStep({ code, playerId, onAdvance }) {
       .catch((err) => setError(err.message))
   }
 
-  const guess = (index) => {
+  const guess = () => {
     setGuessed(true)
-    submitTraitGuess(code, turn.target_player_id, playerId, index)
+    submitTraitGuess(code, turn.target_player_id, playerId, pick)
       .then(setTurn)
       .catch((err) => {
         setGuessed(false)
@@ -83,12 +90,19 @@ export default function TraitStep({ code, playerId, onAdvance }) {
         </p>
         <div className="trait-options">
           {options.map((label, i) => (
-            <button key={label} className="trait-option" onClick={() => chooseSelf(i)}>
+            <button
+              key={label}
+              className={`trait-option${pick === i ? ' picked' : ''}`}
+              onClick={() => setPick(i)}
+            >
               {label}
             </button>
           ))}
         </div>
         <p className="trait-note">남들이 이걸 맞힐 거예요</p>
+        <Button disabled={pick === null} onClick={() => chooseSelf(pick)}>
+          확인
+        </Button>
       </div>
     )
   }
@@ -128,6 +142,11 @@ export default function TraitStep({ code, playerId, onAdvance }) {
         <p>
           <b>내 차례</b>예요. 다들 맞히는 중...
         </p>
+        {myIndex !== null && (
+          <p className="trait-mine">
+            내가 고른 답 — <b>{options[myIndex]}</b>
+          </p>
+        )}
         <div className="game-dots">
           {Array.from({ length: turn.total }, (_, i) => (
             <span key={i} className={i < turn.submitted ? 'game-dot on' : 'game-dot'} />
@@ -157,11 +176,18 @@ export default function TraitStep({ code, playerId, onAdvance }) {
       </p>
       <div className="trait-options">
         {options.map((label, i) => (
-          <button key={label} className="trait-option" onClick={() => guess(i)}>
+          <button
+            key={label}
+            className={`trait-option${pick === i ? ' picked' : ''}`}
+            onClick={() => setPick(i)}
+          >
             {label}
           </button>
         ))}
       </div>
+      <Button disabled={pick === null} onClick={guess}>
+        확인
+      </Button>
     </div>
   )
 }

@@ -10,10 +10,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(10, 13, 34, 0.92);
+  /* 불투명해야 한다. 살짝 비치게 두면 밑에 깔린 문항 글자와 규칙 한 줄이
+     겹쳐서 둘 다 안 읽힌다. */
+  background: #0a0d22;
   z-index: 20;
-  animation: intro-fade 1.4s ease forwards;
+  animation: intro-fade 2.2s ease forwards;
   pointer-events: none;
+}
+
+.stage-intro {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stage-intro small {
+  max-width: 280px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  text-align: center;
+  text-wrap: balance;
+  padding: 0 20px;
+  animation: intro-slide 0.6s var(--ease-pop) 0.1s both;
 }
 
 .stage-intro span {
@@ -26,7 +44,7 @@
 }
 
 @keyframes intro-fade {
-  0%, 68% { opacity: 1; }
+  0%, 78% { opacity: 1; }
   100% { opacity: 0; }
 }
 
@@ -279,13 +297,25 @@
   text-align: center;
   border-radius: var(--radius-md);
   margin: -6px;
-  padding: 24px 16px;
+  padding: 20px 16px;
   transition: background var(--dur) ease;
   background: transparent;
 }
 
-.nunchi.ok { background: var(--ok); }
-.nunchi.fail { background: var(--no); animation: shake 0.4s ease; }
+/* 걸리면 붉게 한 번 번쩍이고 어둡게 그을린 채로 남는다 — 불꽃이 붉은 바탕
+   위에서는 안 보인다. 살아남으면 초록으로 밝아진다. 버튼 뒤에서 터지는
+   연출이 주인공이라 배경은 거기까지만 거든다. */
+.nunchi.boomed {
+  background: #2a0812;
+  animation: shake 0.4s ease, nunchi-flash 0.5s ease both;
+}
+
+.nunchi.cheered { background: var(--ok); }
+
+@keyframes nunchi-flash {
+  0% { background-color: #ff5470; }
+  100% { background-color: #2a0812; }
+}
 
 .nunchi-round {
   margin: 0;
@@ -295,44 +325,80 @@
   letter-spacing: 0.1em;
 }
 
-.nunchi.ok .nunchi-round,
-.nunchi.fail .nunchi-round,
-.nunchi.ok .nunchi-cap,
-.nunchi.fail .nunchi-cap,
-.nunchi.ok .nunchi-order,
-.nunchi.fail .nunchi-order {
+.nunchi.boomed .nunchi-round,
+.nunchi.cheered .nunchi-round,
+.nunchi.boomed .nunchi-cap,
+.nunchi.cheered .nunchi-cap,
+.nunchi.boomed .nunchi-order,
+.nunchi.cheered .nunchi-order {
   color: rgba(255, 255, 255, 0.92);
 }
 
 .nunchi-big {
   font-family: var(--font-heading);
-  font-size: 5.4rem;
+  font-size: 5rem;
   line-height: 1;
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   color: var(--hot);
   animation: pop-in 0.35s var(--ease-pop) both;
 }
 
-.nunchi.ok .nunchi-big,
-.nunchi.fail .nunchi-big { color: #fff; }
+/* 위치를 가진 연출이 정적인 글자보다 위에 그려지므로, 글자 쪽을 올려 둔다. */
+.nunchi-verdict {
+  position: relative;
+  z-index: 2;
+  margin: 6px 0 0;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 2.6rem;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+  animation: pop-in 0.35s var(--ease-pop) both;
+}
 
 .nunchi-cap {
+  position: relative;
+  z-index: 2;
   margin: 4px 0 0;
   font-size: 1rem;
   font-weight: 600;
 }
 
 .nunchi-order {
+  position: relative;
+  z-index: 2;
   margin: 10px 0 0;
   font-family: var(--font-mono);
   font-size: 0.82rem;
+}
+
+.nunchi-hint {
+  margin: 14px 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  max-width: 260px;
+}
+
+.nunchi.boomed .nunchi-hint,
+.nunchi.cheered .nunchi-hint { color: rgba(255, 255, 255, 0.8); }
+
+/* 버튼과 그 뒤에서 터지는 연출이 같은 중심을 쓰도록 겹쳐 둔다. 파편과 폭죽은
+   버튼 아래(z-index 0)에서 날아가므로 버튼을 가리지 않는다. */
+.nunchi-stage {
+  position: relative;
+  width: 190px;
+  height: 190px;
+  margin: 18px auto 0;
+  display: grid;
+  place-items: center;
 }
 
 /* 진짜 버튼처럼 아래에 두께(짙은 그림자)를 깔아두고, 누르면 그 두께만큼
    내려앉게 한다 — 눌렀다는 게 색 변화가 아니라 "들어갔다"는 움직임으로
    보이게. */
 .nunchi-btn {
-  margin-top: 22px;
+  position: relative;
+  z-index: 1;
   width: 190px;
   height: 190px;
   border-radius: 50%;
@@ -359,92 +425,113 @@
   transform: translateY(2px);
 }
 
+/* 걸린 버튼은 그을린 것처럼 주저앉고, 살아남은 버튼은 한 번 부푼다. */
+.nunchi-btn.is-boom:disabled {
+  /* 배경보다 한 단계 밝게 — 같은 색이면 버튼이 사라져 버린다. */
+  background: #55121f;
+  color: #fff;
+  font-size: 3.4rem;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.6);
+  animation: nunchi-scorch 0.5s ease both;
+}
+
+.nunchi-btn.is-party:disabled {
+  background: var(--deep);
+  color: #fff;
+  font-size: 3.4rem;
+  box-shadow: 0 6px 0 0 rgba(0, 0, 0, 0.28);
+  animation: nunchi-swell 0.5s var(--ease-pop) both;
+}
+
 @keyframes nunchi-pulse {
   0% { box-shadow: 0 8px 0 0 #a8134f, 0 0 0 0 rgba(255, 46, 136, 0.5); }
   70% { box-shadow: 0 8px 0 0 #a8134f, 0 0 0 22px rgba(255, 46, 136, 0); }
   100% { box-shadow: 0 8px 0 0 #a8134f, 0 0 0 0 rgba(255, 46, 136, 0); }
 }
 
-/* 꼴찌/동시누름 전용 연출 — "빵" 하고 부풀었다가 네 조각으로 터져 날아간다.
-   조각 4개(스팬)를 사분면별로 clip-path로 잘라 각자 다른 대각선으로 날린다. */
-.nunchi.shattered { animation: shake 0.35s ease; }
-
-.nunchi-shatter {
-  position: relative;
-  width: 150px;
-  height: 150px;
-  margin: 8px auto 0;
-  border-radius: 50%;
-  background: var(--no);
-  display: grid;
-  place-items: center;
-  animation: shatter-pop 0.22s ease;
+@keyframes nunchi-scorch {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.14); }
+  60% { transform: scale(0.9) translateY(6px); }
+  100% { transform: scale(0.94) translateY(6px); }
 }
 
-.nunchi-shatter-face {
-  font-size: 2.6rem;
-  animation: shatter-face-fade 0.4s 0.15s ease forwards;
-}
-
-.nunchi-shard {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: inherit;
-}
-
-.nunchi-shard-1 {
-  clip-path: polygon(4% 4%, 54% 0, 30% 54%, 0 46%);
-  animation: shatter-shard-1 0.65s 0.15s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
-}
-
-.nunchi-shard-2 {
-  clip-path: polygon(54% 0, 98% 6%, 100% 52%, 40% 42%);
-  animation: shatter-shard-2 0.65s 0.15s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
-}
-
-.nunchi-shard-3 {
-  clip-path: polygon(0 46%, 40% 42%, 46% 96%, 2% 100%);
-  animation: shatter-shard-3 0.65s 0.15s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
-}
-
-.nunchi-shard-4 {
-  clip-path: polygon(40% 42%, 100% 52%, 98% 98%, 44% 100%);
-  animation: shatter-shard-4 0.65s 0.15s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
-}
-
-.nunchi-fail-word {
-  margin: 10px 0 0;
-  font-family: var(--font-heading);
-  font-weight: 400;
-  font-size: 2.8rem;
-  color: #fff;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
-  animation: pop-in 0.35s var(--ease-pop) 0.15s both;
-}
-
-@keyframes shatter-pop {
-  0% { transform: scale(0.85); }
-  45% { transform: scale(1.15); }
+@keyframes nunchi-swell {
+  0% { transform: scale(0.9); }
+  55% { transform: scale(1.12); }
   100% { transform: scale(1); }
 }
 
-@keyframes shatter-shard-1 { to { transform: translate(-54px, -48px) rotate(-42deg); opacity: 0; } }
-@keyframes shatter-shard-2 { to { transform: translate(56px, -46px) rotate(40deg); opacity: 0; } }
-@keyframes shatter-shard-3 { to { transform: translate(-50px, 54px) rotate(-36deg); opacity: 0; } }
-@keyframes shatter-shard-4 { to { transform: translate(52px, 56px) rotate(38deg); opacity: 0; } }
-
-@keyframes shatter-face-fade {
-  to { opacity: 0; transform: scale(0.5); }
+/* ── 버튼 뒤에서 터지는 것 ──
+   조각마다 각도(--a)와 거리(--d)를 인라인으로 받아 같은 키프레임 하나로
+   사방으로 흩어진다. 조각 수가 늘어도 키프레임은 하나뿐이다. */
+.nunchi-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .nunchi.shattered,
-  .nunchi-shatter,
-  .nunchi-shard,
-  .nunchi-shatter-face,
-  .nunchi-fail-word {
-    animation: none;
+.nunchi-wave {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  opacity: 0.9;
+  animation: nunchi-wave 0.7s cubic-bezier(0.15, 0.7, 0.3, 1) both;
+}
+
+.nunchi-burst.boom .nunchi-wave { border-color: #ffd0a8; }
+.nunchi-burst.party .nunchi-wave { border-color: #fff; }
+
+.nunchi-shard,
+.nunchi-confetti {
+  position: absolute;
+  animation-duration: 0.85s;
+  animation-timing-function: cubic-bezier(0.12, 0.75, 0.3, 1);
+  animation-fill-mode: both;
+  animation-delay: calc(var(--i) * 8ms);
+}
+
+/* 폭발 파편 — 불똥처럼 길쭉하게, 날아가는 방향으로 누워서 간다. */
+.nunchi-shard {
+  width: 8px;
+  height: 24px;
+  border-radius: 4px;
+  background: linear-gradient(#fff, #ffd36e 40%, #ff5a2b 75%, #c81e1e);
+  box-shadow: 0 0 10px rgba(255, 160, 60, 0.7);
+  animation-name: nunchi-fly;
+}
+
+/* 폭죽 조각 — 색종이라 굴러가며 떨어진다. */
+.nunchi-confetti {
+  width: 9px;
+  height: 13px;
+  border-radius: 2px;
+  background: var(--c);
+  animation-name: nunchi-flutter;
+}
+
+@keyframes nunchi-wave {
+  0% { transform: scale(0.35); opacity: 0.95; }
+  100% { transform: scale(2.1); opacity: 0; }
+}
+
+@keyframes nunchi-fly {
+  0% { transform: rotate(var(--a)) translateY(0) scale(0.4); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(1); opacity: 0; }
+}
+
+@keyframes nunchi-flutter {
+  0% { transform: rotate(var(--a)) translateY(0) rotate(0deg) scale(0.5); opacity: 1; }
+  70% { opacity: 1; }
+  100% {
+    transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) rotate(540deg) scale(1);
+    opacity: 0;
   }
 }
 
@@ -672,4 +759,130 @@
   font-family: var(--font-mono);
   color: var(--hot) !important;
   font-weight: 600;
+}
+
+/* ── 되돌릴 수 없는 탭을 없애면서 생긴 것들 ── */
+
+/* 고른 것이 화면에 남아야 확인 버튼이 의미가 있다. 어느 화면에서 골랐든
+   "이게 지금 내 선택"이 같은 모양으로 보이게 한 곳에 모아 둔다. */
+.tele-pick.picked,
+.trait-option.picked {
+  border-color: var(--hot);
+  background: var(--hot);
+  color: #fff;
+}
+
+.btn.is-picked {
+  border-color: var(--hot);
+  background: var(--hot);
+  color: #fff;
+}
+
+/* 텔레파시 — 먼저 고른 내 답. 눌러서 되돌린다. */
+.tele-mine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.tele-mine b { color: var(--hot); }
+
+.tele-redo {
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  flex-shrink: 0;
+}
+
+/* 첫인상 — 문항 사이를 되돌아갈 수 있게 */
+.impression-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 되돌아가기 버튼이 옆에 붙어도 진행바는 남는 폭을 다 쓴다. */
+.impression-top .pprog { flex: 1; min-width: 0; }
+
+.impression-back {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+}
+
+.impression-back:disabled { opacity: 0.35; }
+
+.impression-note {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.trait-mine {
+  margin: 10px 0 0;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+
+.trait-mine b { color: var(--ink); }
+
+/* ── 라이어 제시어 — 손을 대고 있는 동안만 ── */
+.liar-hold {
+  width: 100%;
+  min-height: 118px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px 16px;
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  /* 길게 누르는 조작이라 브라우저의 선택·확대 제스처를 막아야 한다. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+}
+
+.liar-hold.held {
+  border-style: solid;
+  border-color: transparent;
+  background: var(--deep);
+  transform: scale(1.02);
+}
+
+.liar-hold.held.liar { background: var(--hot); }
+
+.liar-hold-lock { font-size: 1.6rem; opacity: 0.7; }
+
+.liar-hold-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+.liar-hold.held .liar-hold-label { color: rgba(255, 255, 255, 0.82); }
+
+.liar-hold-word {
+  font-family: var(--font-heading);
+  font-size: 2.3rem;
+  color: #fff;
 }

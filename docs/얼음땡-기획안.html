@@ -475,17 +475,20 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
 
     <div class="stage"><div class="s-n">6</div><div class="s-b">
       <div class="s-h"><span class="t">눈치 게임</span><span class="chip g">게임</span><span class="chip">1:00</span><span class="chip">3판</span></div>
-      <p class="small">화면에 버튼 하나. <b>1등부터 순서대로</b> 눌러야 하고 <b>둘이 동시에 누르면 그 판은 실패</b>입니다.</p>
+      <p class="small">화면에 버튼 하나. 먼저 누른 순서대로 살고, <b>걸리는 사람이 나옵니다.</b></p>
       <ul class="small">
+        <li><b>둘이 붙어서 누르면 그 둘이 걸립니다</b> (0.35초 이내를 같은 순간으로 봅니다)</li>
+        <li><b>끝까지 안 누른 마지막 한 명도 걸립니다.</b> 그게 이 게임의 원래 규칙입니다</li>
+        <li>그래서 한 판은 <b>인원-1명이 누른 순간</b> 닫힙니다 — 전원이 누를 때까지 기다리면 버티는 쪽이 이기는 게임에서 버티는 사람 때문에 판이 안 끝납니다</li>
+        <li>걸린 사람은 버튼 뒤에서 <b>폭발</b>이, 살아남은 사람은 <b>폭죽</b>이 터집니다</li>
         <li>폰에 볼 게 버튼 하나뿐이라 <b>남을 봐야 이깁니다</b></li>
         <li>평균 등수가 앞쪽일수록 <b>주도력</b>이 올라갑니다</li>
-        <li>비대면이어도 됩니다 — 몇 명이 통과했는지만 보이면 성립합니다</li>
       </ul>
     </div></div>
 
     <div class="stage"><div class="s-n">7</div><div class="s-b">
       <div class="s-h"><span class="t">라이어 게임</span><span class="chip g">게임</span><span class="chip">3:30</span><span class="chip">노출도 ▆</span></div>
-<pre>① 제시어 확인   각자 폰을 탭하면 3초 보이고 사라진다
+<pre>① 제시어 확인   손을 대고 있는 동안만 보이고 떼면 가려진다
                 넷은 "치킨", 한 명만 "피자"
 
 ② 설명 한 바퀴  화면: "지금 지민님 차례입니다"  15초씩
@@ -496,8 +499,9 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
 ④ 지목          각자 한 명 지목 → 최다 득표자 공개
                 라이어가 걸려도 제시어를 맞히면 라이어 승</pre>
       <ul class="small">
-        <li><b>③이 핵심입니다.</b> 한 바퀴 더 돌면 정보는 늘지만 라이어에게도 시간을 줍니다</li>
-        <li>제시어는 <b>탭해야 보이고 3초 뒤 사라집니다.</b> 다시 보려면 또 탭해야 하고 티가 납니다</li>
+        <li><b>③이 핵심입니다.</b> 한 바퀴 더 돌면 정보는 늘지만 라이어에게도 시간을 줍니다. 단 <b>마지막 바퀴를 돌고 나면 묻지 않습니다</b> — 고를 수 없는 것을 고르게 하면 표가 무시된 것처럼 보입니다</li>
+        <li>제시어는 <b>손을 대고 있는 동안만 보입니다.</b> 어느 단계에서든 다시 볼 수 있습니다 — 말을 해야 하는 유일한 단계인데 "내 단어 뭐였지"의 답이 화면에 없으면 안 됩니다. 대신 확인하는 동작이 남 눈에 그대로 보입니다</li>
+        <li>결과 화면은 <b>각자 자기 속도로</b> 넘어갑니다. 한 사람 때문에 남들이 결과를 놓치지 않습니다</li>
         <li><b>상한 3:30.</b> 넘으면 강제로 ④로 넘어갑니다</li>
         <li>비대면에서 음성이 없으면 <b>이 단계를 건너뜁니다</b></li>
       </ul>
@@ -505,8 +509,9 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
     </div></div>
 
     <div class="stage"><div class="s-n">8</div><div class="s-b">
-      <div class="s-h"><span class="t">첫인상 투표 ②</span><span class="chip">1:00</span><span class="chip">설문</span></div>
+      <div class="s-h"><span class="t">첫인상 다시 보기</span><span class="chip">1:00</span><span class="chip">설문</span></div>
       <p class="small">2단계와 <b>완전히 같은 다섯 문항</b>. 생성된 문항을 썼다면 그대로 다시 씁니다. 이미 봤기 때문에 시간이 짧습니다.</p>
+      <p class="small">화면에는 <i>"게임을 하고 나서 생각이 바뀌었는지 봅니다. 처음과 같아도 괜찮습니다"</i> 라고 밝힙니다 — 글자 하나 안 다른 화면을 이유 없이 다시 내밀면 "아까 한 거 또 하네"가 됩니다. ①의 결과는 보여주지 않습니다. 보여주면 그 숫자에 끌려갑니다.</p>
       <div class="note hot">문항이 하나라도 달라지면 전후 비교가 무너지고, <code>첫인상 배신자</code> 칭호와 팀 등급의 인상 변화량 지표가 같이 무너집니다.</div>
     </div></div>
 
@@ -663,7 +668,7 @@ footer{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid 
     <div class="legend">
       <div class="row"><span class="sw"></span><span><b>오늘의 나</b> — 능력치 5개</span></div>
       <div class="row"><span class="sw p1"></span><span><b>처음에 본 나</b> — 첫인상 투표 ①</span></div>
-      <div class="row"><span class="sw p2"></span><span><b>끝나고 본 나</b> — 첫인상 투표 ②</span></div>
+      <div class="row"><span class="sw p2"></span><span><b>끝나고 본 나</b> — 첫인상 다시 보기</span></div>
       <p class="small dim" style="margin-top:.3rem">두 점선이 실선 쪽으로 붙어가는 그림이 곧 “서로를 알아갔다”는 뜻입니다.</p>
     </div>
   </div>

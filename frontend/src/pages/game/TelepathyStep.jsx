@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import Button from '../../components/common/Button'
 import ProgressBar from '../../components/common/ProgressBar'
 import { getPlayers } from '../../api/players'
 import { getTelepathyRound, getTelepathyStatus, submitTelepathy } from '../../api/telepathy'
@@ -12,6 +13,7 @@ export default function TelepathyStep({ code, playerId, onAdvance }) {
   const [round, setRound] = useState(null)
   const [players, setPlayers] = useState([])
   const [choice, setChoice] = useState(null)
+  const [target, setTarget] = useState(null)
   const [status, setStatus] = useState(null)
   const [error, setError] = useState(null)
   const advanced = useRef(false)
@@ -23,6 +25,7 @@ export default function TelepathyStep({ code, playerId, onAdvance }) {
   useEffect(() => {
     advanced.current = false
     setChoice(null)
+    setTarget(null)
     setStatus(null)
     getTelepathyRound(code, roundNo).then(setRound).catch((err) => setError(err.message))
   }, [code, roundNo])
@@ -58,8 +61,8 @@ export default function TelepathyStep({ code, playerId, onAdvance }) {
     }
   }, [submitted, code, roundNo, advance])
 
-  const pick = (targetId) => {
-    submitTelepathy(code, roundNo, playerId, choice, targetId)
+  const submit = () => {
+    submitTelepathy(code, roundNo, playerId, choice, target)
       .then(setStatus)
       .catch((err) => setError(err.message))
   }
@@ -126,16 +129,27 @@ export default function TelepathyStep({ code, playerId, onAdvance }) {
           </>
         ) : (
           <>
-            <p className="tele-prompt">
-              나랑 <b>{choice === 'A' ? round.a : round.b}</b>를 같이 고를 사람은?
-            </p>
+            {/* 여기가 되돌릴 수 없는 탭이 두 번 연달아 있던 자리다. 고른 것을
+                화면에 남기고, 확정은 아래 버튼 하나로만 되게 한다. */}
+            <button className="tele-mine" onClick={() => { setChoice(null); setTarget(null) }}>
+              <span>나는 <b>{choice === 'A' ? round.a : round.b}</b></span>
+              <span className="tele-redo">다시 고르기</span>
+            </button>
+            <p className="tele-prompt">나랑 같은 걸 고를 사람은?</p>
             <div className="tele-picks">
               {others.map((p) => (
-                <button key={p.id} className="tele-pick" onClick={() => pick(p.id)}>
+                <button
+                  key={p.id}
+                  className={`tele-pick${target === p.id ? ' picked' : ''}`}
+                  onClick={() => setTarget(p.id)}
+                >
                   {p.nickname}
                 </button>
               ))}
             </div>
+            <Button disabled={!target} onClick={submit}>
+              확인
+            </Button>
           </>
         )}
       </div>
