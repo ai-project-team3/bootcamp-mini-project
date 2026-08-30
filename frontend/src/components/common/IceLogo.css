@@ -1,164 +1,92 @@
-/* 얼음땡 워드마크 — 얼음과 땡 사이가 갈라진다.
+/* 얼음땡 워드마크 — 얼음을 깎아 만든 글자.
  *
- * 같은 글자를 두 벌 겹쳐 놓고 금을 기준으로 왼쪽 조각과 오른쪽 조각만 보이게
- * 잘라둔다(clip-path는 JSX가 좌표 하나에서 만들어 넘긴다). 금이 다 그어지는
- * 순간 `땡` 쪽이 밖으로 튀어나가고, 튀어나간 채로 멈춘다. */
+ * 같은 글자를 네 벌 겹친다. 첫 벌만 자리를 차지하고 나머지는 그 위에 정확히
+ * 포개진다. 그래서 어느 벌을 고쳐도 글자가 어긋나지 않는다. */
 
 .icelogo {
   position: relative;
-  display: inline-block;
-  isolation: isolate;
-  /* 조각이 밀려도, 실금이 옆으로 뻗어도 잘리지 않게 여백을 준다. */
-  padding: 10px 16px;
+  /* 네 벌을 격자 한 칸에 포갠다. absolute로 겹치면 각 벌의 상자가 글자가
+     아니라 바깥 상자가 되어, 배경을 글자 모양으로 자르는 계산도 광택을
+     자르는 위치도 전부 어긋난다. */
+  display: inline-grid;
   font-family: var(--font-heading);
   font-weight: 400;
   font-size: clamp(3.4rem, 17vw, 4.6rem);
-  line-height: 1.06;
+  line-height: 1.1;
   letter-spacing: 1px;
   white-space: nowrap;
   user-select: none;
 }
 
-.icelogo-piece {
-  display: block;
-  background: linear-gradient(174deg, #f6feff 0%, #bdeeff 32%, #74ccf2 64%, #2e97c9 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* 얼음은 언 파랑, 땡은 풀리는 핑크. 이름 두 토막이 그대로 앱의 두 색이고,
-   금이 바로 그 경계에 선다. */
-.icelogo-piece b {
-  font-weight: inherit;
-  background: linear-gradient(174deg, #ffdcee 0%, #ff8ac0 38%, #ff2e88 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.icelogo-frozen {
+/* 겹치는 순서를 못 박는다. transform이나 filter가 걸린 벌은 그것만으로
+   위 단계에서 그려지기 때문에, 순서를 DOM에 맡기면 두께가 몸통을 덮는다.
+   실제로 그렇게 되어 글자가 통째로 어두워졌었다. */
+.icelogo-layer {
+  grid-area: 1 / 1;
   position: relative;
-  z-index: 1;
-  filter: drop-shadow(0 0 20px rgba(120, 210, 240, 0.35));
-  animation: icelogo-recoil 1.5s cubic-bezier(0.2, 1.5, 0.35, 1) both;
 }
 
-/* 떨어져 나간 조각. 살짝 앞으로 나오므로 그림자를 조금 더 준다. */
-.icelogo-freed {
-  position: absolute;
-  inset: 10px 16px auto;
-  z-index: 2;
-  filter: drop-shadow(-3px 4px 10px rgba(0, 0, 0, 0.45))
-    drop-shadow(0 0 18px rgba(255, 46, 136, 0.3));
-  animation: icelogo-break 1.5s cubic-bezier(0.2, 1.5, 0.35, 1) both;
+.icelogo-depth { z-index: 1; }
+.icelogo-rim { z-index: 2; }
+.icelogo-body { z-index: 3; }
+.icelogo-gloss { z-index: 4; }
+
+/* ① 두께 — 아래로 내려간 짙은 파랑. 얼음 덩어리의 옆면이다. */
+.icelogo-depth {
+  transform: translateY(4px);
+  color: #16406a;
+  filter: drop-shadow(0 6px 14px rgba(4, 16, 40, 0.7));
 }
 
-/* ── 금 ─────────────────────────────────────────────────────────────────── */
+.icelogo-depth b { color: #7d1745; }
 
-.icelogo-crack {
-  position: absolute;
-  inset: 10px 16px;
-  z-index: 3;
-  width: calc(100% - 32px);
-  height: calc(100% - 20px);
-  overflow: visible;
+/* ② 서리 테두리 — 굵으면 만화가 되고 없으면 밋밋하다. */
+.icelogo-rim {
+  color: transparent;
+  -webkit-text-stroke: 2.5px rgba(214, 244, 255, 0.5);
+}
+
+.icelogo-rim b { -webkit-text-stroke-color: rgba(255, 214, 234, 0.5); }
+
+/* ③ 몸통 — 빛이 위에서 온다. */
+.icelogo-body {
+  background: linear-gradient(
+    177deg,
+    #f8feff 0%,
+    #d3f2ff 22%,
+    #8fd6f4 52%,
+    #4aa9d8 78%,
+    #2b7fb4 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 얼음은 언 파랑, 땡은 풀리는 핑크. */
+.icelogo-body b {
+  font-weight: inherit;
+  background: linear-gradient(177deg, #fff0f7 0%, #ffb3d6 26%, #ff5ea3 62%, #e01a6f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ④ 광택 — 윗면의 젖은 빛과, 그 아래를 한 번 지나가는 얇은 굴절선.
+   칼로 자르듯 끊으면 글자를 반으로 칠한 것처럼 보인다. 그라디언트로 사라지게
+   두어야 빛으로 읽힌다. */
+.icelogo-gloss {
+  background: linear-gradient(
+    179deg,
+    rgba(255, 255, 255, 0.62) 0%,
+    rgba(255, 255, 255, 0.3) 14%,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, 0.22) 66%,
+    rgba(255, 255, 255, 0) 74%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   pointer-events: none;
-}
-
-.icelogo-crack polyline {
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  /* viewBox가 0~100으로 늘어나 있어서, 이게 없으면 선 굵기가 한쪽으로만 늘어난다. */
-  vector-effect: non-scaling-stroke;
-  stroke-dasharray: 260;
-  stroke-dashoffset: 260;
-  animation: icelogo-draw 0.42s 0.16s cubic-bezier(0.55, 0, 0.3, 1) forwards;
-}
-
-/* 실금은 본금이 지나간 뒤 퍼진다. 가늘고 옅어야 곁가지로 읽힌다. */
-.icelogo-crack g polyline:nth-child(n + 2) {
-  stroke-dasharray: 60;
-  stroke-dashoffset: 60;
-  animation-delay: 0.44s;
-  animation-duration: 0.22s;
-}
-
-/* 금은 그린 선이 아니라 벌어진 틈이다. 굵은 쪽을 바탕색으로 두어 틈으로
-   읽히게 하고, 한쪽 가장자리에만 가느다란 빛을 얹는다 — 깨진 단면이다. */
-.icelogo-crack-gap polyline {
-  stroke: var(--bg);
-  stroke-width: 4.2;
-}
-
-.icelogo-crack-gap polyline:nth-child(n + 2) { stroke-width: 2.2; }
-
-.icelogo-crack-lip {
-  transform: translateX(-1.5px);
-}
-
-.icelogo-crack-lip polyline {
-  stroke: #dff7ff;
-  stroke-width: 1;
-  opacity: 0.7;
-}
-
-.icelogo-crack-lip polyline:nth-child(n + 2) {
-  stroke-width: 0.6;
-  opacity: 0.35;
-}
-
-/* 깨지는 순간 튀는 조각. 한 번만 튀고 사라진다. */
-.icelogo-shard {
-  position: absolute;
-  z-index: 4;
-  width: 6px;
-  height: 6px;
-  background: #eafbff;
-  box-shadow: 0 0 7px rgba(190, 240, 255, 0.9);
-  clip-path: polygon(50% 0%, 100% 72%, 12% 100%);
-  opacity: 0;
-  animation: icelogo-shard var(--d) 0.52s cubic-bezier(0.15, 0.8, 0.3, 1) forwards;
-  pointer-events: none;
-}
-
-/* 언 쪽은 반동으로 살짝 물러나기만 한다. */
-@keyframes icelogo-recoil {
-  0% { transform: translate3d(0, 0, 0) scale(1.03); opacity: 0; }
-  20% { opacity: 1; }
-  40% { transform: translate3d(0, 0, 0) scale(1); }
-  52% { transform: translate3d(-4px, 0, 0); }
-  100% { transform: translate3d(-1.5px, 0, 0); }
-}
-
-/* 땡은 금을 따라 밖으로 튀어나간다. */
-@keyframes icelogo-break {
-  0% { transform: translate3d(0, 0, 0) scale(1.03); opacity: 0; }
-  20% { opacity: 1; }
-  40% { transform: translate3d(0, 0, 0) rotate(0deg); }
-  52% { transform: translate3d(13px, 7px, 0) rotate(2.6deg); }
-  100% { transform: translate3d(6px, 3px, 0) rotate(1.3deg); }
-}
-
-@keyframes icelogo-draw {
-  to { stroke-dashoffset: 0; }
-}
-
-@keyframes icelogo-shard {
-  0% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4) rotate(0deg); }
-  15% { opacity: 1; }
-  100% {
-    opacity: 0;
-    transform: translate3d(var(--dx), var(--dy), 0) scale(1) rotate(var(--r));
-  }
-}
-
-/* 움직임을 줄이라고 한 사람에게는 깨진 결과만 보여준다 — 금과 어긋남은
-   장식이 아니라 로고 자체라서 없애지 않는다. */
-@media (prefers-reduced-motion: reduce) {
-  .icelogo-frozen { animation: none; transform: translate3d(-1.5px, 0, 0); }
-  .icelogo-freed { animation: none; transform: translate3d(6px, 3px, 0) rotate(1.3deg); }
-  .icelogo-crack polyline { animation: none; stroke-dashoffset: 0; }
-  .icelogo-shard { display: none; }
 }
