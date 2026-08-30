@@ -1,16 +1,5 @@
 import { apiFetch } from './client'
 
-export function submitSelfGuess(code, playerId, typeCode) {
-  return apiFetch(`/rooms/${code}/type-guess/self`, {
-    method: 'POST',
-    body: JSON.stringify({ player_id: playerId, type_code: typeCode }),
-  })
-}
-
-export function getSelfStatus(code) {
-  return apiFetch(`/rooms/${code}/type-guess/self-status`)
-}
-
 export function getCards(code, playerId) {
   return apiFetch(`/rooms/${code}/type-guess/cards?player_id=${playerId}`)
 }
@@ -22,6 +11,6 @@ export function submitAssignment(code, playerId, assignments) {
   })
 }
 
-export function getAssignStatus(code) {
-  return apiFetch(`/rooms/${code}/type-guess/status`)
+export function getAssignStatus(code, playerId) {
+  return apiFetch(`/rooms/${code}/type-guess/status?player_id=${playerId}`)
 }

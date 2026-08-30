@@ -263,8 +263,8 @@
 }
 
 /* 유형 맞히기 */
-.typeguess-self,
-.typeguess-assign {
+.typeguess-assign,
+.typeguess-reveal {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -280,38 +280,6 @@
   text-align: center;
 }
 
-/* 8개 유형 카드가 화면 높이를 그대로 채우도록 4행으로 고정하고 flex:1로
-   .typeguess-self의 남는 세로 공간을 다 가져간다. */
-.typeguess-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: repeat(4, 1fr);
-  gap: 10px;
-  flex: 1;
-}
-
-.typeguess-type-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px;
-  border-radius: var(--radius-md);
-  border: 2px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
-}
-
-.typeguess-type-symbol {
-  font-size: 2.2rem;
-}
-
-.typeguess-type-name {
-  font-size: 0.92rem;
-  text-align: center;
-}
-
 .typeguess-card {
   display: flex;
   flex-direction: column;
@@ -324,10 +292,10 @@
   gap: 12px;
 }
 
-/* 카드마다 "이게 누구 카드인지"를 이미지+이름으로 크게 보여주는 게 이 화면의
+/* 카드마다 "이게 누구 카드인지"를 그림+이름으로 크게 보여주는 게 이 화면의
    핵심이고, 선택 드롭다운은 그 판단을 확정하는 부수적인 조작이라 작게 둔다. */
-.typeguess-card-symbol {
-  font-size: 2.6rem;
+.typeguess-card-art {
+  flex-shrink: 0;
 }
 
 .typeguess-card-name {
@@ -354,18 +322,51 @@
   text-align-last: center;
 }
 
-.typeguess-results {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+/* 공개 — 이 판의 결과물이라 카드 한 장을 화면 가운데 크게 세운다. */
+.typeguess-reveal-label {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  text-align: center;
 }
 
-.typeguess-results-title {
+.typeguess-reveal-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.typeguess-reveal-name {
+  margin: 6px 0 0;
   font-family: var(--font-heading);
   font-weight: 400;
-  font-size: 1.1rem;
+  font-size: 1.7rem;
+}
+
+.typeguess-reveal-subtitle {
   margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.typeguess-selfline {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px dashed var(--line);
+  font-size: 0.84rem;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.typeguess-selfline.is-correct {
+  border-style: solid;
+  border-color: var(--deep);
+  color: var(--ink);
 }
 
 .typeguess-result-list {
@@ -394,4 +395,15 @@
 
 .typeguess-wrong span {
   color: var(--ink-soft);
+}
+
+.typeguess-score {
+  margin: 0;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.typeguess-score strong {
+  color: var(--hot);
 }

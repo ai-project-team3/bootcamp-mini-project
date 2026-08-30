@@ -22,6 +22,7 @@ from ..schemas.report import (
     TeamRole,
 )
 from ..services import report_gen
+from ..services import type_cards
 from ..services.scoring import (
     COMPAT_NOTES,
     assign_badges,
@@ -93,6 +94,14 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
         abilities[p.id] = a
         provisional_types[p.id] = determine_type(a["DOM"], a["EXP"], obs, a["SPD"])
         final_types[p.id] = provisional_types[p.id]
+
+    # 유형 맞히기에서 카드로 뿌린 값이 있으면 그게 답이다. 이 판의 맞히기 기록이
+    # 관찰력을 조금 더 움직였다고 해서, 방금 "당신의 카드는 X"라고 보여준 뒤에
+    # 리포트에서 Y를 내밀 수는 없다.
+    frozen = type_cards.read(db, room.id, players)
+    for pid, code_ in frozen.items():
+        provisional_types[pid] = code_
+        final_types[pid] = code_
 
     self_guess_by_player: dict[str, str] = {}
     for g in db.query(Guess).filter(Guess.room_id == room.id, Guess.kind == "TYPE").all():

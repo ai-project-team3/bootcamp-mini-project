@@ -11,12 +11,15 @@ from .base import Base
 class GameResult(Base):
     """Plan doc §14 GameResult — 추측이 아닌 게임 기록.
 
-    kind ∈ {NUNCHI_RANK, NUNCHI_CLASH, LIAR_ROLE, LIAR_SURVIVED}
+    kind ∈ {NUNCHI_RANK, NUNCHI_CLASH, LIAR_ROLE, LIAR_SURVIVED, TYPE_CARD}
       NUNCHI_PRESS   눌렀다는 기록. 순서와 간격은 created_at으로 판정한다
       NUNCHI_RANK    한 판에서 몇 번째로 눌렀나 (round_no=판 번호, value=등수)
       NUNCHI_CLASH   그 판을 깨뜨린 동시 누름에 가담했나 (value=1)
       LIAR_ROLE      그 판에서 라이어였나 (value=1)
       LIAR_SURVIVED  라이어인데 안 걸렸나 (value=1)
+      TYPE_CARD      유형 맞히기에 뿌린 카드의 유형 (value=1~8 → T1~T8).
+                     카드·공개·리포트가 같은 유형을 말하도록 한 번만 박는다
+                     (services/type_cards)
     """
 
     __tablename__ = "game_results"

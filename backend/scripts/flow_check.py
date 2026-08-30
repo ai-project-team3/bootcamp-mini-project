@@ -209,20 +209,16 @@ def run(n: int) -> None:
 
         elif current == "TYPE_GUESS":
             for me in ids:
-                r = client.post(
-                    f"/rooms/{code}/type-guess/self",
-                    json={"player_id": me, "type_code": "T1"},
-                )
-                check("자기 유형 예측", r.status_code == 200, r.text)
-            for me in ids:
                 cards = client.get(f"/rooms/{code}/type-guess/cards", params={"player_id": me})
                 check("카드 조회", cards.status_code == 200, cards.text)
                 if cards.status_code != 200:
                     return
                 deck = cards.json()
-                others = [p for p in ids if p != me]
+                check("카드 = 인원수", len(deck) == n, f"{len(deck)} != {n}")
+                # 자기 카드까지 섞여 있으므로 배정 대상도 전원이다. 순서를 한 칸씩
+                # 밀어 붙여 아무도 정답과 우연히 맞지 않게 둔다.
                 payload = [
-                    {"card_id": c["card_id"], "target_player_id": others[i]}
+                    {"card_id": c["card_id"], "target_player_id": ids[(i + 1) % n]}
                     for i, c in enumerate(deck)
                 ]
                 r = client.post(
@@ -230,6 +226,14 @@ def run(n: int) -> None:
                     json={"player_id": me, "assignments": payload},
                 )
                 check("카드 배정", r.status_code == 200, r.text)
+            last = client.get(f"/rooms/{code}/type-guess/status", params={"player_id": ids[0]})
+            check("공개 상태", last.status_code == 200, last.text)
+            if last.status_code == 200:
+                body = last.json()
+                check("공개됨", body["revealed"] is True, str(body))
+                check("내 유형 공개", bool(body["self_type_code"]), str(body))
+                check("자기 예측 기록", bool(body["self_guess_type_code"]), str(body))
+                check("나를 맞힌 사람 = 인원-1", len(body["results"]) == n - 1, str(body["results"]))
 
     check("DONE 도달", phase(code) == "DONE")
 
