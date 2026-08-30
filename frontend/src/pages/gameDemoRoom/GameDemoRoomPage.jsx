@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { fillDemoTestPlayers, getDemoPlayers, getDemoRoom, startDemoRoom } from '../../api/demoRooms'
+import {
+  fillDemoTestPlayers,
+  getDemoPlayers,
+  getDemoRoom,
+  leaveDemoRoom,
+  startDemoRoom,
+} from '../../api/demoRooms'
 import Button from '../../components/common/Button'
 import GameDemoRoomHero from '../../components/common/GameDemoRoomHero'
 import PhoneFrame from '../../components/layout/PhoneFrame'
@@ -18,7 +24,7 @@ const POLL_INTERVAL_MS = 1500
 export default function GameDemoRoomPage() {
   const { code } = useParams()
   const navigate = useNavigate()
-  const { isHost, playerId, roomCode } = useGameRoom()
+  const { isHost, playerId, roomCode, setPlayerId, setRoomCode } = useGameRoom()
   const [players, setPlayers] = useState([])
   const [room, setRoom] = useState(null)
   const [error, setError] = useState('')
@@ -89,12 +95,26 @@ export default function GameDemoRoomPage() {
     }
   }
 
+  // 화면만 빠져나가면 서버 명단에는 그대로 남는다. 나간다고 말해줘야 한다.
+  // 방장이 나가면 방 자체가 닫히므로(services/demo_rooms.leave_room) 미리 알린다.
+  const handleLeave = async () => {
+    if (isHost && !window.confirm('방장이 나가면 이 방은 닫힙니다. 나갈까요?')) return
+    try {
+      await leaveDemoRoom(code, playerId)
+    } catch {
+      /* 이미 빠졌거나 방이 사라진 경우 — 나가는 길을 막을 이유는 없다 */
+    }
+    setRoomCode(null)
+    setPlayerId(null)
+    navigate('/games')
+  }
+
   const inviteUrl = `${window.location.origin}/games/demo/join/${code}`
   const canStart = canStartDemoRoom({ isHost, playerCount: players.length })
 
   return (
     <PhoneFrame>
-      <TopBar title={`게임방 · ${code}`} onBack={() => navigate('/games/demo')} />
+      <TopBar title={`게임방 · ${code}`} onBack={handleLeave} />
       <RoomWaitingLayout
         title={<>같이 놀 사람을<br />기다리고 있어요</>}
         lead={`${players.length}/${DEMO_ROOM_MAX_PLAYERS}명 참여 · ${DEMO_ROOM_MIN_PLAYERS}명부터 시작`}

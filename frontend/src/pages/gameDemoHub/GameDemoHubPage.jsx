@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import Badge from '../../components/common/Badge'
 import GameDemoExitControl from '../../components/common/GameDemoExitControl'
 import Card from '../../components/common/Card'
 import PhoneFrame from '../../components/layout/PhoneFrame'
@@ -98,9 +97,11 @@ export default function GameDemoHubPage() {
                       disabled={!isHost || Boolean(blocker)}
                     >
                       <Card className="demo-hub-card">
+                        {/* 배지는 뺐다. 카드 아래 줄이 "시작하기 →"인지 인원
+                            부족인지를 이미 말한다. 좁은 카드에 알약을 하나 더
+                            얹으면 그게 제일 크게 보인다. */}
                         <div className="demo-hub-card-top">
                           <span>{game.emoji}</span>
-                          <Badge tone={blocker ? 'neutral' : 'fun'}>{blocker ? '인원' : 'PLAY'}</Badge>
                         </div>
                         <h2>{game.title}</h2>
                         <p>{game.desc}</p>

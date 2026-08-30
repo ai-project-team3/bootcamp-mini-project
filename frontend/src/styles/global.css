@@ -28,6 +28,9 @@ body {
 button {
   font-family: inherit;
   cursor: pointer;
+  /* button은 font-family와 달리 color를 상속하지 않는다 — 색을 따로 안 준
+     버튼은 UA 기본값(검정)으로 그려져서, 어두운 카드 위 제목이 안 보였다. */
+  color: inherit;
 }
 
 a {
