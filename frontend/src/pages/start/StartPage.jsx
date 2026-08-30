@@ -4,21 +4,12 @@ import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import Button from '../../components/common/Button'
 import IceScene from '../../components/common/IceScene'
+import ProfileFields, { mbtiOf, toggleMbti } from '../../components/common/ProfileFields'
 import IceLogo from '../../components/common/IceLogo'
 import { useRoomFlow } from '../../context/RoomFlowContext'
 import { getRoom } from '../../api/rooms'
 import { joinRoom } from '../../api/players'
 import './StartPage.css'
-
-// MBTI를 네 글자로 받아치게 하지 않는다. 자리마다 두 글자 중 하나를 고르는
-// 게 폰에서 훨씬 빠르고, 오타로 존재하지 않는 유형이 들어오는 일도 없다.
-// 고른 걸 다시 누르면 풀린다 — 모르는 사람은 비워두면 된다.
-const MBTI_AXES = [
-  ['E', 'I'],
-  ['N', 'S'],
-  ['T', 'F'],
-  ['J', 'P'],
-]
 
 export default function StartPage() {
   const navigate = useNavigate()
@@ -31,16 +22,15 @@ export default function StartPage() {
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
 
-  // 네 자리를 다 골랐을 때만 값이 된다. 세 글자짜리 MBTI는 없다.
-  const mbti = mbtiPicks.every(Boolean) ? mbtiPicks.join('') : ''
+  const mbti = mbtiOf(mbtiPicks)
+  // 닉네임은 필수다. 이게 없으면 첫인상 투표도 유형 맞히기도 "누구를"
+  // 고르는지 알 수 없고, 리포트에는 이름 없는 사람이 남는다.
+  const named = nicknameDraft.trim().length > 0
 
-  const pickMbti = (axis, letter) =>
-    setMbtiPicks((current) =>
-      current.map((value, i) => (i === axis ? (value === letter ? null : letter) : value)),
-    )
+  const pickMbti = (axis, letter) => setMbtiPicks((current) => toggleMbti(current, axis, letter))
 
   const commitProfile = () => {
-    const nickname = nicknameDraft.trim() || '플레이어'
+    const nickname = nicknameDraft.trim()
     setNickname(nickname)
     setGender(genderDraft)
     setMbti(mbti)
@@ -48,6 +38,14 @@ export default function StartPage() {
   }
 
   const handleCreate = () => {
+    if (!named) {
+      // 버튼을 죽여두면 왜 안 되는지 알 수 없다. 누를 수 있게 두고 이유를
+      // 말한 뒤 그 칸으로 데려간다.
+      setError('닉네임을 입력해주세요')
+      document.getElementById('start-nickname')?.focus()
+      return
+    }
+    setError(null)
     commitProfile()
     setRoomCode(null)
     setIsHost(true)
@@ -55,6 +53,13 @@ export default function StartPage() {
   }
 
   const handleJoin = async () => {
+    if (!named) {
+      // 버튼을 죽여두면 왜 안 되는지 알 수 없다. 누를 수 있게 두고 이유를
+      // 말한 뒤 그 칸으로 데려간다.
+      setError('닉네임을 입력해주세요')
+      document.getElementById('start-nickname')?.focus()
+      return
+    }
     const code = codeDraft.trim().toUpperCase()
     if (!code) {
       setError('초대코드를 입력해주세요')
@@ -93,64 +98,15 @@ export default function StartPage() {
         </header>
         <p className="start-tagline">처음 만난 사람들, 잠시 뒤엔 서로를 놀립니다</p>
 
-        <section className="start-card">
-          <div className="start-field">
-            <label className="start-label" htmlFor="nickname">닉네임</label>
-            <input
-              id="nickname"
-              className="start-input"
-              placeholder="뭐라고 부를까요?"
-              value={nicknameDraft}
-              onChange={(e) => setNicknameDraft(e.target.value)}
-              maxLength={12}
-            />
-          </div>
-
-          <div className="start-field">
-            <span className="start-label">성별</span>
-            <div className="start-seg" role="group" aria-label="성별">
-              {[['M', '남'], ['F', '여']].map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={`start-seg-btn${genderDraft === value ? ' is-on' : ''}`}
-                  aria-pressed={genderDraft === value}
-                  onClick={() => setGenderDraft(value)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="start-field">
-            <span className="start-label">
-              MBTI <em>선택</em>
-            </span>
-            <div className="start-mbti">
-              {MBTI_AXES.map(([left, right], axis) => (
-                <div key={axis} className="start-mbti-pair">
-                  {[left, right].map((letter) => (
-                    <button
-                      key={letter}
-                      type="button"
-                      className={`start-mbti-btn${mbtiPicks[axis] === letter ? ' is-on' : ''}`}
-                      aria-pressed={mbtiPicks[axis] === letter}
-                      onClick={() => pickMbti(axis, letter)}
-                    >
-                      {letter}
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </div>
-            <p className="start-hint">
-              {mbti
-                ? `${mbti} — 리포트 문장에만 씁니다. 유형이나 점수에는 안 들어갑니다`
-                : '골라두면 리포트가 그 사람다워집니다. 비워둬도 됩니다'}
-            </p>
-          </div>
-        </section>
+        <ProfileFields
+          idPrefix="start"
+          nickname={nicknameDraft}
+          onNicknameChange={setNicknameDraft}
+          gender={genderDraft}
+          onGenderChange={setGenderDraft}
+          mbtiPicks={mbtiPicks}
+          onMbtiPick={pickMbti}
+        />
 
         {error && <p className="start-error">{error}</p>}
 

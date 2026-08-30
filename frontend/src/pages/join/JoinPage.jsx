@@ -3,24 +3,39 @@ import { useNavigate, useParams } from 'react-router-dom'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import Button from '../../components/common/Button'
+import ProfileFields, { mbtiOf, toggleMbti } from '../../components/common/ProfileFields'
 import { useRoomFlow } from '../../context/RoomFlowContext'
 import { getRoom } from '../../api/rooms'
 import { joinRoom } from '../../api/players'
 import './JoinPage.css'
 
+// QR을 찍고 들어오는 자리. 묻는 것은 첫 화면과 똑같으므로 같은 폼을 쓴다 —
+// 각자 들고 있었더니 한쪽만 고쳐져서, 여기로 들어온 사람만 MBTI를 손으로
+// 타이핑하고 있었다.
 export default function JoinPage() {
   const { code } = useParams()
   const navigate = useNavigate()
   const { setNickname, setGender, setMbti, setRoomCode, setPlayerId, setIsHost } = useRoomFlow()
   const [nicknameDraft, setNicknameDraft] = useState('')
   const [genderDraft, setGenderDraft] = useState('M')
-  const [mbtiDraft, setMbtiDraft] = useState('')
+  const [mbtiPicks, setMbtiPicks] = useState([null, null, null, null])
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
+  // 닉네임은 필수다. 없으면 첫인상 투표도 유형 맞히기도 "누구를" 고르는지
+  // 알 수 없고, 리포트에는 이름 없는 사람이 남는다.
+  const named = nicknameDraft.trim().length > 0
+
   const handleJoin = async () => {
-    const nickname = nicknameDraft.trim() || '참가자'
-    const mbti = mbtiDraft.trim().toUpperCase()
+    if (!named) {
+      // 버튼을 죽여두면 왜 안 되는지 알 수 없다. 누를 수 있게 두고 이유를
+      // 말한 뒤 그 칸으로 데려간다.
+      setError('닉네임을 입력해주세요')
+      document.getElementById('join-nickname')?.focus()
+      return
+    }
+    const nickname = nicknameDraft.trim()
+    const mbti = mbtiOf(mbtiPicks)
     setError(null)
     setLoading(true)
     try {
@@ -49,42 +64,15 @@ export default function JoinPage() {
           <br />
           방에 참가해요
         </h1>
-        <label className="join-label" htmlFor="join-nickname">닉네임</label>
-        <input
-          id="join-nickname"
-          className="join-input"
-          placeholder="닉네임을 입력하세요"
-          value={nicknameDraft}
-          onChange={(e) => setNicknameDraft(e.target.value)}
-          maxLength={12}
-        />
 
-        <label className="join-label">성별</label>
-        <div className="join-gender-row">
-          <button
-            type="button"
-            className={`join-gender-btn ${genderDraft === 'M' ? 'join-gender-btn-active' : ''}`}
-            onClick={() => setGenderDraft('M')}
-          >
-            남
-          </button>
-          <button
-            type="button"
-            className={`join-gender-btn ${genderDraft === 'F' ? 'join-gender-btn-active' : ''}`}
-            onClick={() => setGenderDraft('F')}
-          >
-            여
-          </button>
-        </div>
-
-        <label className="join-label" htmlFor="join-mbti">MBTI (선택)</label>
-        <input
-          id="join-mbti"
-          className="join-input"
-          placeholder="예: INTJ"
-          value={mbtiDraft}
-          onChange={(e) => setMbtiDraft(e.target.value.toUpperCase())}
-          maxLength={4}
+        <ProfileFields
+          idPrefix="join"
+          nickname={nicknameDraft}
+          onNicknameChange={setNicknameDraft}
+          gender={genderDraft}
+          onGenderChange={setGenderDraft}
+          mbtiPicks={mbtiPicks}
+          onMbtiPick={(axis, letter) => setMbtiPicks((c) => toggleMbti(c, axis, letter))}
         />
 
         {error && <p className="join-error">{error}</p>}

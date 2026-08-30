@@ -3,10 +3,11 @@ from typing import Optional
 from pydantic import BaseModel
 
 from ..constants import DEFAULT_PLAYER_LIMIT
+from .player import NICKNAME
 
 
 class RoomCreateRequest(BaseModel):
-    nickname: str
+    nickname: str = NICKNAME
     gender: str  # M | F
     mbti: Optional[str] = None
     project_text: str = ""  # 얼음땡 기획안 §4-0, §5. 빈 문자열이면 생성 없이 기본 세트.

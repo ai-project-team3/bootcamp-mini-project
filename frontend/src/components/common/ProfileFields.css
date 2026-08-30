@@ -1,0 +1,132 @@
+/* 사람에 대해 묻는 칸들. 방을 여는 화면과 초대코드로 들어오는 화면이 같이
+   쓴다 — 물어보는 게 같으면 생김새도 같아야 한다. */
+
+.profile-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 16px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+}
+
+.profile-label em {
+  font-style: normal;
+  font-size: 0.66rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-soft);
+}
+
+.profile-input {
+  width: 100%;
+  height: 50px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.98rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.profile-input::placeholder { color: var(--ink-soft); opacity: 0.6; }
+
+.profile-input:focus {
+  outline: none;
+  border-color: var(--hot);
+  box-shadow: 0 0 0 3px rgba(255, 46, 136, 0.18);
+}
+
+/* 성별 — 칸 안에서 하나가 켜지는 모양. 두 버튼을 나란히 두는 것보다 "둘 중
+   하나"라는 게 먼저 읽힌다. */
+.profile-seg {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.profile-seg-btn {
+  flex: 1;
+  height: 40px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.profile-seg-btn.is-on {
+  background: var(--hot);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* MBTI — 자리마다 두 글자 중 하나. 네 자리를 다 골라야 값이 된다. */
+.profile-mbti {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+
+.profile-mbti-pair {
+  display: flex;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.profile-mbti-btn {
+  flex: 1;
+  height: 42px;
+  border: 0;
+  /* 두 글자 사이에 실선을 넣는다. 없으면 한 칸에 놓인 E와 I가 서로 다른
+     선택지가 아니라 그냥 나란한 두 글자로 읽힌다. `border: 0` 뒤에 와야
+     지워지지 않는다. */
+  border-left: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.profile-mbti-pair > .profile-mbti-btn:first-child { border-left: 0; }
+
+.profile-mbti-btn.is-on {
+  background: var(--deep);
+  color: #fff;
+  font-weight: 700;
+}
+
+.profile-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
