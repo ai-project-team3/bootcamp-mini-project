@@ -15,6 +15,8 @@ body {
      어절 중간이 아니라 어절 경계에서만 줄바꿈되게 한다. */
   word-break: keep-all;
   overflow-wrap: break-word;
+  /* 배경 그림이 폰 밖으로 나가도 페이지가 옆으로 밀리지 않게. */
+  overflow-x: hidden;
 }
 
 #root {
