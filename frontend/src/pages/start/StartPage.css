@@ -62,40 +62,14 @@
   text-wrap: balance;
 }
 
-/* ── 나를 적는 카드 ─────────────────────────────────────────────────────── */
+/* ── 초대코드 칸 ─────────────────────────────────────────────────────────── */
 
-.start-card {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 18px 16px;
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
-}
-
-.start-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
+/* 닉네임·성별·MBTI는 ProfileFields가 들고 있다. 여기 남은 것은 그 카드 밖에
+   있는 초대코드 한 줄뿐이다. */
 .start-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: block;
   font-size: 0.76rem;
   letter-spacing: 0.03em;
-  color: var(--ink-soft);
-}
-
-.start-label em {
-  font-style: normal;
-  font-size: 0.66rem;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: var(--surface-2);
   color: var(--ink-soft);
 }
 
@@ -118,80 +92,6 @@
   outline: none;
   border-color: var(--hot);
   box-shadow: 0 0 0 3px rgba(255, 46, 136, 0.18);
-}
-
-/* 성별 — 칸 안에서 하나가 켜지는 모양. 두 버튼을 나란히 두는 것보다 "둘 중
-   하나"라는 게 먼저 읽힌다. */
-.start-seg {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line);
-  background: var(--bg);
-}
-
-.start-seg-btn {
-  flex: 1;
-  height: 40px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: var(--ink-soft);
-  font-family: inherit;
-  font-size: 0.9rem;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.start-seg-btn.is-on {
-  background: var(--hot);
-  color: #fff;
-  font-weight: 700;
-}
-
-/* MBTI — 자리마다 두 글자 중 하나. 네 자리를 다 골라야 값이 된다. */
-.start-mbti {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 7px;
-}
-
-.start-mbti-pair {
-  display: flex;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line);
-  background: var(--bg);
-  overflow: hidden;
-}
-
-.start-mbti-btn {
-  flex: 1;
-  height: 42px;
-  border: 0;
-  /* 두 글자 사이에 실선을 넣는다. 없으면 한 칸에 놓인 E와 I가 서로 다른
-     선택지가 아니라 그냥 나란한 두 글자로 읽힌다. `border: 0` 뒤에 와야
-     지워지지 않는다. */
-  border-left: 1px solid var(--line);
-  background: transparent;
-  color: var(--ink-soft);
-  font-family: var(--font-mono);
-  font-size: 0.88rem;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.start-mbti-pair > .start-mbti-btn:first-child { border-left: 0; }
-
-.start-mbti-btn.is-on {
-  background: var(--deep);
-  color: #fff;
-  font-weight: 700;
-}
-
-.start-hint {
-  margin: 0;
-  font-size: 0.72rem;
-  line-height: 1.5;
-  color: var(--ink-soft);
 }
 
 /* ── 시작하는 두 갈래 ───────────────────────────────────────────────────── */

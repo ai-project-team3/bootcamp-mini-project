@@ -1,102 +1,106 @@
-/* 빙하와 그 위에서 얼음을 부수는 펭귄.
+/* 빙하 위, 가운데 얼음덩이를 펭귄과 북극곰이 번갈아 찍는다.
  *
- * 모든 움직임이 같은 3.4초 위에 놓인다. 하나라도 다른 길이를 쓰면 내리치는
- * 순간과 부스러기가 서서히 어긋난다. */
+ * 캐릭터는 두 컷을 겹쳐두고 딱딱 갈아끼운다. 보간을 아예 하지 않으므로
+ * 중간 프레임이 뭉개질 일이 없고, 36px에서도 어느 자세인지 확실히 읽힌다.
+ *
+ * 모든 것이 같은 1.5초 위에 놓인다. 곰은 그 절반(0.75초)을 밀어서 —
+ * 그래서 둘이 주고받는 것으로 보인다. */
 
 .icescene {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 100px;
+  height: 110px;
   pointer-events: none;
 }
 
-/* ── 빙하 ───────────────────────────────────────────────────────────────── */
-
-.icescene-floe {
+.icescene-glacier {
   position: absolute;
-  /* 양옆으로 넘겨 끝이 안 보이게 한다 — 끝이 보이면 얼음판이 아니라 카드다. */
+  /* 양옆으로 넘겨 끝이 안 보이게 한다 — 끝이 보이면 빙하가 아니라 카드다. */
   left: -6%;
   right: -6%;
   bottom: 0;
   width: 112%;
-  height: 100px;
+  height: 110px;
 }
 
-/* 내리친 자리에 갈라지는 금. 펭귄 발밑에 맞춰 둔다. */
-.icescene-cracks {
+/* ── 가운데 얼음덩이 ─────────────────────────────────────────────────────── */
+
+.icescene-block {
   position: absolute;
   left: 50%;
-  bottom: 44px;
-  width: 120px;
+  bottom: 46px;
+  width: 48px;
   height: 40px;
-  margin-left: -60px;
-  opacity: 0;
-  animation: icescene-cracks 3.4s ease-out infinite;
+  margin-left: -24px;
+  /* 맞을 때마다 한 번 흔들린다. 안 움직이면 곡괭이가 허공을 치는 것처럼 보인다. */
+  animation: icescene-block 1.5s linear infinite;
 }
 
-/* ── 펭귄 ───────────────────────────────────────────────────────────────── */
+.icescene-hitmark {
+  opacity: 0;
+  animation: icescene-hitmark 1.5s ease-out infinite;
+}
+
+/* 곰이 남기는 자국은 절반 늦게 켜진다. */
+.icescene-hitmark-b { animation-delay: 0.75s; }
+
+/* ── 두 마리 ─────────────────────────────────────────────────────────────── */
+
+.icescene-actor {
+  position: absolute;
+  bottom: 42px;
+  /* 어두운 몸도 흰 몸도 남색 바탕에서 가장자리가 살아야 한다. */
+  filter: drop-shadow(0 0 6px rgba(150, 200, 240, 0.28));
+}
 
 .icescene-penguin {
-  position: absolute;
   left: 50%;
-  bottom: 54px;
-  margin-left: -33px;
-  transform-origin: 50% 100%;
-  animation: icescene-slam 3.4s cubic-bezier(0.3, 0, 0.2, 1) infinite;
-  /* 어두운 몸이 남색 바탕에 묻히지 않게 가장자리에 옅은 빛. */
-  filter: drop-shadow(0 0 7px rgba(150, 200, 240, 0.3));
+  /* 곡괭이 날이 얼음덩이에 닿을 만큼만 붙인다. */
+  margin-left: -62px;
 }
 
-/* 날개는 각자 자기 어깨를 축으로 돈다. fill-box가 없으면 SVG 전체를 기준으로
-   삼아서 팔이 화면 밖으로 날아간다. */
-.icescene-wing {
-  transform-box: fill-box;
-  animation: icescene-swing 3.4s cubic-bezier(0.3, 0, 0.2, 1) infinite;
+.icescene-bear {
+  left: 50%;
+  margin-left: 22px;
 }
 
-.icescene-wing-l { transform-origin: 100% 25%; }
-.icescene-wing-r { transform-origin: 0% 25%; animation-name: icescene-swing-r; }
-
-/* 치켜들었다가 내리친다. 올릴 때는 느리게, 내릴 때는 순식간에 —
-   그 차이가 힘으로 읽힌다.
-   부호를 조심할 것: 왼쪽 날개는 **양수**가 위로 올라간다. 반대로 걸면 팔이
-   몸 뒤로 접혀서 아무것도 안 보인다(처음에 그렇게 만들었다). 그리고 쉴 때도
-   0도가 아니라 살짝 벌려 둔다 — 딱 붙으면 팔이 있는지도 모른다. */
-@keyframes icescene-swing {
-  0%, 6% { transform: rotate(12deg); }
-  32% { transform: rotate(78deg); }
-  40% { transform: rotate(-16deg); }
-  46% { transform: rotate(-4deg); }
-  62%, 100% { transform: rotate(12deg); }
+/* 두 컷을 정확히 겹쳐두고 하나만 켠다. 보간이 없어야 게임 스프라이트처럼
+   딱딱 끊긴다 — 이 크기에서는 그게 더 잘 읽힌다. */
+.icescene-frame {
+  animation: icescene-frame-up 1.5s steps(1, end) infinite;
 }
 
-@keyframes icescene-swing-r {
-  0%, 6% { transform: rotate(-12deg); }
-  32% { transform: rotate(-78deg); }
-  40% { transform: rotate(16deg); }
-  46% { transform: rotate(4deg); }
-  62%, 100% { transform: rotate(-12deg); }
+.icescene-frame-hit { animation-name: icescene-frame-hit; }
+
+.icescene-bear .icescene-frame { animation-delay: 0.75s; }
+
+@keyframes icescene-frame-up {
+  0% { opacity: 1; }
+  70% { opacity: 0; }
+  90% { opacity: 1; }
 }
 
-/* 몸은 젖혔다가 찍어 누른다. 맞는 순간 살짝 납작해져야 충격이 보인다. */
-@keyframes icescene-slam {
-  0%, 6% { transform: translateY(0) scaleY(1) rotate(0deg); }
-  32% { transform: translateY(-5px) scaleY(1.03) rotate(-3deg); }
-  40% { transform: translateY(3px) scaleY(0.9) rotate(2deg); }
-  48% { transform: translateY(0) scaleY(1.02) rotate(0deg); }
-  62% { transform: translateY(0) scaleY(1) rotate(0deg); }
-  /* 사이사이 숨 쉬듯 한 번 */
-  80% { transform: translateY(-1.5px) scaleY(1.01) rotate(0deg); }
-  100% { transform: translateY(0) scaleY(1) rotate(0deg); }
+@keyframes icescene-frame-hit {
+  0% { opacity: 0; }
+  70% { opacity: 1; }
+  90% { opacity: 0; }
 }
 
-@keyframes icescene-cracks {
-  0%, 38% { opacity: 0; transform: scale(0.7); }
-  41% { opacity: 0.95; transform: scale(1); }
-  58% { opacity: 0.55; transform: scale(1.04); }
-  72%, 100% { opacity: 0; transform: scale(1.06); }
+@keyframes icescene-block {
+  0%, 69% { transform: translate(0, 0) rotate(0deg); }
+  71% { transform: translate(2px, 1px) rotate(1.4deg); }
+  75% { transform: translate(-2px, 0) rotate(-1.1deg); }
+  79% { transform: translate(1px, 0) rotate(0.5deg); }
+  83%, 100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes icescene-hitmark {
+  0%, 69% { opacity: 0; }
+  71% { opacity: 1; }
+  86% { opacity: 0.6; }
+  96%, 100% { opacity: 0; }
 }
 
 /* ── 부스러기 ───────────────────────────────────────────────────────────── */
@@ -104,34 +108,34 @@
 .icescene-chip {
   position: absolute;
   left: 50%;
-  bottom: 56px;
-  width: 5px;
-  height: 5px;
+  top: 14px;
+  width: 4px;
+  height: 4px;
   border-radius: 1px;
   background: #eafbff;
-  box-shadow: 0 0 6px rgba(190, 240, 255, 0.9);
+  box-shadow: 0 0 5px rgba(190, 240, 255, 0.9);
   opacity: 0;
-  animation: icescene-chip 3.4s cubic-bezier(0.15, 0.75, 0.35, 1) infinite;
+  animation: icescene-chip 1.5s cubic-bezier(0.15, 0.75, 0.35, 1) infinite;
 }
 
-.icescene-chip-1 { --cx: -34px; --cy: -26px; }
-.icescene-chip-2 { --cx: -18px; --cy: -36px; }
-.icescene-chip-3 { --cx: 2px; --cy: -40px; }
-.icescene-chip-4 { --cx: 20px; --cy: -34px; }
-.icescene-chip-5 { --cx: 36px; --cy: -22px; }
+.icescene-chip-1 { --cx: -20px; --cy: -18px; }
+.icescene-chip-2 { --cx: -8px; --cy: -24px; }
+.icescene-chip-3 { --cx: 8px; --cy: -23px; }
+.icescene-chip-4 { --cx: 20px; --cy: -16px; }
 
 @keyframes icescene-chip {
-  0%, 38% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
-  40% { opacity: 1; transform: translate3d(0, 0, 0) scale(0.7); }
-  56% { opacity: 0; transform: translate3d(var(--cx), var(--cy), 0) scale(1) rotate(140deg); }
-  57%, 100% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
+  0%, 69% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
+  71% { opacity: 1; transform: translate3d(0, 0, 0) scale(0.7); }
+  88% { opacity: 0; transform: translate3d(var(--cx), var(--cy), 0) scale(1) rotate(140deg); }
+  89%, 100% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
 }
 
-/* 움직임을 줄이라고 했으면 빙하 위에 가만히 서 있는다. */
+/* 움직임을 줄이라고 했으면 빙하 위에 곡괭이를 든 채로 서 있는다. */
 @media (prefers-reduced-motion: reduce) {
-  .icescene-penguin,
-  .icescene-wing,
-  .icescene-cracks { animation: none; }
-  .icescene-cracks { opacity: 0; }
+  .icescene-block,
+  .icescene-frame,
+  .icescene-hitmark { animation: none; }
+  .icescene-frame-hit,
+  .icescene-hitmark { opacity: 0; }
   .icescene-chip { display: none; }
 }
