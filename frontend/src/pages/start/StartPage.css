@@ -17,28 +17,45 @@
 .start-hero {
   position: relative;
   width: 100%;
-  padding: 18px 0 22px;
+  /* 아래 여백은 펭귄이 돌아다니는 띠다. */
+  padding: 20px 0 62px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.start-hero-glow {
+/* 눈밭. 둥근 흰 발광을 로고 뒤에 깔았더니 아래 입력 칸까지 번져서 싼티가
+   났다 — 빛을 뿌리는 대신 **바닥**을 둔다. 다만 바닥에 테두리가 보이면 그건
+   그냥 회색 상자다. 그래서 (1) 사방에서 0까지 사라지는 그라디언트만 쓰고,
+   (2) 이걸 자르는 부모를 두지 않는다. 잘리는 순간 그 자리에 선이 생긴다. */
+.start-snow {
   position: absolute;
-  top: -30px;
-  width: 260px;
-  height: 260px;
-  border-radius: 50%;
+  left: -12%;
+  right: -12%;
+  bottom: -26px;
+  height: 150px;
   background: radial-gradient(
-    circle,
-    rgba(120, 210, 240, 0.42) 0%,
-    rgba(120, 210, 240, 0.16) 45%,
-    rgba(120, 210, 240, 0) 70%
+    58% 72% at 50% 74%,
+    rgba(212, 238, 255, 0.2) 0%,
+    rgba(212, 238, 255, 0.08) 40%,
+    rgba(212, 238, 255, 0) 74%
   );
+}
+
+/* 펭귄이 돌아다니는 띠. 양옆으로 사라지는 게 연출이라 여기서만 잘라낸다. */
+.start-rink {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 118px;
+  overflow: hidden;
+  z-index: 0;
 }
 
 .start-wordmark {
   position: relative;
+  z-index: 1;
   margin: 0;
   font-size: inherit;
   font-weight: inherit;
@@ -46,7 +63,8 @@
 
 .start-tagline {
   position: relative;
-  margin: 16px 0 0;
+  z-index: 1;
+  margin: 4px 0 0;
   font-size: 0.9rem;
   color: var(--ink);
   text-align: center;
