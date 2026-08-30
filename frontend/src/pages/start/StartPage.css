@@ -1,109 +1,271 @@
+/* 앱의 첫 화면. 여기서 받는 건 결국 닉네임 하나와 선택 두 개인데, 그걸
+   라벨과 입력칸을 번갈아 쌓아 늘어놓으면 서비스가 아니라 가입 폼으로 읽힌다.
+   그래서 세 덩어리로 나눈다 — 무엇인지 말하는 머리, 나를 적는 카드,
+   시작하는 두 갈래. */
+
 .start-body {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  padding-top: 8px;
+  padding-bottom: 8px;
 }
+
+/* ── 머리 ───────────────────────────────────────────────────────────────── */
 
 .start-hero {
   position: relative;
   width: 100%;
-  height: 220px;
+  padding: 18px 0 22px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  overflow: hidden;
 }
 
 .start-hero-glow {
   position: absolute;
-  width: 240px;
-  height: 240px;
+  top: -30px;
+  width: 260px;
+  height: 260px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(120, 210, 240, 0.55) 0%, rgba(120, 210, 240, 0.22) 45%, rgba(120, 210, 240, 0) 72%);
-  filter: blur(2px);
+  background: radial-gradient(
+    circle,
+    rgba(120, 210, 240, 0.42) 0%,
+    rgba(120, 210, 240, 0.16) 45%,
+    rgba(120, 210, 240, 0) 70%
+  );
 }
 
-.start-hero-flake {
+/* 눈은 흩날리기만 한다 — 세 개를 박아두면 장식이지만, 느리게 지나가면
+   화면이 살아 있는 것처럼 보인다. 절대 시선을 끌지 않을 만큼만 옅게. */
+.start-flake {
   position: absolute;
-  color: #bfe8f7;
-  text-shadow: 0 0 8px rgba(120, 210, 240, 0.9);
+  top: -14px;
+  color: #cfeeff;
+  opacity: 0;
+  animation-name: start-drift;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  pointer-events: none;
 }
 
-.start-hero-flake-1 {
-  top: 14px;
-  left: 22%;
-  font-size: 1.4rem;
-}
-
-.start-hero-flake-2 {
-  bottom: 30px;
-  right: 18%;
-  font-size: 1rem;
-}
-
-.start-hero-flake-3 {
-  top: 44px;
-  right: 24%;
-  font-size: 0.75rem;
+@keyframes start-drift {
+  0% { transform: translate3d(0, -10px, 0) rotate(0deg); opacity: 0; }
+  12% { opacity: 0.5; }
+  80% { opacity: 0.35; }
+  100% { transform: translate3d(-16px, 190px, 0) rotate(220deg); opacity: 0; }
 }
 
 .start-title {
   position: relative;
   font-family: var(--font-heading);
   font-weight: 400;
-  font-size: 4.8rem;
+  font-size: 4.4rem;
   line-height: 1;
   margin: 0;
-  /* 짙은 바탕으로 옮기면서 아래쪽이 배경에 묻혀 글자가 반쯤 사라졌다.
-     밝은 쪽으로 뒤집고 발광을 얹는다. */
+  letter-spacing: 1px;
+  /* 짙은 바탕에서 아래쪽이 묻히지 않게 밝은 쪽으로 뒤집고 발광을 얹는다. */
   background: linear-gradient(180deg, #eafaff 0%, #7fd8f5 52%, #2fa8d6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   filter: drop-shadow(0 0 18px rgba(120, 210, 240, 0.45));
-  letter-spacing: 1px;
+}
+
+.start-tagline {
+  position: relative;
+  margin: 12px 0 0;
+  font-size: 0.9rem;
+  color: var(--ink);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.start-meta {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.start-meta li {
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* ── 나를 적는 카드 ─────────────────────────────────────────────────────── */
+
+.start-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 16px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.start-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .start-label {
-  align-self: flex-start;
-  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  letter-spacing: 0.03em;
   color: var(--ink-soft);
-  margin-top: 6px;
+}
+
+.start-label em {
+  font-style: normal;
+  font-size: 0.66rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-soft);
 }
 
 .start-input {
   width: 100%;
-  padding: 12px 14px;
+  height: 50px;
+  padding: 0 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--line);
-  background: var(--surface);
+  background: var(--bg);
   color: var(--ink);
-  font-size: 0.95rem;
+  font-family: inherit;
+  font-size: 0.98rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.start-gender-row {
+.start-input::placeholder { color: var(--ink-soft); opacity: 0.6; }
+
+.start-input:focus {
+  outline: none;
+  border-color: var(--hot);
+  box-shadow: 0 0 0 3px rgba(255, 46, 136, 0.18);
+}
+
+/* 성별 — 칸 안에서 하나가 켜지는 모양. 두 버튼을 나란히 두는 것보다 "둘 중
+   하나"라는 게 먼저 읽힌다. */
+.start-seg {
   display: flex;
-  gap: 8px;
-  width: 100%;
-}
-
-.start-gender-btn {
-  flex: 1;
-  padding: 10px 0;
+  gap: 4px;
+  padding: 4px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink-soft);
-  font-size: 0.9rem;
+  background: var(--bg);
 }
 
-.start-gender-btn-active {
-  border-color: var(--deep);
-  color: var(--deep);
-  background: var(--deep-soft);
-  font-weight: 600;
+.start-seg-btn {
+  flex: 1;
+  height: 40px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.start-seg-btn.is-on {
+  background: var(--hot);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* MBTI — 자리마다 두 글자 중 하나. 네 자리를 다 골라야 값이 된다. */
+.start-mbti {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+
+.start-mbti-pair {
+  display: flex;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.start-mbti-btn {
+  flex: 1;
+  height: 42px;
+  border: 0;
+  /* 두 글자 사이에 실선을 넣는다. 없으면 한 칸에 놓인 E와 I가 서로 다른
+     선택지가 아니라 그냥 나란한 두 글자로 읽힌다. `border: 0` 뒤에 와야
+     지워지지 않는다. */
+  border-left: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.start-mbti-pair > .start-mbti-btn:first-child { border-left: 0; }
+
+.start-mbti-btn.is-on {
+  background: var(--deep);
+  color: #fff;
+  font-weight: 700;
+}
+
+.start-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* ── 시작하는 두 갈래 ───────────────────────────────────────────────────── */
+
+.start-cta {
+  height: 56px;
+  font-size: 1.02rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 22px rgba(255, 46, 136, 0.28);
+}
+
+.start-or {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 2px 0;
+  color: var(--ink-soft);
+  font-size: 0.74rem;
+}
+
+.start-or::before,
+.start-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.start-join {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .start-join-row {
@@ -120,86 +282,27 @@
 .start-join-row .btn {
   width: auto;
   flex-shrink: 0;
+  padding-inline: 22px;
 }
+
+/* 초대코드는 사람이 옮겨 적는 여섯 글자다. 고정폭에 자간을 주면 한 글자씩
+   짚어가며 확인할 수 있다. */
+.start-code {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  letter-spacing: 0.28em;
+  text-align: center;
+}
+
+.start-code::placeholder { letter-spacing: 0.28em; }
 
 .start-error {
   width: 100%;
-  font-size: 0.75rem;
-  color: var(--hot);
   margin: 0;
-}
-
-.start-seg {
-  display: flex;
-  gap: 6px;
-}
-
-.start-seg-btn {
-  flex: 1;
-  padding: 10px 0;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink-soft);
-  font-family: inherit;
-  font-size: 0.84rem;
-  cursor: pointer;
-}
-
-.start-seg-btn.is-on {
-  border-color: var(--hot);
-  background: var(--hot-soft);
-  color: var(--hot);
-  font-weight: 600;
-}
-
-.start-error {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   color: var(--hot);
 }
 
-.start-join {
-  margin-top: 10px;
-  padding: 10px 0;
-  border: none;
-  background: none;
-  color: var(--ink-soft);
-  font-family: inherit;
-  font-size: 0.82rem;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-/* 초대코드 칸을 하나의 덩어리로 묶고, 방 만들기와 사이를 벌린다. 붙어 있으면
-   위 칸을 채워야 아래 버튼이 눌리는 것처럼 읽힌다. */
-.start-join {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 10px;
-  padding: 14px;
-  border-radius: var(--radius-md);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-}
-
-.start-join .start-label { margin: 0; }
-
-.start-or {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 6px 0 2px;
-  color: var(--ink-soft);
-  font-size: 0.76rem;
-}
-
-.start-or::before,
-.start-or::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--line);
+@media (prefers-reduced-motion: reduce) {
+  .start-flake { animation: none; opacity: 0.3; }
 }
