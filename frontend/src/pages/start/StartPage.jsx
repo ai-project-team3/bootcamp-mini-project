@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import Button from '../../components/common/Button'
+import IceLogo from '../../components/common/IceLogo'
 import { useRoomFlow } from '../../context/RoomFlowContext'
 import { getRoom } from '../../api/rooms'
 import { joinRoom } from '../../api/players'
@@ -16,15 +17,6 @@ const MBTI_AXES = [
   ['N', 'S'],
   ['T', 'F'],
   ['J', 'P'],
-]
-
-const FLAKES = [
-  { left: '12%', delay: '0s', dur: '13s', size: '0.8rem' },
-  { left: '28%', delay: '3.4s', dur: '16s', size: '0.55rem' },
-  { left: '46%', delay: '1.6s', dur: '11s', size: '0.7rem' },
-  { left: '64%', delay: '5.2s', dur: '15s', size: '0.5rem' },
-  { left: '81%', delay: '2.4s', dur: '12s', size: '0.75rem' },
-  { left: '93%', delay: '6.8s', dur: '17s', size: '0.5rem' },
 ]
 
 export default function StartPage() {
@@ -91,28 +83,10 @@ export default function StartPage() {
       <div className="start-body">
         <header className="start-hero">
           <span className="start-hero-glow" aria-hidden />
-          {FLAKES.map((flake, i) => (
-            <span
-              key={i}
-              className="start-flake"
-              aria-hidden
-              style={{
-                left: flake.left,
-                fontSize: flake.size,
-                animationDelay: flake.delay,
-                animationDuration: flake.dur,
-              }}
-            >
-              ❄
-            </span>
-          ))}
-          <h1 className="start-title">얼음땡</h1>
-          <p className="start-tagline">처음 만난 사람들, 18분 뒤엔 서로를 놀립니다</p>
-          <ul className="start-meta">
-            <li>18분</li>
-            <li>2~8명</li>
-            <li>각자 폰으로</li>
-          </ul>
+          <h1 className="start-wordmark">
+            <IceLogo />
+          </h1>
+          <p className="start-tagline">처음 만난 사람들, 잠시 뒤엔 서로를 놀립니다</p>
         </header>
 
         <section className="start-card">

@@ -21,7 +21,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
 }
 
 .start-hero-glow {
@@ -38,68 +37,20 @@
   );
 }
 
-/* 눈은 흩날리기만 한다 — 세 개를 박아두면 장식이지만, 느리게 지나가면
-   화면이 살아 있는 것처럼 보인다. 절대 시선을 끌지 않을 만큼만 옅게. */
-.start-flake {
-  position: absolute;
-  top: -14px;
-  color: #cfeeff;
-  opacity: 0;
-  animation-name: start-drift;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  pointer-events: none;
-}
-
-@keyframes start-drift {
-  0% { transform: translate3d(0, -10px, 0) rotate(0deg); opacity: 0; }
-  12% { opacity: 0.5; }
-  80% { opacity: 0.35; }
-  100% { transform: translate3d(-16px, 190px, 0) rotate(220deg); opacity: 0; }
-}
-
-.start-title {
+.start-wordmark {
   position: relative;
-  font-family: var(--font-heading);
-  font-weight: 400;
-  font-size: 4.4rem;
-  line-height: 1;
   margin: 0;
-  letter-spacing: 1px;
-  /* 짙은 바탕에서 아래쪽이 묻히지 않게 밝은 쪽으로 뒤집고 발광을 얹는다. */
-  background: linear-gradient(180deg, #eafaff 0%, #7fd8f5 52%, #2fa8d6 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 18px rgba(120, 210, 240, 0.45));
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 .start-tagline {
   position: relative;
-  margin: 12px 0 0;
+  margin: 16px 0 0;
   font-size: 0.9rem;
   color: var(--ink);
   text-align: center;
   text-wrap: balance;
-}
-
-.start-meta {
-  position: relative;
-  display: flex;
-  gap: 6px;
-  margin: 12px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.start-meta li {
-  padding: 5px 11px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.03);
-  font-size: 0.72rem;
-  color: var(--ink-soft);
-  white-space: nowrap;
 }
 
 /* ── 나를 적는 카드 ─────────────────────────────────────────────────────── */
@@ -303,6 +254,3 @@
   color: var(--hot);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .start-flake { animation: none; opacity: 0.3; }
-}
