@@ -8,3 +8,11 @@
 .demo-game-confirm p { color: var(--ink-soft); line-height: 1.5; }
 .demo-game-confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
 .demo-game-confirm-options { margin-top: 16px; text-align: left; }
+
+/* 카드 안 글자 색을 못 박아 둔다. 이 카드는 <button> 안에 들어 있어서, 색을
+   물려받지 못하면 어두운 바탕 위에 검은 제목이 그려진다. */
+.demo-hub-button { color: var(--ink); }
+.demo-hub-card h2 { color: var(--ink); }
+
+/* 배지가 빠진 자리 — 이모지만 남으니 위 여백을 조금 줄인다. */
+.demo-hub-card-top > span { line-height: 1; }

@@ -5,6 +5,7 @@ import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
 import RoomEntryLayout from '../../components/room/RoomEntryLayout'
 import { useGameRoom } from '../../context/GameRoomContext'
+import { useRoomFlow } from '../../context/RoomFlowContext'
 import { normalizeDemoNickname, normalizeDemoRoomCode } from '../../data/gameDemo/gameDemoModels'
 
 export default function GameDemoEntryPage() {
@@ -15,7 +16,12 @@ export default function GameDemoEntryPage() {
   const [searchParams] = useSearchParams()
   const sourceRoomCode = searchParams.get('from') ?? null
   const { setIsHost, setNickname, setPlayerId, setRoomCode } = useGameRoom()
-  const [nicknameDraft, setNicknameDraft] = useState('')
+  // 얼음땡을 방금 하고 넘어온 사람이면 그때 쓴 닉네임을 그대로 채워둔다.
+  // 성향을 잇는 끈이 이름 하나뿐인데 손으로 다시 치게 하면 거기서 끊긴다.
+  const { nickname: icebreakingNickname } = useRoomFlow()
+  const [nicknameDraft, setNicknameDraft] = useState(
+    sourceRoomCode ? (icebreakingNickname ?? '') : '',
+  )
   const [codeDraft, setCodeDraft] = useState(invitedCode)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -68,13 +74,16 @@ export default function GameDemoEntryPage() {
 
   return (
     <PhoneFrame>
-      <TopBar title="방 만들기" onBack={() => navigate('/')} />
+      <TopBar
+        title="방 만들기"
+        onBack={() => navigate(sourceRoomCode ? `/games?from=${sourceRoomCode}` : '/games')}
+      />
       <RoomEntryLayout
         idPrefix="demo"
         eyebrow="ROOM"
         title={<>닉네임만 정하고<br />같이 모여요</>}
         lead={sourceRoomCode
-          ? '얼음땡에서 나온 성향으로 진행해요. 그때 쓰던 닉네임 그대로 입력해주세요.'
+          ? '얼음땡에서 쓰던 닉네임을 그대로 채워뒀어요. 이대로 두면 그때 나온 성향이 따라옵니다.'
           : '2명부터 10명까지 초대코드로 모인 다음, 방장이 게임을 골라요.'}
         nickname={nicknameDraft}
         onNicknameChange={setNicknameDraft}
