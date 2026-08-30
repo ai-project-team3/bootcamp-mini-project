@@ -50,7 +50,7 @@ def _clamp(value: float, lo: float = 0.0, hi: float = 5.0) -> float:
 
 
 def compute_behavior_abilities(db: Session, room_id: str, players: list[Player]) -> dict[str, dict[str, float]]:
-    """§5 DOM/EXP/EMP/SPD. OBS는 compute_half_obs/compute_full_obs에서 별도 계산."""
+    """§5 DOM/EXP/EMP/SPD. OBS는 compute_guess_hits + obs_from_hits로 따로 낸다."""
     answers = db.query(Answer).filter(Answer.room_id == room_id).all()
     by_player: dict[str, dict[int, Answer]] = defaultdict(dict)
     for a in answers:
@@ -82,23 +82,6 @@ def compute_behavior_abilities(db: Session, room_id: str, players: list[Player])
 
         result[player.id] = {"DOM": dom, "EXP": exp, "EMP": emp, "SPD": _clamp(spd)}
     return result
-
-
-def compute_type_guess_correct_counts(db: Session, room_id: str, players: list[Player]) -> dict[str, int]:
-    """플레이어별 '남의 유형 카드를 맞힌 횟수' (0~4). round_no에 담긴 카드 실소유자의
-    seat_no와 guess.target_player_id의 seat_no가 같으면 정답."""
-    seat_by_player = {p.id: p.seat_no for p in players}
-    guesses = (
-        db.query(Guess)
-        .filter(Guess.room_id == room_id, Guess.kind == "TYPE", Guess.round_no.isnot(None))
-        .all()
-    )
-    correct: dict[str, int] = defaultdict(int)
-    for g in guesses:
-        target_seat = seat_by_player.get(g.target_player_id)
-        if target_seat is not None and target_seat == g.round_no:
-            correct[g.guesser_id] += 1
-    return correct
 
 
 def compute_nunchi_scores(db: Session, room_id: str, players: list[Player]) -> dict[str, float]:
@@ -172,14 +155,19 @@ def compute_guess_hits(db: Session, room_id: str, players: list[Player]) -> dict
         if liar_by_round.get(g.round_no) == g.target_player_id:
             hits[g.guesser_id] += 1
 
-    # 유형 맞히기 — round_no에 카드 실소유자의 seat_no가 들어 있다
-    for g in (
-        db.query(Guess)
-        .filter(Guess.room_id == room_id, Guess.kind == "TYPE", Guess.round_no.isnot(None))
-        .all()
-    ):
+    # 유형 맞히기 — round_no에 카드 실소유자의 seat_no가 들어 있다.
+    type_rows = db.query(Guess).filter(Guess.room_id == room_id, Guess.kind == "TYPE").all()
+    # 자리별 카드 유형. 카드는 한 번 얼려서 뿌리므로 어느 행에서 읽어도 같다.
+    type_by_seat = {g.round_no: g.target_type_code for g in type_rows}
+    for g in type_rows:
+        # 자기 자신을 가리킨 한 장은 "내 카드는 이것 같다"는 자기 예측이라
+        # 관찰력에서 뺀다. 남을 본 결과가 아니다.
+        if g.guesser_id == g.target_player_id:
+            continue
         tries[g.guesser_id] += 1
-        if seat_by_player.get(g.target_player_id) == g.round_no:
+        # 사람이 아니라 유형으로 따진다 — 유형이 같은 두 사람의 카드는 글자
+        # 하나 다르지 않아서, 구별할 수 없는 것을 틀렸다고 할 수 없다.
+        if type_by_seat.get(seat_by_player.get(g.target_player_id)) == g.target_type_code:
             hits[g.guesser_id] += 1
 
     return {p.id: (hits[p.id], tries[p.id]) for p in players}
@@ -190,24 +178,6 @@ def obs_from_hits(hits: int, tries: int) -> float:
     if tries <= 0:
         return 2.5
     return _clamp(hits / tries * 5)
-
-
-def compute_half_obs(lie_correct: dict[str, int], player_id: str, player_count: int) -> float:
-    """유형 카드를 뿌리는 시점의 임시 관찰력.
-
-    아직 유형 맞히기를 안 했으니 그 몫을 빼고 계산해야 하는데, 이 시점에는
-    앞선 세 게임의 기록만 있으면 충분하다. 인자는 하위 호환을 위해 남긴다.
-    """
-    others = max(player_count - 1, 1)
-    return _clamp((lie_correct.get(player_id, 0) / others) * 2.5, 0.0, 2.5)
-
-
-def compute_full_obs(lie_correct: dict[str, int], type_correct: dict[str, int], player_id: str, player_count: int) -> float:
-    """구 산출식. compute_guess_hits + obs_from_hits로 대체됐다."""
-    others = max(player_count - 1, 1)
-    lie = lie_correct.get(player_id, 0)
-    type_ = type_correct.get(player_id, 0)
-    return _clamp((lie + type_) / (2 * others) * 5)
 
 
 def _tiebreak_level(value: float, spd: float) -> str:

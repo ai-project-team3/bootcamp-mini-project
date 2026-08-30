@@ -36,6 +36,7 @@ export default function GamePage() {
   const [questions, setQuestions] = useState(null)
   const [error, setError] = useState(null)
   const [intro, setIntro] = useState(null)
+  const [revealSeen, setRevealSeen] = useState(false)
 
   const refreshPhase = useCallback(async () => {
     try {
@@ -58,9 +59,12 @@ export default function GamePage() {
     getQuestions(code).then(setQuestions).catch((err) => setError(err.message))
   }, [code])
 
+  // 마지막 사람이 제출하는 순간 방은 DONE이 되지만, 그때 바로 허브로 보내면
+  // 유형 공개 화면을 아무도 못 본다. 그 화면이 이 판의 결과물이므로 스스로
+  // 끝났다고 할 때까지 붙잡는다.
   useEffect(() => {
-    if (phase === 'DONE') navigate(`/room/${code}/hub`)
-  }, [phase, code, navigate])
+    if (phase === 'DONE' && revealSeen) navigate(`/room/${code}/hub`)
+  }, [phase, revealSeen, code, navigate])
 
   // 단계가 바뀌면 이름을 한 번 크게 띄우고 들어간다 (§13-3 단계 전환).
   useEffect(() => {
@@ -99,7 +103,7 @@ export default function GamePage() {
 
   return (
     <PhoneFrame>
-      <TopBar title={PHASE_TITLES[phase] ?? '얼음땡'} showBack={false} />
+      <TopBar title={PHASE_TITLES[phase === 'DONE' ? 'TYPE_GUESS' : phase] ?? '얼음땡'} showBack={false} />
       {error && <p className="game-error">{error}</p>}
       {phase && !questions && !error && <p className="game-hint">문항을 불러오는 중...</p>}
       {phase === 'IMPRESSION_PRE' && questions && (
@@ -129,7 +133,9 @@ export default function GamePage() {
       {phase === 'TRAIT' && <TraitStep code={code} playerId={playerId} onAdvance={refreshPhase} />}
       {phase === 'NUNCHI' && <NunchiStep code={code} playerId={playerId} onAdvance={refreshPhase} />}
       {phase === 'LIAR' && <LiarStep code={code} playerId={playerId} onAdvance={refreshPhase} />}
-      {phase === 'TYPE_GUESS' && <TypeGuessStep code={code} playerId={playerId} onAdvance={refreshPhase} />}
+      {(phase === 'TYPE_GUESS' || (phase === 'DONE' && !revealSeen)) && (
+        <TypeGuessStep code={code} playerId={playerId} onAdvance={() => setRevealSeen(true)} />
+      )}
       {!phase && !error && <p className="game-hint">불러오는 중...</p>}
       {intro && <StageIntro label={PHASE_TITLES[intro] ?? ''} />}
     </PhoneFrame>

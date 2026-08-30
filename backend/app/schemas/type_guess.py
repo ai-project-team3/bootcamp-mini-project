@@ -1,15 +1,6 @@
+from typing import Optional
+
 from pydantic import BaseModel
-
-
-class SelfGuessRequest(BaseModel):
-    player_id: str
-    type_code: str
-
-
-class SelfStatusResponse(BaseModel):
-    submitted: int
-    total: int
-    revealed: bool
 
 
 class CardOut(BaseModel):
@@ -19,6 +10,7 @@ class CardOut(BaseModel):
     subtitle: str
     color: str
     symbol: str
+    image: Optional[str] = None
 
 
 class AssignmentIn(BaseModel):
@@ -32,8 +24,9 @@ class AssignRequest(BaseModel):
 
 
 class AssignResultEntry(BaseModel):
+    """공개 화면에 뜨는 한 줄 — 내 카드를 이 사람은 맞혔나."""
+
     guesser_nickname: str
-    target_player_id: str
     correct: bool
 
 
@@ -41,4 +34,9 @@ class TypeGuessStatusResponse(BaseModel):
     submitted: int
     total: int
     revealed: bool
+    # 공개 전에는 아래가 전부 비어 있다. player_id를 안 넘기면 공개 뒤에도 비어 있다.
+    self_type_code: Optional[str] = None
+    self_guess_type_code: Optional[str] = None
+    my_hits: int = 0
+    my_tries: int = 0
     results: list[AssignResultEntry] = []

@@ -29,42 +29,42 @@ TYPES = {
     "T1": {
         "dom": "H", "exp": "H", "obs": "H",
         "name": "셀프 사회자", "subtitle": "아무도 안 시켰는데 진행도 발언도 판단도 본인이",
-        "color": "#FF2E88", "symbol": "🎤", "image": "/types/T1.png",
+        "color": "#FF2E88", "symbol": "🎤", "image": "/types/T1.webp",
     },
     "T2": {
         "dom": "H", "exp": "H", "obs": "L",
         "name": "직구 마스터", "subtitle": "할 말은 다 하는데 남 표정은 안 봅니다",
-        "color": "#FF6B35", "symbol": "⚾", "image": "/types/T2.png",
+        "color": "#FF6B35", "symbol": "⚾", "image": "/types/T2.webp",
     },
     "T3": {
         "dom": "H", "exp": "L", "obs": "H",
         "name": "뒷자리 미어캣", "subtitle": "조용히 보다가 결정은 제일 먼저 냅니다",
-        "color": "#FFC531", "symbol": "👀", "image": "/types/T3.png",
+        "color": "#FFC531", "symbol": "👀", "image": "/types/T3.webp",
     },
     "T4": {
         "dom": "H", "exp": "L", "obs": "L",
         "name": "무면허 라이더", "subtitle": "앞은 안 보고 액셀만 밟습니다",
-        "color": "#FF4757", "symbol": "🏍️", "image": "/types/T4.png",
+        "color": "#FF4757", "symbol": "🏍️", "image": "/types/T4.webp",
     },
     "T5": {
         "dom": "L", "exp": "H", "obs": "H",
         "name": "방구석 박사", "subtitle": "다 알고 다 말하는데 정작 본인은 안 나섭니다",
-        "color": "#7B61FF", "symbol": "🎓", "image": "/types/T5.png",
+        "color": "#7B61FF", "symbol": "🎓", "image": "/types/T5.webp",
     },
     "T6": {
         "dom": "L", "exp": "H", "obs": "L",
         "name": "MZ 응원단장", "subtitle": "판은 못 읽는데 텐션은 제일 높습니다",
-        "color": "#C6FF4E", "symbol": "📣", "image": "/types/T6.png",
+        "color": "#C6FF4E", "symbol": "📣", "image": "/types/T6.webp",
     },
     "T7": {
         "dom": "L", "exp": "L", "obs": "H",
         "name": "은둔형 명탐정", "subtitle": "말 한마디 없이 다 맞혔습니다",
-        "color": "#2E86FF", "symbol": "🔍", "image": "/types/T7.png",
+        "color": "#2E86FF", "symbol": "🔍", "image": "/types/T7.webp",
     },
     "T8": {
         "dom": "L", "exp": "L", "obs": "L",
         "name": "평화성애자", "subtitle": "아무하고도 안 부딪혔습니다. 아무것도 안 해서요",
-        "color": "#7FD8C9", "symbol": "🕊️", "image": "/types/T8.png",
+        "color": "#7FD8C9", "symbol": "🕊️", "image": "/types/T8.webp",
     },
 }
 
