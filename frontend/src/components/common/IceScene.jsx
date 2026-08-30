@@ -21,12 +21,12 @@ import './IceScene.css'
 function Pickaxe({ transform }) {
   return (
     <g transform={transform}>
-      <rect x="-1.5" y="-22" width="3" height="30" rx="1.5" fill="#b07c3c" stroke="#5f3f16" strokeWidth="1.4" />
+      <rect x="-2.4" y="-34" width="4.8" height="48" rx="2.4" fill="#b07c3c" stroke="#5f3f16" strokeWidth="2" />
       <path
-        d="M-10 -19c4.5-7 15.5-7 20 0-6-3.5-14-3.5-20 0z"
+        d="M-16 -30c7-11 25-11 32 0-9.5-5.5-22.5-5.5-32 0z"
         fill="#c6d3e6"
         stroke="#46506a"
-        strokeWidth="1.4"
+        strokeWidth="2"
         strokeLinejoin="round"
       />
     </g>
@@ -76,50 +76,58 @@ function Penguin({ hit }) {
   )
 }
 
-/** 북극곰. 왼쪽(얼음덩이)을 본다. 펭귄과 좌우로 뒤집힌 자세다. */
+/**
+ * 북극곰. 왼쪽(얼음덩이)을 본다.
+ *
+ * 달걀에서 벗어나려면 두 가지가 필요하다. **머리와 몸을 나누고**, **귀를 둘**
+ * 그리는 것. 한 덩이에 귀 하나를 붙이면 어느 각도에서 봐도 달걀이거나
+ * 강아지다. 머리를 몸보다 크게 얹고 귀 두 개를 위로 세우면 그 순간 곰이 된다.
+ */
 function Bear({ hit }) {
-  const lean = hit ? 'rotate(-9 36 64)' : 'rotate(2 36 64)'
+  const lean = hit ? 'rotate(-8 36 66)' : 'rotate(2 36 66)'
   return (
     <g transform={lean}>
       <g fill="#f6f2e8" stroke="#6f6558" strokeWidth="2.4" strokeLinejoin="round">
-        <path d="M40 60c6 1 10 4 9 6-1 2-8 2-12 0z" />
-        <path d="M29 60c-6 1-10 4-9 6 1 2 8 2 12 0z" />
+        <path d="M42 62c6 1 10 4 9 6-1 2-8 2-12 0z" />
+        <path d="M30 62c-6 1-10 4-9 6 1 2 8 2 12 0z" />
       </g>
-      {/* 귀는 **머리 꼭대기**에 둥글게. 뒤통수에 붙이면 토끼가 된다. */}
-      <circle cx="41" cy="6" r="7" fill="#f6f2e8" stroke="#6f6558" strokeWidth="2.4" />
-      <circle cx="41" cy="6" r="3" fill="#e8b9c4" />
+      {/* 몸 — 머리보다 작고 낮게. 곰은 어깨가 두툼하다 */}
       <path
-        d="M37 4c11 0 19 11 19 28 0 18-7 30-20 30s-19-12-19-30C17 15 26 4 37 4z"
+        d="M36 34c11 0 18 7 18 18 0 9-6 14-18 14s-18-5-18-14c0-11 7-18 18-18z"
         fill="#f6f2e8"
         stroke="#6f6558"
-        strokeWidth="2.6"
+        strokeWidth="2.5"
       />
-      {/* 주둥이는 몸 밖으로 나와서 실루엣을 깨야 한다. 안쪽으로만 그리면
-          같은 크림색이라 통째로 사라진다. */}
-      {/* 주둥이는 짧고 넓게. 길고 뾰족하면 개가 된다. */}
+      {/* 귀 둘 — 뒤쪽 귀를 살짝 어둡게 해서 앞뒤가 보이게 */}
+      <circle cx="47" cy="12" r="7.5" fill="#e8e1d2" stroke="#6f6558" strokeWidth="2.4" />
+      <circle cx="26" cy="9" r="8" fill="#f6f2e8" stroke="#6f6558" strokeWidth="2.4" />
+      <circle cx="26" cy="9" r="3.4" fill="#e8b9c4" />
+      {/* 머리 — 몸보다 확실히 크게 */}
+      <circle cx="34" cy="24" r="19" fill="#f6f2e8" stroke="#6f6558" strokeWidth="2.6" />
+      {/* 주둥이는 머리 밖으로 나와 실루엣을 깬다. 짧고 넓게 — 길면 개가 된다 */}
       <path
-        d="M21 19c-7 0-11 4-11 8.5S14 36 21 36c5 0 9-3.5 9-8.5S26 19 21 19z"
+        d="M20 20c-8 0-13 3.6-13 8s5 8 13 8c5.5 0 9-3.6 9-8s-3.5-8-9-8z"
         fill="#fffdf8"
         stroke="#6f6558"
         strokeWidth="2.4"
       />
-      <ellipse cx="13" cy="25.5" rx="4.4" ry="3.4" fill="#20232b" />
-      <path d="M14 29.5c2.4 2.8 5.8 2 6.4-.8" stroke="#20232b" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-      <circle cx="30" cy="16" r="4.8" fill="#20232b" />
-      <circle cx="28.4" cy="14" r="1.9" fill="#fff" />
-      <ellipse cx="36" cy="30" rx="3.4" ry="2.2" fill="#ff9ec0" opacity="0.45" />
+      <ellipse cx="10" cy="25.5" rx="4.6" ry="3.6" fill="#20232b" />
+      <path d="M11 29.5c2.6 3 6 2.2 6.6-.8" stroke="#20232b" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+      <circle cx="29" cy="20" r="4.6" fill="#20232b" />
+      <circle cx="27.4" cy="18" r="1.8" fill="#fff" />
+      <ellipse cx="40" cy="30" rx="3.6" ry="2.4" fill="#ff9ec0" opacity="0.45" />
 
       {hit ? (
         <>
-          <path d="M28 34c-8 2-13 7-14 12l7 3c3-5 7-9 11-10z" fill="#e5decf" stroke="#6f6558" strokeWidth="2.2" strokeLinejoin="round" />
-          <Pickaxe transform="translate(16,48) rotate(-126)" />
-          <path d="M30 30c-9 2-15 8-17 14l7 3c3-6 8-11 13-12z" fill="#f6f2e8" stroke="#6f6558" strokeWidth="2.2" strokeLinejoin="round" />
+          <path d="M28 40c-9 3-15 9-16 15l8 3c3-6 8-11 13-12z" fill="#e5decf" stroke="#6f6558" strokeWidth="2.2" strokeLinejoin="round" />
+          <Pickaxe transform="translate(14,56) rotate(-124)" />
+          <path d="M31 36c-10 3-17 9-19 16l8 3c3-7 9-13 15-14z" fill="#f6f2e8" stroke="#6f6558" strokeWidth="2.2" strokeLinejoin="round" />
         </>
       ) : (
         <>
-          <path d="M28 38c-7-2-12-1-15 2l4 6c3-2 7-2 11-1z" fill="#e5decf" stroke="#6f6558" strokeWidth="2.2" strokeLinejoin="round" />
-          <Pickaxe transform="translate(15,40) rotate(-34)" />
-          <path d="M30 34c-8-2-14 0-18 4l5 6c3-3 9-3 13-2z" fill="#f6f2e8" stroke="#6f6558" strokeWidth="2.2" strokeLinejoin="round" />
+          <path d="M28 42c-8-2-13-1-16 2l5 6c3-2 7-2 11-1z" fill="#e5decf" stroke="#6f6558" strokeWidth="2.2" strokeLinejoin="round" />
+          <Pickaxe transform="translate(14,44) rotate(-30)" />
+          <path d="M31 38c-9-2-15 0-19 4l5 7c4-3 10-3 14-2z" fill="#f6f2e8" stroke="#6f6558" strokeWidth="2.2" strokeLinejoin="round" />
         </>
       )}
     </g>
@@ -164,7 +172,7 @@ export default function IceScene() {
 
       {/* ── 가운데 얼음덩이 ── */}
       <div className="icescene-block">
-        <svg viewBox="0 0 72 60" width="48" height="40">
+        <svg viewBox="0 0 72 60" width="72" height="60">
           <defs>
             <linearGradient id="blk" x1="0" y1="0" x2="0.3" y2="1">
               <stop offset="0" stopColor="#eafaff" />
@@ -212,8 +220,8 @@ export default function IceScene() {
       </div>
 
       <div className="icescene-actor icescene-bear">
-        <svg viewBox="0 0 72 74" width="42" height="43">
-          <ellipse cx="36" cy="68" rx="16" ry="3" fill="#050a1e" opacity="0.45" />
+        <svg viewBox="0 0 72 76" width="44" height="46">
+          <ellipse cx="36" cy="70" rx="16" ry="3" fill="#050a1e" opacity="0.45" />
           <g className="icescene-frame icescene-frame-up">
             <Bear hit={false} />
           </g>
