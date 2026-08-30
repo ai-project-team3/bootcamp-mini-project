@@ -803,26 +803,36 @@
 }
 
 /* 첫인상 — 문항 사이를 되돌아갈 수 있게 */
-.impression-top {
+/* 되돌아가기는 진행바 옆이 아니라 선택지 아래. 진행 표시와 조작 버튼이 한
+   줄에 섞이면 둘 다 무엇인지 알아보기 어렵다. */
+.impression-foot {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 10px;
+  margin-top: 4px;
 }
 
-/* 되돌아가기 버튼이 옆에 붙어도 진행바는 남는 폭을 다 쓴다. */
-.impression-top .pprog { flex: 1; min-width: 0; }
-
 .impression-back {
-  flex-shrink: 0;
-  padding: 4px 10px;
+  align-self: flex-start;
+  padding: 6px 12px;
   border-radius: 999px;
   border: 1px solid var(--line);
   background: transparent;
   color: var(--ink-soft);
-  font-size: 0.76rem;
+  font-size: 0.78rem;
 }
 
-.impression-back:disabled { opacity: 0.35; }
+.impression-back:disabled { opacity: 0.3; }
+
+.impression-foot .btn { width: 100%; }
+
+.game-waiting-note {
+  margin: 10px 0 0;
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
 
 .impression-note {
   margin: 8px 0 0;

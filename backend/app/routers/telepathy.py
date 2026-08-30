@@ -37,6 +37,7 @@ def get_round(code: str, round_no: int, db: Session = Depends(get_db)) -> Telepa
     return TelepathyRoundResponse(
         round_no=round_no,
         total_rounds=len(rounds),
+        topic=pair.get("topic", ""),
         a=pair["a"],
         b=pair["b"],
     )

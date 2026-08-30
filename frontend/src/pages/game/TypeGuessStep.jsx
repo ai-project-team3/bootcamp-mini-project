@@ -10,7 +10,7 @@ import { TYPES } from '../../data/types'
 const REVEAL_DISPLAY_MS = 8000
 const STATUS_POLL_MS = 1200
 
-export default function TypeGuessStep({ code, playerId, onAdvance }) {
+export default function TypeGuessStep({ code, playerId, onHold, onAdvance }) {
   const [players, setPlayers] = useState([])
   const [cards, setCards] = useState(null)
   const [assignments, setAssignments] = useState({})
@@ -45,12 +45,13 @@ export default function TypeGuessStep({ code, playerId, onAdvance }) {
 
   useEffect(() => {
     if (!revealed || advanced.current) return
+    onHold?.()
     const timer = setTimeout(() => {
       advanced.current = true
       onAdvance()
     }, REVEAL_DISPLAY_MS)
     return () => clearTimeout(timer)
-  }, [revealed, onAdvance])
+  }, [revealed, onHold, onAdvance])
 
   const handleAssignChange = (cardId, targetPlayerId) => {
     setAssignments({ ...assignments, [cardId]: targetPlayerId })

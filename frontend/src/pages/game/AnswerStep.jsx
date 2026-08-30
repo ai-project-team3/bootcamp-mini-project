@@ -5,7 +5,7 @@ import { getAnswerStatus, submitAnswer } from '../../api/answers'
 const REVEAL_DISPLAY_MS = 2500
 const STATUS_POLL_MS = 1000
 
-export default function AnswerStep({ code, playerId, questions, onAdvance }) {
+export default function AnswerStep({ code, playerId, questions, onHold, onAdvance }) {
   const [questionNo, setQuestionNo] = useState(1)
   const [startedAt, setStartedAt] = useState(() => Date.now())
   const [myChoice, setMyChoice] = useState(null)
@@ -36,6 +36,7 @@ export default function AnswerStep({ code, playerId, questions, onAdvance }) {
           setStatus(s)
           if (s.revealed && !advanced.current) {
             advanced.current = true
+            onHold?.()
             setTimeout(() => {
               if (cancelled) return
               if (questionNo < questions.length) setQuestionNo(questionNo + 1)
@@ -51,7 +52,7 @@ export default function AnswerStep({ code, playerId, questions, onAdvance }) {
       cancelled = true
       clearInterval(timer)
     }
-  }, [submitted, code, questionNo, questions.length, onAdvance])
+  }, [submitted, code, questionNo, questions.length, onHold, onAdvance])
 
   const handleChoice = (choice) => {
     const elapsedMs = Date.now() - startedAt

@@ -2,7 +2,11 @@
   position: relative;
   width: 100%;
   max-width: 380px;
-  min-height: 720px;
+  /* 높이를 **가둔다**. min-height만 두면 내용이 길어질 때 껍데기가 같이
+     늘어나서 화면 전체가 아래로 쭉 뻗고, 안쪽의 overflow-y: auto는 잴 기준이
+     없어 스크롤이 생기지 않는다. 여덟 장짜리 유형 카드 화면이 그랬다. */
+  height: min(760px, calc(100vh - 48px));
+  min-height: 560px;
   background: linear-gradient(180deg, var(--surface) 0%, var(--card) 100%);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -16,9 +20,14 @@
 
 .phone-body {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   padding: 20px 18px 28px;
+  /* 어느 화면이 길어지든 껍데기 안에서 스크롤된다 — 폰에서 드래그해서 내리는
+     그 동작이다. 화면마다 따로 스크롤 컨테이너를 두지 않아도 되게 여기서 받는다. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 /* Dark shell for screens with a dark palette of their own. Keeping the frame
@@ -52,8 +61,10 @@
 
   .phone {
     max-width: none;
+    height: 100vh;
     min-height: 100vh;
     /* dvh accounts for the browser's collapsing address bar. */
+    height: 100dvh;
     min-height: 100dvh;
     border: 0;
     border-radius: 0;

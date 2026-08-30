@@ -36,6 +36,8 @@ class LiarStateResponse(BaseModel):
     my_word: Optional[str] = None
     am_i_liar: bool = False
     seen: int = 0
+    # 나는 준비됐다고 눌렀나. 제시어를 본 것과 시작할 준비가 된 것은 다르다.
+    i_am_seen: bool = False
     total: int = 0
     speaker_player_id: Optional[str] = None
     speaker_nickname: Optional[str] = None

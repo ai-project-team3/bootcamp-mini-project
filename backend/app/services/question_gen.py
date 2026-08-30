@@ -53,6 +53,7 @@ class BinaryQuestionOut(BaseModel):
 
 
 class TelepathyPairOut(BaseModel):
+    topic: str = Field(max_length=GAME_WORD_MAX_LEN)
     a: str = Field(max_length=GAME_WORD_MAX_LEN)
     b: str = Field(max_length=GAME_WORD_MAX_LEN)
 
@@ -188,9 +189,9 @@ def _apply_game_content(db: Session, room_id: str, result: GeneratedQuestions) -
     from ..content.game_content import LIAR_ROUNDS, TELEPATHY_ROUNDS, save
 
     pairs = [
-        {"a": t.a, "b": t.b}
+        {"topic": t.topic, "a": t.a, "b": t.b}
         for t in result.telepathy
-        if t.a and t.b and t.a != t.b and not contains_banned_word(t.a, t.b)
+        if t.topic and t.a and t.b and t.a != t.b and not contains_banned_word(t.topic, t.a, t.b)
     ]
     if len(pairs) >= TELEPATHY_ROUNDS:
         save(db, room_id, "TELEPATHY", pairs[:TELEPATHY_ROUNDS])
@@ -275,6 +276,18 @@ def _call_llm(project_text: str) -> Optional[GeneratedQuestions]:
         f"p3 (표현력 — 잘 드러내는 사람 지목): \"{IMPRESSION_QUESTIONS[2]['text']}\"\n"
         f"p4 (공감력 — 잘 챙기는 사람 지목): \"{IMPRESSION_QUESTIONS[3]['text']}\"\n"
         f"p5 (관찰력 — 잘 눈치채는 사람 지목): \"{IMPRESSION_QUESTIONS[4]['text']}\"\n"
+        "\n[게임 소재]\n"
+        "telepathy 6쌍 — 가벼운 취향 고르기다. 각 쌍은 topic/a/b 셋을 채운다.\n"
+        "  topic은 무엇을 묻는지다. 없으면 화면에 단어 두 개만 놓여서 무엇을 "
+        "고르라는 건지 알 수 없다. 예) topic='여행 짐은' a='캐리어' b='배낭'.\n"
+        "  a와 b는 같은 꼴로 쓴다. '파인애플 피자 찬성' 대 '반대'처럼 한쪽만 "
+        "길면 안 된다 — topic을 '파인애플 피자는'으로 올리고 a/b를 '찬성'/'반대'로 맞춘다.\n"
+        "  프로젝트와 무관해도 된다. 능력치를 재지 않으므로 가벼울수록 좋다.\n"
+        "traits 6개 — '나는 ___한 사람이다'의 빈칸. 배타적이지 않아도 되고 고르는 재미만 있으면 된다.\n"
+        "liar_words 4쌍 — major는 다수가 받는 말, minor는 한 명만 받는 말이고 둘은 서로 "
+        "비슷해야 한다. 아예 다른 두 단어면 첫 마디에 들통난다. 그리고 다들 한마디씩은 "
+        "할 말이 있는 것으로 고른다 — 겪어봤거나, 호불호가 갈리거나, 말하다 보면 웃긴 것. "
+        "심부름 목록 같은 건 피한다.\n"
     )
     started = time.monotonic()
     try:

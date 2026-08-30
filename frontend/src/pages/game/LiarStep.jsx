@@ -65,6 +65,7 @@ export default function LiarStep({ code, playerId, onAdvance }) {
   const [accusePick, setAccusePick] = useState(null)
   const [accused, setAccused] = useState(false)
   const [wordDraft, setWordDraft] = useState('')
+  const [peeked, setPeeked] = useState(false)
   const [left, setLeft] = useState(SPEAK_SECONDS)
   const [error, setError] = useState(null)
   const advanced = useRef(false)
@@ -85,6 +86,7 @@ export default function LiarStep({ code, playerId, onAdvance }) {
               setAccused(false)
               setAccusePick(null)
               setWordDraft('')
+              setPeeked(false)
             }
             return s
           })
@@ -141,14 +143,31 @@ export default function LiarStep({ code, playerId, onAdvance }) {
           word={state.my_word}
           isLiar={state.am_i_liar}
           hint="꾹 누르고 있는 동안만 보입니다"
-          onFirstPeek={() => markLiarSeen(code, playerId).then(setState).catch(() => {})}
+          onFirstPeek={() => setPeeked(true)}
         />
-        <p className="liar-cap">
-          {state.seen} / {state.total}명 확인
-        </p>
         <p className="liar-hint">
-          한 명만 다른 단어를 받습니다. 돌아가며 한마디씩 하고, 라이어를 지목합니다
+          한 명만 다른 단어를 받습니다. 돌아가며 <b>제시어를 설명</b>하고, 설명이
+          어긋나는 사람을 찾아 지목합니다
         </p>
+        {/* 확인하자마자 넘어가면 단어를 곱씹을 틈이 없다. 준비됐다고 스스로
+            말한 사람만 세고, 전원이 준비되면 시작한다. */}
+        {state.i_am_seen ? (
+          <div className="game-waiting">
+            <p>다른 사람들을 기다리는 중...</p>
+            <div className="game-dots">
+              {Array.from({ length: state.total }, (_, i) => (
+                <span key={i} className={i < state.seen ? 'game-dot on' : 'game-dot'} />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <Button
+            disabled={!peeked}
+            onClick={() => markLiarSeen(code, playerId).then(setState).catch(() => {})}
+          >
+            {peeked ? '준비됐어요' : '먼저 제시어를 확인하세요'}
+          </Button>
+        )}
       </div>
     )
   }
@@ -165,7 +184,7 @@ export default function LiarStep({ code, playerId, onAdvance }) {
               <span>{left}</span>
             </div>
             <p className="liar-turn-name">내 차례입니다</p>
-            <p className="liar-hint">제시어를 직접 말하지 말고 설명하세요</p>
+            <p className="liar-hint">제시어를 그대로 말하지 않고 설명합니다</p>
             <Button variant="secondary" onClick={() => nextLiarSpeaker(code)}>
               다 말했어요
             </Button>
@@ -173,7 +192,7 @@ export default function LiarStep({ code, playerId, onAdvance }) {
         ) : (
           <div className="liar-turn">
             <p className="liar-turn-name">{state.speaker_nickname}님 차례</p>
-            <p className="liar-hint">화면 말고 사람을 보세요</p>
+            <p className="liar-hint">설명이 어딘가 어긋나지 않는지 들어보세요</p>
           </div>
         )}
         {/* 말하는 동안에도 자기 단어는 언제든 다시 볼 수 있어야 한다. */}

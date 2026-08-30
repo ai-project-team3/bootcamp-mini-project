@@ -48,7 +48,11 @@ export default function GamePage() {
   const [questions, setQuestions] = useState(null)
   const [error, setError] = useState(null)
   const [intro, setIntro] = useState(null)
-  const [revealSeen, setRevealSeen] = useState(false)
+  // 마지막 판이 끝나면 서버 단계가 곧바로 다음으로 넘어간다. 그러면 2.5초
+  // 폴링이 화면을 갈아치워서, 그 단계가 자기 결과를 보여줄 틈이 없다 — 눈치
+  // 게임 마지막 판이 연출도 없이 지나가던 이유다. 마무리 화면이 있는 단계는
+  // 스스로 끝났다고 할 때까지 화면을 붙잡는다.
+  const [held, setHeld] = useState(null)
 
   const refreshPhase = useCallback(async () => {
     try {
@@ -71,12 +75,30 @@ export default function GamePage() {
     getQuestions(code).then(setQuestions).catch((err) => setError(err.message))
   }, [code])
 
+  // 단계에 내려보내는 콜백은 신원이 고정돼야 한다. 렌더마다 새 함수를 만들면
+  // 그걸 의존성에 넣은 폴링 effect가 매번 다시 걸리고, 공개 타이머가 걸릴
+  // 때마다 초기화돼 다음 단계로 영영 못 넘어간다.
+  const advance = useCallback(() => {
+    setHeld(null)
+    refreshPhase()
+  }, [refreshPhase])
+
+  const holders = useMemo(() => {
+    const names = [
+      'IMPRESSION_PRE', 'ANSWER', 'IMPRESSION_POST', 'TELEPATHY',
+      'TRAIT', 'NUNCHI', 'LIAR', 'TYPE_GUESS',
+    ]
+    return Object.fromEntries(
+      names.map((name) => [name, () => setHeld((cur) => (cur === name ? cur : name))]),
+    )
+  }, [])
+
   // 마지막 사람이 제출하는 순간 방은 DONE이 되지만, 그때 바로 허브로 보내면
   // 유형 공개 화면을 아무도 못 본다. 그 화면이 이 판의 결과물이므로 스스로
   // 끝났다고 할 때까지 붙잡는다.
   useEffect(() => {
-    if (phase === 'DONE' && revealSeen) navigate(`/room/${code}/hub`)
-  }, [phase, revealSeen, code, navigate])
+    if (phase === 'DONE' && !held) navigate(`/room/${code}/hub`)
+  }, [phase, held, code, navigate])
 
   // 단계가 바뀌면 이름을 한 번 크게 띄우고 들어간다 (§13-3 단계 전환).
   useEffect(() => {
@@ -114,41 +136,29 @@ export default function GamePage() {
     )
   }
 
+  // 붙잡고 있는 단계가 있으면 그걸, 없으면 서버가 말하는 단계를 그린다.
+  const shown = held ?? phase
+  const stepProps = (name) => ({ code, playerId, onHold: holders[name], onAdvance: advance })
+
   return (
     <PhoneFrame>
-      <TopBar title={PHASE_TITLES[phase === 'DONE' ? 'TYPE_GUESS' : phase] ?? '얼음땡'} showBack={false} />
+      <TopBar title={PHASE_TITLES[shown === 'DONE' ? 'TYPE_GUESS' : shown] ?? '얼음땡'} showBack={false} />
       {error && <p className="game-error">{error}</p>}
       {phase && !questions && !error && <p className="game-hint">문항을 불러오는 중...</p>}
-      {phase === 'IMPRESSION_PRE' && questions && (
-        <ImpressionStep
-          code={code}
-          playerId={playerId}
-          round="pre"
-          questions={impressionQuestions}
-          onAdvance={refreshPhase}
-        />
+      {shown === 'IMPRESSION_PRE' && questions && (
+        <ImpressionStep round="pre" questions={impressionQuestions} {...stepProps('IMPRESSION_PRE')} />
       )}
-      {phase === 'ANSWER' && questions && (
-        <AnswerStep code={code} playerId={playerId} questions={eitherOrQuestions} onAdvance={refreshPhase} />
+      {shown === 'ANSWER' && questions && (
+        <AnswerStep questions={eitherOrQuestions} {...stepProps('ANSWER')} />
       )}
-      {phase === 'IMPRESSION_POST' && questions && (
-        <ImpressionStep
-          code={code}
-          playerId={playerId}
-          round="post"
-          questions={impressionQuestions}
-          onAdvance={refreshPhase}
-        />
+      {shown === 'IMPRESSION_POST' && questions && (
+        <ImpressionStep round="post" questions={impressionQuestions} {...stepProps('IMPRESSION_POST')} />
       )}
-      {phase === 'TELEPATHY' && (
-        <TelepathyStep code={code} playerId={playerId} onAdvance={refreshPhase} />
-      )}
-      {phase === 'TRAIT' && <TraitStep code={code} playerId={playerId} onAdvance={refreshPhase} />}
-      {phase === 'NUNCHI' && <NunchiStep code={code} playerId={playerId} onAdvance={refreshPhase} />}
-      {phase === 'LIAR' && <LiarStep code={code} playerId={playerId} onAdvance={refreshPhase} />}
-      {(phase === 'TYPE_GUESS' || (phase === 'DONE' && !revealSeen)) && (
-        <TypeGuessStep code={code} playerId={playerId} onAdvance={() => setRevealSeen(true)} />
-      )}
+      {shown === 'TELEPATHY' && <TelepathyStep {...stepProps('TELEPATHY')} />}
+      {shown === 'TRAIT' && <TraitStep {...stepProps('TRAIT')} />}
+      {shown === 'NUNCHI' && <NunchiStep {...stepProps('NUNCHI')} />}
+      {shown === 'LIAR' && <LiarStep {...stepProps('LIAR')} />}
+      {(shown === 'TYPE_GUESS' || shown === 'DONE') && <TypeGuessStep {...stepProps('TYPE_GUESS')} />}
       {!phase && !error && <p className="game-hint">불러오는 중...</p>}
       {intro && <StageIntro label={PHASE_TITLES[intro] ?? ''} rule={PHASE_RULES[intro]} />}
     </PhoneFrame>
