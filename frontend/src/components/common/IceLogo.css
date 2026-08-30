@@ -38,7 +38,8 @@
   filter: drop-shadow(0 6px 14px rgba(4, 16, 40, 0.7));
 }
 
-.icelogo-depth b { color: #7d1745; }
+/* 땡의 두께는 얼음보다 밝게. 짙게 깔면 핑크가 어두운 테에 갇혀 답답해진다. */
+.icelogo-depth b { color: #a81a5c; }
 
 /* ② 서리 테두리 — 굵으면 만화가 되고 없으면 밋밋하다. */
 .icelogo-rim {
@@ -46,7 +47,9 @@
   -webkit-text-stroke: 2.5px rgba(214, 244, 255, 0.5);
 }
 
-.icelogo-rim b { -webkit-text-stroke-color: rgba(255, 214, 234, 0.5); }
+/* 땡에는 서리를 두르지 않는다. 얼음은 갇혀 있고 땡은 풀린 쪽이라, 같은
+   두께로 테를 치면 둘이 같은 상태로 보인다. */
+.icelogo-rim b { -webkit-text-stroke-width: 0; }
 
 /* ③ 몸통 — 빛이 위에서 온다. */
 .icelogo-body {
@@ -66,7 +69,9 @@
 /* 얼음은 언 파랑, 땡은 풀리는 핑크. */
 .icelogo-body b {
   font-weight: inherit;
-  background: linear-gradient(177deg, #fff0f7 0%, #ffb3d6 26%, #ff5ea3 62%, #e01a6f 100%);
+  /* 아래쪽을 어둡게 떨어뜨리지 않는다. 얼음은 짙어져야 덩어리로 보이지만
+     땡은 풀린 쪽이라 끝까지 선명한 편이 맞다. */
+  background: linear-gradient(177deg, #ffe3f0 0%, #ff8cc2 30%, #ff3d90 70%, #ff2e88 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -75,6 +80,19 @@
 /* ④ 광택 — 윗면의 젖은 빛과, 그 아래를 한 번 지나가는 얇은 굴절선.
    칼로 자르듯 끊으면 글자를 반으로 칠한 것처럼 보인다. 그라디언트로 사라지게
    두어야 빛으로 읽힌다. */
+/* 땡에는 광택도 옅게. 젖은 얼음 면은 얼음 쪽 이야기다. */
+.icelogo-gloss b {
+  background: linear-gradient(
+    179deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.12) 16%,
+    rgba(255, 255, 255, 0) 34%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .icelogo-gloss {
   background: linear-gradient(
     179deg,

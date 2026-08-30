@@ -16,6 +16,34 @@
 .icecritter-bob {
   animation: icecritter-bob 0.42s ease-in-out infinite alternate;
   transform-origin: 50% 100%;
+  /* 어두운 몸통이 남색 바탕에 묻히지 않게 가장자리에 옅은 빛을 준다. */
+  filter: drop-shadow(0 0 7px rgba(150, 200, 240, 0.35));
+}
+
+/* 다리는 멈췄을 때만, 잔상은 달릴 때만. 둘은 정확히 반대다. */
+.icecritter-legs { animation: icecritter-legs 22s linear infinite; }
+.icecritter-wheel { animation: icecritter-wheel 22s linear infinite; }
+.icecritter-wheel-spin { animation: icecritter-wheel-spin 0.5s linear infinite; }
+
+@keyframes icecritter-legs {
+  0%, 18% { opacity: 0; }
+  20%, 66% { opacity: 1; }
+  68%, 79% { opacity: 0; }
+  81%, 91% { opacity: 1; }
+  93%, 100% { opacity: 0; }
+}
+
+@keyframes icecritter-wheel {
+  0%, 18% { opacity: 1; }
+  20%, 66% { opacity: 0; }
+  68%, 79% { opacity: 1; }
+  81%, 91% { opacity: 0; }
+  93%, 100% { opacity: 1; }
+}
+
+/* 잔상은 점선이 돌면서 바퀴처럼 보이게 한다. */
+@keyframes icecritter-wheel-spin {
+  to { stroke-dashoffset: -32; }
 }
 
 .icecritter-hit {
@@ -107,6 +135,11 @@
 @media (prefers-reduced-motion: reduce) {
   .icecritter { animation: none; transform: translateX(128px); opacity: 1; }
   .icecritter-hit,
-  .icecritter-bob { animation: none; }
+  .icecritter-bob,
+  .icecritter-legs,
+  .icecritter-wheel-spin { animation: none; }
+  /* 서 있는 모습으로 고정한다 — 다리가 보이고 잔상은 없다. */
+  .icecritter-legs { opacity: 1; }
+  .icecritter-wheel { animation: none; opacity: 0; }
   .icecritter-chip { display: none; }
 }
