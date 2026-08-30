@@ -30,10 +30,10 @@
 .icescene-block {
   position: absolute;
   left: 50%;
-  bottom: 46px;
-  width: 48px;
-  height: 40px;
-  margin-left: -24px;
+  bottom: 42px;
+  width: 72px;
+  height: 60px;
+  margin-left: -36px;
   /* 맞을 때마다 한 번 흔들린다. 안 움직이면 곡괭이가 허공을 치는 것처럼 보인다. */
   animation: icescene-block 1.5s linear infinite;
 }
@@ -58,12 +58,12 @@
 .icescene-penguin {
   left: 50%;
   /* 곡괭이 날이 얼음덩이에 닿을 만큼만 붙인다. */
-  margin-left: -62px;
+  margin-left: -78px;
 }
 
 .icescene-bear {
   left: 50%;
-  margin-left: 22px;
+  margin-left: 36px;
 }
 
 /* 두 컷을 정확히 겹쳐두고 하나만 켠다. 보간이 없어야 게임 스프라이트처럼
@@ -88,10 +88,17 @@
   90% { opacity: 0; }
 }
 
+/* 한 바퀴에 **두 번** 맞는다. 펭귄이 70%에, 곰이 그 절반 뒤인 20%에 —
+   한 번만 넣어두면 곰이 칠 때 얼음이 가만히 있어서 헛치는 것처럼 보인다.
+   맞은 쪽으로 밀리게 방향도 반대로 준다. */
 @keyframes icescene-block {
-  0%, 69% { transform: translate(0, 0) rotate(0deg); }
-  71% { transform: translate(2px, 1px) rotate(1.4deg); }
-  75% { transform: translate(-2px, 0) rotate(-1.1deg); }
+  0%, 19% { transform: translate(0, 0) rotate(0deg); }
+  21% { transform: translate(-3px, 1px) rotate(-1.6deg); }
+  25% { transform: translate(2px, 0) rotate(1.2deg); }
+  29% { transform: translate(-1px, 0) rotate(-0.5deg); }
+  33%, 69% { transform: translate(0, 0) rotate(0deg); }
+  71% { transform: translate(3px, 1px) rotate(1.6deg); }
+  75% { transform: translate(-2px, 0) rotate(-1.2deg); }
   79% { transform: translate(1px, 0) rotate(0.5deg); }
   83%, 100% { transform: translate(0, 0) rotate(0deg); }
 }
@@ -108,9 +115,9 @@
 .icescene-chip {
   position: absolute;
   left: 50%;
-  top: 14px;
-  width: 4px;
-  height: 4px;
+  top: 20px;
+  width: 5px;
+  height: 5px;
   border-radius: 1px;
   background: #eafbff;
   box-shadow: 0 0 5px rgba(190, 240, 255, 0.9);
@@ -123,8 +130,12 @@
 .icescene-chip-3 { --cx: 8px; --cy: -23px; }
 .icescene-chip-4 { --cx: 20px; --cy: -16px; }
 
+/* 부스러기도 두 번 튄다. 곰이 칠 때는 반대쪽으로. */
 @keyframes icescene-chip {
-  0%, 69% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
+  0%, 19% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
+  21% { opacity: 1; transform: translate3d(0, 0, 0) scale(0.7); }
+  38% { opacity: 0; transform: translate3d(calc(var(--cx) * -1), var(--cy), 0) scale(1) rotate(-140deg); }
+  39%, 69% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
   71% { opacity: 1; transform: translate3d(0, 0, 0) scale(0.7); }
   88% { opacity: 0; transform: translate3d(var(--cx), var(--cy), 0) scale(1) rotate(140deg); }
   89%, 100% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
