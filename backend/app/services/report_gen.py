@@ -24,7 +24,11 @@ PARAGRAPH_MAX_COUNT = 3
 SUMMARY_MAX_LEN = 60
 REASON_MAX_LEN = 100
 HIGHLIGHT_MAX_LEN = 110
-TIMEOUT_S = 20.0
+COMPAT_NOTE_MAX_LEN = 160
+# 짝 수는 인원수의 제곱으로 늘어난다(8명이면 28쌍). 궁합 문단까지 얹으면
+# 출력이 길어져서 여유를 준다 — 마지막 단계가 끝난 뒤 한 번 부르는 호출이라
+# 몇 초 더 걸려도 게임 진행에는 영향이 없다.
+TIMEOUT_S = 45.0
 
 # 출력에서 이 단어가 하나라도 보이면 통째로 버린다. MBTI를 재탕한 리포트는
 # "오늘의 나"가 아니게 된다.
@@ -43,8 +47,19 @@ class PlayerCommentOut(BaseModel):
     paragraphs: list[str] = Field(min_length=PARAGRAPH_MIN_COUNT, max_length=PARAGRAPH_MAX_COUNT)
 
 
+class CompatNoteOut(BaseModel):
+    """두 사람 사이에 대한 한 문단. 등급과 태그는 코드가 이미 계산해 두었고
+    (services/scoring.compute_compat), 여기서는 그 판정을 **말로 푸는 일**만 한다.
+    판정 자체를 다시 하지 않는다."""
+
+    a: str
+    b: str
+    note: str = Field(max_length=COMPAT_NOTE_MAX_LEN)
+
+
 class GeneratedReport(BaseModel):
     players: list[PlayerCommentOut]
+    compat: list[CompatNoteOut]
     team_summary: str = Field(max_length=SUMMARY_MAX_LEN)
     team_reasons: list[str]
     highlights: list[str]
@@ -92,6 +107,9 @@ def _clean(result: GeneratedReport, expected_nicknames: set[str]) -> bool:
     texts: list[str] = [result.team_summary, *result.team_reasons, *result.highlights]
     for p in result.players:
         texts += p.paragraphs
+    # 궁합 문장도 같은 금지어를 지켜야 한다. 여기만 빠지면 MBTI 이름이 리포트에
+    # 남는 구멍이 된다.
+    texts += [c.note for c in result.compat]
     for t in texts:
         if any(word in t for word in BANNED):
             logger.warning("report generation: banned word in %r", t)
@@ -138,6 +156,17 @@ def generate(context: str, expected_nicknames: set[str]) -> Optional[GeneratedRe
         f"team_summary: 이 팀을 한 줄로. {SUMMARY_MAX_LEN}자 이내.\n"
         f"team_reasons: 등급이 그렇게 나온 이유 4개. 각 {REASON_MAX_LEN}자 이내.\n"
         f"highlights: 오늘의 장면 3개. 각 {HIGHLIGHT_MAX_LEN}자 이내.\n"
+        f"compat: 위 '짝별 판정'에 적힌 **모든 짝**에 한 문단씩. 각 "
+        f"{COMPAT_NOTE_MAX_LEN}자 이내. a와 b에는 그 두 사람의 닉네임을 그대로 쓴다.\n"
+        "  · 등급과 보완/닮음은 이미 정해져 있다. 다시 판정하지 말고 **왜 그렇게 "
+        "나왔는지**를 두 사람의 능력치로 짚어라.\n"
+        "  · 세 가지를 순서대로 담는다 — 어디가 닮았는지, 어디가 갈리는지, 그래서 "
+        "둘이 같이 일하면 뭐가 잘 굴러갈지.\n"
+        "  · 게임에서 뭘 했는지가 아니라 **그래서 어떤 사람들인지**를 쓴다. "
+        "'눈치 게임에서 먼저 눌렀다'가 아니라 '먼저 움직이는 사람과 재보고 "
+        "움직이는 사람'처럼 성향으로 옮겨 쓴다.\n"
+        "  · 여기서는 비꼬지 않는다. 개인 코멘트는 놀려도 되지만 두 사람 사이를 "
+        "놀리면 그 자리에서 어색해진다.\n"
     )
     started = time.monotonic()
     try:
@@ -171,6 +200,7 @@ def build_context(
     context_line: Optional[str],
     players: list[dict],
     grade: str,
+    compat_pairs: Optional[list[dict]] = None,
 ) -> str:
     """LLM에 넘길 기록. 사람이 읽어도 이해되는 형태로 둔다 — 프롬프트를 디버깅할 때
     이 문자열만 보고 무엇이 들어갔는지 알 수 있어야 한다."""
@@ -196,4 +226,9 @@ def build_context(
             f"  맞히기 {p['hits']}/{p['tries']} · 칭호 {', '.join(p['badges']) or '-'}\n"
             f"  궁합 {compat_line}"
         )
+    if compat_pairs:
+        lines.append("")
+        lines.append("짝별 판정 — 이미 계산된 값이다. 뒤집지 말고 이유만 붙여라:")
+        for c in compat_pairs:
+            lines.append(f"  {c['a']} ↔ {c['b']} — {c['grade']} 등급, {c['tag']}")
     return "\n".join(lines)

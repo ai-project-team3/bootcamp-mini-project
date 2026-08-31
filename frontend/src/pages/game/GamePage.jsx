@@ -100,14 +100,23 @@ export default function GamePage() {
     if (phase === 'DONE' && !held) navigate(`/room/${code}/hub`)
   }, [phase, held, code, navigate])
 
+  // 붙잡고 있는 단계가 있으면 그걸, 없으면 서버가 말하는 단계를 그린다.
+  const shown = held ?? phase
+
   // 단계가 바뀌면 이름을 한 번 크게 띄우고 들어간다 (§13-3 단계 전환).
+  //
+  // **`phase`가 아니라 화면에 실제로 그려지는 단계를 따라야 한다.** 서버 단계는
+  // 마지막 사람이 제출하는 순간 넘어가는데, 그때 이전 단계는 아직 결과를
+  // 보여주는 중이다. phase를 따라가면 다음 단계 이름이 불투명한 막으로 그 결과를
+  // 덮어버린다 — 동시에 답하기 마지막 문항의 집계가 안 보이고 ○○님은 화면이
+  // 튀어나오던 게 이것이었다.
   useEffect(() => {
-    if (!phase || phase === 'DONE') return
-    setIntro(phase)
+    if (!shown || shown === 'DONE') return
+    setIntro(shown)
     // 이름만 띄울 때는 1.4초였는데, 밑에 규칙 한 줄이 붙었으니 읽을 시간을 준다.
     const timer = setTimeout(() => setIntro(null), 2200)
     return () => clearTimeout(timer)
-  }, [phase])
+  }, [shown])
 
   const impressionQuestions = useMemo(
     () =>
@@ -136,8 +145,6 @@ export default function GamePage() {
     )
   }
 
-  // 붙잡고 있는 단계가 있으면 그걸, 없으면 서버가 말하는 단계를 그린다.
-  const shown = held ?? phase
   const stepProps = (name) => ({ code, playerId, onHold: holders[name], onAdvance: advance })
 
   return (

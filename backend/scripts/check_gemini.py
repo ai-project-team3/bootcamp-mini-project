@@ -59,8 +59,20 @@ def main() -> int:
         )
     except Exception as error:  # noqa: BLE001 — 무엇이 틀렸든 사람에게 보여준다
         # 구글이 돌려주는 본문은 길다. 사람이 읽을 한 줄만 남긴다.
-        detail = str(error).splitlines()[0][:150]
-        print(f"[  실패  ] 호출이 안 됩니다: {type(error).__name__}: {detail}")
+        text = str(error)
+        # 한도 초과는 "키가 틀렸다"와 완전히 다른 이야기다. 같은 문구로 안내하면
+        # 멀쩡한 키를 지우고 다시 발급받게 된다.
+        if "RESOURCE_EXHAUSTED" in text or "429" in text[:20]:
+            print("[ 한도초과 ] 키는 멀쩡한데 오늘 몫을 다 썼습니다.")
+            print("           무료 한도는 모델·프로젝트당 하루 20회입니다.")
+            print("           한 세션이 두 번 부르니 하루 열 판입니다. 내일 다시 찹니다.")
+            print("           지우고 새로 발급받아도 같은 프로젝트면 소용없습니다.")
+            return 1
+        if "UNAVAILABLE" in text or "503" in text[:20]:
+            print("[  붐빔  ] 키는 멀쩡한데 모델 쪽이 지금 몰려 있습니다.")
+            print("           잠깐 뒤에 다시 해보세요. 앱은 그동안 기본 문장으로 넘어갑니다.")
+            return 1
+        print(f"[  실패  ] 호출이 안 됩니다: {type(error).__name__}: {text.splitlines()[0][:150]}")
         print("           키가 틀렸거나, 만료됐거나, 네트워크가 막혀 있습니다.")
         return 1
 
