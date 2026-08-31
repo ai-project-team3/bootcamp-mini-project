@@ -1,3 +1,5 @@
+import random
+import time
 import uuid
 from dataclasses import dataclass, field
 from threading import Lock
@@ -37,9 +39,35 @@ class DemoRoomLaunchError(DemoRoomError):
     pass
 
 
-#: Nickname prefix for seats filled by the "혼자 해보기" button, so a bot is
-#: recognisable in every roster it appears in.
-TEST_BOT_NICKNAME_PREFIX = '테스트봇'
+#: Names for the seats the demo fills, in order.
+#:
+#: The first four are the people the party games in the shared room already
+#: play with (`frontend/src/data/gameDemo/gameDemoData.js`), so a group that
+#: carries on into 마피아 or 커플 브루마블 keeps the same faces instead of
+#: watching 서준 and 유나 turn into 테스트봇1 and 테스트봇2 on the way in.
+#: The rest continue the list far enough to fill the largest room.
+TEST_BOT_NICKNAMES = ('서준', '유나', '지안', '다온', '하람', '시우', '나린', '도윤', '소율')
+
+
+def bot_nickname_for(index: int) -> str:
+    """The name for the `index`-th filled seat, counting from zero.
+
+    Past the end of the roster the names repeat with a number, which only
+    happens in rooms bigger than the list — never in a game that runs today.
+    """
+    name = TEST_BOT_NICKNAMES[index % len(TEST_BOT_NICKNAMES)]
+    lap = index // len(TEST_BOT_NICKNAMES)
+    return name if lap == 0 else f'{name}{lap + 1}'
+
+
+#: How long apart the filled seats appear, in seconds.
+#:
+#: They are all created by one request, but a waiting room where four names
+#: appear in the same instant does not read as people arriving — it reads as a
+#: list being populated, which is what it is. Letting them in one at a time
+#: over a few seconds gives the host the thing the waiting room is for:
+#: watching the room fill up.
+BOT_ARRIVAL_SECONDS = (1.0, 3.0)
 
 
 @dataclass(frozen=True)
@@ -49,6 +77,13 @@ class DemoPlayer:
     seat_no: int
     is_host: bool
     is_bot: bool = False
+    #: When this seat becomes visible to the room, as a `time.time()` moment.
+    #: A person is here the moment they join; a filled seat walks in a little
+    #: later so the room fills up rather than appearing all at once.
+    arrives_at: float = 0.0
+
+    def has_arrived(self, now: float) -> bool:
+        return self.arrives_at <= now
 
 
 @dataclass(frozen=True)
@@ -78,6 +113,18 @@ class DemoRoom:
     #: The games use it to look up the abilities that session measured, matching
     #: people by nickname — see `services/persona_handoff`.
     source_room_code: str | None = None
+
+
+def visible_players(room: DemoRoom, now: float | None = None) -> list[DemoPlayer]:
+    """The seats the room currently shows, newest arrivals included.
+
+    Filled seats walk in a few seconds apart, so this is what any client-facing
+    count or roster must use. Capacity, starting and the handover to a game
+    read `room.players` — every seat is really taken from the moment it is
+    created, whether or not its occupant has appeared yet.
+    """
+    moment = time.time() if now is None else now
+    return [player for player in room.players if player.has_arrived(moment)]
 
 
 def demo_room_can_start(player_count: int) -> bool:
@@ -112,9 +159,16 @@ class DemoRoomStore:
         with self._lock:
             return self._require_room(code)
 
-    def list_players(self, code: str) -> list[DemoPlayer]:
+    def list_players(self, code: str, now: float | None = None) -> list[DemoPlayer]:
+        """The roster as the room currently shows it.
+
+        Seats whose occupant has not walked in yet are held back, so a room
+        filled with test bots fills up over a few seconds. Everything that has
+        to count every seat — capacity, starting, handing the group to a game —
+        reads `room.players` instead.
+        """
         with self._lock:
-            return list(self._require_room(code).players)
+            return visible_players(self._require_room(code), now)
 
     def join_room(self, code: str, nickname: str) -> DemoPlayer:
         with self._lock:
@@ -143,17 +197,23 @@ class DemoRoomStore:
             if host is None or not host.is_host:
                 raise DemoRoomAuthorizationError('방장만 인원을 채울 수 있습니다')
             bot_number = sum(1 for player in room.players if player.is_bot)
+            # They are seated now — capacity and the launch see them straight
+            # away — but each walks in a little after the last, so the host
+            # watches the room fill instead of it appearing already full.
+            arrival = time.time()
             for _ in range(max(count, 0)):
                 if not demo_room_has_capacity(len(room.players)):
                     break
-                bot_number += 1
+                arrival += random.uniform(*BOT_ARRIVAL_SECONDS)
                 room.players.append(DemoPlayer(
                     str(uuid.uuid4()),
-                    f'{TEST_BOT_NICKNAME_PREFIX}{bot_number}',
+                    bot_nickname_for(bot_number),
                     len(room.players) + 1,
                     False,
                     is_bot=True,
+                    arrives_at=arrival,
                 ))
+                bot_number += 1
             return room
 
     def start_room(self, code: str, player_id: str) -> DemoRoom:

@@ -20,6 +20,7 @@ from ..schemas.demo_room import (
     DemoRoomStartRequest,
 )
 from ..services.demo_rooms import (
+    visible_players,
     DEMO_ROOM_MAX_PLAYERS,
     DemoLaunch,
     DemoPlayer,
@@ -47,7 +48,10 @@ def _room_response(room: DemoRoom, persona_matches: int = 0) -> DemoRoomResponse
     return DemoRoomResponse(
         code=room.code,
         status=room.status,
-        player_count=len(room.players),
+        # Matches the roster GET /players returns: seats whose occupant has not
+        # walked in yet are not counted, so the number and the list of names
+        # never disagree while a filled room is still filling.
+        player_count=len(visible_players(room)),
         max_players=DEMO_ROOM_MAX_PLAYERS,
         selected_game_id=room.selected_game_id,
         game_phase=room.game_phase,

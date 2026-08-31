@@ -141,6 +141,9 @@ class Room:
     #: When a test bot last moved, so the next bot move waits long enough for
     #: a watcher to read what happened. See `game/bots.py`.
     last_bot_action_at: float = 0.0
+    #: How long the bot whose turn it is takes over its next move. Drawn per
+    #: move from `bots.BOT_THINKING_SECONDS` so the pace is not a metronome.
+    next_bot_delay: float = 0.0
 
     def is_full(self) -> bool:
         return len(self.players) >= self.max_players

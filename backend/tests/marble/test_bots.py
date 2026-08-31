@@ -29,7 +29,7 @@ _clock = [0.0]
 
 def _t() -> float:
     """A clock that always says enough time has passed for the next bot move."""
-    _clock[0] += bots.BOT_MOVE_INTERVAL_SECONDS
+    _clock[0] += max(bots.BOT_THINKING_SECONDS)
     return _clock[0]
 
 
@@ -109,9 +109,24 @@ def test_a_bot_move_waits_long_enough_to_be_watched():
     room, player_ids = _started_room([False, True])
     engine.advance_turn(room)
     now = 1000.0
+    low, high = bots.BOT_THINKING_SECONDS
 
     assert bots.take_pending_turn(room, random.Random(0), now=now) is True
-    assert bots.take_pending_turn(room, random.Random(0), now=now + 0.5) is False
-    assert bots.take_pending_turn(
-        room, random.Random(0), now=now + bots.BOT_MOVE_INTERVAL_SECONDS
-    ) is True
+    # The pause is drawn per move, so only the shortest one is guaranteed.
+    assert bots.take_pending_turn(room, random.Random(0), now=now + low - 0.1) is False
+    assert bots.take_pending_turn(room, random.Random(0), now=now + high) is True
+
+
+def test_each_pause_is_drawn_fresh_so_the_pace_is_not_a_metronome():
+    room, player_ids = _started_room([False, True])
+    engine.advance_turn(room)
+    low, high = bots.BOT_THINKING_SECONDS
+
+    drawn = set()
+    now = 1000.0
+    for seed in range(12):
+        bots.take_pending_turn(room, random.Random(seed), now=now)
+        assert low <= room.next_bot_delay <= high
+        drawn.add(round(room.next_bot_delay, 4))
+        now += high
+    assert len(drawn) > 1

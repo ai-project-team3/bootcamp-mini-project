@@ -13,33 +13,40 @@ read.
 import random
 import time
 
-from app.mafia.game import timing
 from app.mafia.models.room import GamePhase, Player, Room
 
-#: How long each phase the bots take part in runs for.
-_PHASE_SECONDS = {
-    GamePhase.DAY_VOTE: timing.DAY_VOTE_SECONDS,
-    GamePhase.EXECUTION_VOTE: timing.EXECUTION_VOTE_SECONDS,
-    GamePhase.NIGHT_ACTION: timing.NIGHT_ACTION_SECONDS,
-}
-
-#: How much of a phase the bots let pass before acting.
+#: How long a bot takes to make up its mind, in seconds.
 #:
-#: Without this the game skips: the state machine ends a phase the moment
-#: everyone who *can* act has, and a phase's required actors are often bots
-#: alone. A citizen watching the night sees mafia, doctor and police all move
-#: on the first poll and the night is over before the screen has drawn; the
-#: same happens in the execution vote to whoever is on trial. Waiting most of
-#: the phase out gives the human time to read what is happening, while still
-#: ending early once they have taken their own turn.
-THINKING_FRACTION = 0.55
+#: Each bot draws its own pause in this range when a phase opens, so the seats
+#: fill in one after another over a few seconds rather than every one of them
+#: resolving on a single tick — which is what a room of people looks like.
+#:
+#: The pauses run side by side rather than back to back on purpose. Queueing
+#: them made the wait grow with the room: eight players meant six execution
+#: votes at up to five seconds each, and that phase only lasts twenty, so the
+#: vote closed with half the room yet to speak and nobody was ever executed.
+BOT_THINKING_SECONDS = (2.0, 5.0)
 
 
-def _still_thinking(room: Room, now: float) -> bool:
-    length = _PHASE_SECONDS.get(room.phase)
-    if length is None or room.phase_deadline is None:
-        return False
-    return (room.phase_deadline - now) > length * (1 - THINKING_FRACTION)
+def _schedule(room: Room, chooser: random.Random, now: float) -> dict[str, float]:
+    """When each bot acts in the phase the room is in now.
+
+    Redrawn whenever the phase (or the day, or the night) changes, so every
+    phase gets a fresh spread instead of one order repeating all game.
+    """
+    key = (room.phase, room.day_number, room.night_number)
+    if room.bot_schedule_key != key:
+        room.bot_schedule_key = key
+        room.bot_schedule = {
+            player.player_id: now + chooser.uniform(*BOT_THINKING_SECONDS)
+            for player in room.players.values()
+            if player.is_bot
+        }
+    return room.bot_schedule
+
+
+def _ready(room: Room, bot_id: str, now: float) -> bool:
+    return room.bot_schedule.get(bot_id, now) <= now
 
 
 def act(
@@ -58,15 +65,28 @@ def act(
     — nobody accused, nobody attacked — so day and night cycled forever with
     nothing ever happening.
     """
-    if not force and _still_thinking(room, time.time() if now is None else now):
-        return
+    moment = time.time() if now is None else now
     chooser = rng or random
+    ready = _ready_bots(room, chooser, moment, force)
+    if not ready:
+        return
     if room.phase is GamePhase.DAY_VOTE:
-        _vote(room, chooser)
+        _vote(room, chooser, ready)
     elif room.phase is GamePhase.EXECUTION_VOTE:
-        _execution_vote(room, chooser)
+        _execution_vote(room, chooser, ready)
     elif room.phase is GamePhase.NIGHT_ACTION:
-        _night(room, chooser)
+        _night(room, chooser, ready)
+
+
+def _ready_bots(
+    room: Room, chooser: random.Random, now: float, force: bool
+) -> list[Player]:
+    """The living bots whose pause has run out."""
+    alive = _alive_bots(room)
+    if force:
+        return alive
+    _schedule(room, chooser, now)
+    return [bot for bot in alive if _ready(room, bot.player_id, now)]
 
 
 def _alive_bots(room: Room) -> list[Player]:
@@ -77,8 +97,8 @@ def _alive_ids(room: Room) -> list[str]:
     return [p.player_id for p in room.players.values() if p.is_alive]
 
 
-def _vote(room: Room, chooser: random.Random) -> None:
-    for bot in _alive_bots(room):
+def _vote(room: Room, chooser: random.Random, ready: list[Player]) -> None:
+    for bot in ready:
         if bot.player_id in room.votes_confirmed:
             continue
         targets = [pid for pid in _alive_ids(room) if pid != bot.player_id]
@@ -88,8 +108,8 @@ def _vote(room: Room, chooser: random.Random) -> None:
         room.votes_confirmed.add(bot.player_id)
 
 
-def _execution_vote(room: Room, chooser: random.Random) -> None:
-    for bot in _alive_bots(room):
+def _execution_vote(room: Room, chooser: random.Random, ready: list[Player]) -> None:
+    for bot in ready:
         if bot.player_id == room.accused_player_id:
             continue
         if bot.player_id in room.execution_confirmed:
@@ -98,8 +118,8 @@ def _execution_vote(room: Room, chooser: random.Random) -> None:
         room.execution_confirmed.add(bot.player_id)
 
 
-def _night(room: Room, chooser: random.Random) -> None:
-    for bot in _alive_bots(room):
+def _night(room: Room, chooser: random.Random, ready: list[Player]) -> None:
+    for bot in ready:
         if bot.player_id in room.night_actions:
             continue
         if bot.role == "mafia":
@@ -107,15 +127,16 @@ def _night(room: Room, chooser: random.Random) -> None:
                 pid for pid in _alive_ids(room)
                 if pid != bot.player_id and room.players[pid].role != "mafia"
             ]
-            if targets:
-                room.night_actions[bot.player_id] = ("kill", chooser.choice(targets))
-        elif bot.role == "doctor":
+            if not targets:
+                continue
+            room.night_actions[bot.player_id] = ("kill", chooser.choice(targets))
+        if bot.role == "doctor":
             # The doctor may protect itself, so every alive player is a target.
             room.night_actions[bot.player_id] = ("protect", chooser.choice(_alive_ids(room)))
-        elif bot.role == "police":
+        if bot.role == "police":
             targets = [pid for pid in _alive_ids(room) if pid != bot.player_id]
-            if targets:
-                target_id = chooser.choice(targets)
-                room.night_actions[bot.player_id] = ("investigate", target_id)
-                # A bot's finding is never shown to anyone, so unlike the real
-                # police action there is nothing to record on the room.
+            if not targets:
+                continue
+            room.night_actions[bot.player_id] = ("investigate", chooser.choice(targets))
+            # A bot's finding is never shown to anyone, so unlike the real
+            # police action there is nothing to record on the room.

@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import APIRouter, HTTPException
 
-from app.mafia.constants import ALLOWED_PLAYER_COUNTS, TEST_BOT_NICKNAME_PREFIX
+from app.mafia.constants import ALLOWED_PLAYER_COUNTS, bot_nickname_for
 from app.mafia.game import bots, state_machine
 from app.mafia.models.room import GamePhase, Player, Room
 from app.mafia.schemas.room import (
@@ -82,18 +82,18 @@ def update_player_count(room_id: str, req: UpdatePlayerCountRequest):
 
 @router.post("/{room_id}/fill-test-players")
 def fill_test_players(room_id: str):
-    """혼자서 전체 플레이를 테스트할 수 있도록 부족한 인원을 테스트봇으로
-    채우는 개발/데모 전용 엔드포인트. 실제 서비스에서는 사용하지 않는다 —
-    실제 인원은 QR/방 코드로 각자 들어온다."""
+    """혼자서 전체 플레이를 테스트할 수 있도록 부족한 인원을 채우는 개발/데모
+    전용 엔드포인트. 실제 서비스에서는 사용하지 않는다 — 실제 인원은 QR/방
+    코드로 각자 들어온다. 이름은 앞 게임들이 쓰는 것과 같은 목록에서 가져온다."""
     room = get_room_or_404(room_id)
     if room.phase != GamePhase.WAITING_ROOM:
         raise HTTPException(400, "대기실에서만 인원을 채울 수 있습니다")
-    bot_index = 1
+    bot_index = sum(1 for player in room.players.values() if player.is_bot)
     while len(room.players) < room.player_count:
         player_id = str(uuid.uuid4())
         room.players[player_id] = Player(
             player_id=player_id,
-            nickname=f"{TEST_BOT_NICKNAME_PREFIX}{bot_index}",
+            nickname=bot_nickname_for(bot_index),
             is_bot=True,
         )
         if room.host_player_id is None:

@@ -5,6 +5,7 @@ the line that picking 마피아 or 커플 브루마블 seats everyone who is alr
 here, and that each player learns only their own id in the new room.
 """
 
+import time
 import unittest
 
 from fastapi import HTTPException
@@ -21,6 +22,7 @@ from app.schemas.demo_room import (
     DemoRoomStartRequest,
 )
 from app.services import DemoRoomStore
+from app.services.demo_rooms import TEST_BOT_NICKNAMES
 
 
 class DemoRoomGameLaunchTest(unittest.TestCase):
@@ -234,22 +236,57 @@ class DemoRoomTestPlayersTest(unittest.TestCase):
             'ABC123', DemoRoomFillRequest(player_id=player_id, count=count), self.store
         )
 
+    def _settled(self):
+        """The roster once every filled seat has walked in.
+
+        Filled seats arrive a second or two apart so the waiting room fills up
+        rather than appearing full; these tests are about who ends up in it.
+        """
+        return self.store.list_players('ABC123', now=time.time() + 3600)
+
     def test_the_host_can_fill_seats_to_reach_a_games_minimum(self):
         host = self._host()
 
         self._fill(host.id, 3)
 
-        players = demo_rooms.list_demo_players('ABC123', self.store)
+        players = self._settled()
         self.assertEqual(len(players), 4)
         self.assertEqual([p.is_bot for p in players], [False, True, True, True])
 
-    def test_bots_are_named_so_nobody_mistakes_them_for_people(self):
+    def test_a_filled_seat_walks_in_rather_than_appearing_at_once(self):
+        host = self._host()
+
+        self._fill(host.id, 3)
+
+        # Right now the host is still alone on screen, though the seats are
+        # taken: capacity and the handover to a game see all four.
+        self.assertEqual(len(demo_rooms.list_demo_players('ABC123', self.store)), 1)
+        self.assertEqual(len(self.store.get_room('ABC123').players), 4)
+        self.assertEqual(len(self._settled()), 4)
+
+    def test_filled_seats_carry_the_names_the_earlier_games_use(self):
+        # A group coming out of the party games should keep the same faces —
+        # 서준 and 유나 turning into 테스트봇1 and 테스트봇2 on the way into
+        # 마피아 read as a different room rather than the same one carrying on.
         host = self._host()
 
         self._fill(host.id, 2)
 
-        names = [p.nickname for p in demo_rooms.list_demo_players('ABC123', self.store)]
-        self.assertEqual(names[1:], ['테스트봇1', '테스트봇2'])
+        names = [p.nickname for p in self._settled()]
+        self.assertEqual(names[1:], list(TEST_BOT_NICKNAMES[:2]))
+
+    def test_the_roster_starts_with_the_party_games_own_people(self):
+        # frontend/src/data/gameDemo/gameDemoData.js
+        self.assertEqual(TEST_BOT_NICKNAMES[:4], ('서준', '유나', '지안', '다온'))
+
+    def test_a_room_larger_than_the_roster_still_names_every_seat(self):
+        host = self._host()
+
+        self._fill(host.id, 9)
+
+        names = [p.nickname for p in self._settled()]
+        self.assertEqual(len(names), 10)
+        self.assertEqual(len(set(names)), 10)
 
     def test_filling_stops_at_the_rooms_capacity(self):
         host = self._host()
@@ -257,7 +294,7 @@ class DemoRoomTestPlayersTest(unittest.TestCase):
         self._fill(host.id, 9)
         self._fill(host.id, 9)
 
-        self.assertEqual(len(demo_rooms.list_demo_players('ABC123', self.store)), 10)
+        self.assertEqual(len(self._settled()), 10)
 
     def test_only_the_host_fills_seats(self):
         self._host()

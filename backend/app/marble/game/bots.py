@@ -16,12 +16,14 @@ import time
 from app.marble.game import engine
 from app.marble.models.room import GamePhase, Room
 
-#: Seconds between one bot move and the next.
+#: How long a bot takes over one move, in seconds.
 #:
-#: Long enough to read the dice, the question and the answer. Without it the
-#: bot rolls, answers and hands play on across three polls a second apart, and
-#: its whole turn is over before anyone has seen the question.
-BOT_MOVE_INTERVAL_SECONDS = 2.5
+#: Long enough to read the dice, the question and the answer — without a pause
+#: the bot rolls, answers and hands play on across three polls a second apart,
+#: and its whole turn is over before anyone has seen the question. The length
+#: is drawn per move rather than fixed, so a bot reads as somebody deciding
+#: rather than a metronome.
+BOT_THINKING_SECONDS = (2.0, 5.0)
 
 
 def take_pending_turn(
@@ -31,7 +33,7 @@ def take_pending_turn(
 ) -> bool:
     """Play one move if the board is waiting on a bot. Returns whether it did."""
     moment = time.time() if now is None else now
-    if moment - room.last_bot_action_at < BOT_MOVE_INTERVAL_SECONDS:
+    if moment - room.last_bot_action_at < room.next_bot_delay:
         return False
     player_id = room.current_player_id
     if player_id is None:
@@ -58,4 +60,5 @@ def take_pending_turn(
         # Two phones polled at once and the other request got there first.
         return False
     room.last_bot_action_at = moment
+    room.next_bot_delay = chooser.uniform(*BOT_THINKING_SECONDS)
     return True

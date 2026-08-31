@@ -63,10 +63,16 @@ class MafiaReceivesTheAbilitiesTest(unittest.TestCase):
         for persona in unknown:
             self.assertEqual({getattr(persona, axis) for axis in PERSONA_AXES}, {NEUTRAL_SCORE})
 
-    def test_a_group_that_skipped_the_run_still_gets_a_room(self):
+    def test_a_group_that_skipped_the_run_still_gets_a_playable_room(self):
+        # Everyone plays as average. Leaving the room with no abilities at all
+        # looked harmless, but roles are only dealt once every seat has them,
+        # so POST /start refused and 마피아 could not be reached from the game
+        # list — only from a finished icebreaking session.
         room = self._launch([None] * 4)
 
-        self.assertEqual(room.personas, {})
+        self.assertEqual(len(room.personas), room.player_count)
+        for persona in room.personas.values():
+            self.assertEqual({getattr(persona, axis) for axis in PERSONA_AXES}, {NEUTRAL_SCORE})
 
 
 class MarbleMapsThemOntoItsOwnStatsTest(unittest.TestCase):

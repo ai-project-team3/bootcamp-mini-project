@@ -50,3 +50,8 @@ class Room:
     winner: str | None = None
     host_player_id: str | None = None
     phase_deadline: float | None = None
+    #: player_id -> the moment that test bot takes its turn this phase, and
+    #: the phase the schedule was drawn for. Each bot gets its own short pause
+    #: so the seats do not all resolve on one tick — see `game/bots.py`.
+    bot_schedule: dict[str, float] = field(default_factory=dict)
+    bot_schedule_key: tuple | None = None

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import PhoneFrame from '../../components/layout/PhoneFrame'
 import TopBar from '../../components/layout/TopBar'
@@ -75,13 +75,30 @@ export default function GamePage() {
     getQuestions(code).then(setQuestions).catch((err) => setError(err.message))
   }, [code])
 
+  // 붙잡아둔 단계를 놓는 시점을 판단하려면 지금 서버 단계를 알아야 하는데,
+  // advance의 신원은 고정돼야 하므로(아래) 의존성 대신 ref로 읽는다.
+  const phaseRef = useRef(null)
+  useEffect(() => {
+    phaseRef.current = phase
+  }, [phase])
+
   // 단계에 내려보내는 콜백은 신원이 고정돼야 한다. 렌더마다 새 함수를 만들면
   // 그걸 의존성에 넣은 폴링 effect가 매번 다시 걸리고, 공개 타이머가 걸릴
   // 때마다 초기화돼 다음 단계로 영영 못 넘어간다.
+  //
+  // 여기서 곧바로 held를 비우면 안 된다. 다음 단계는 아직 서버에서 오는 중이라
+  // shown이 방금 끝난 단계로 되돌아가고, 그 게임 화면이 한 번 깜빡였다가
+  // 넘어간다 — "이전 게임 화면이 잠깐 나타났다가 넘어간다"의 정체다. 지금
+  // 화면을 그대로 붙잡아둔 채 새 단계를 물어보고, 실제로 바뀌면 그때 놓는다.
   const advance = useCallback(() => {
-    setHeld(null)
+    setHeld((cur) => cur ?? (phaseRef.current === 'DONE' ? null : phaseRef.current))
     refreshPhase()
   }, [refreshPhase])
+
+  // 서버 단계가 실제로 넘어갔을 때만 손을 놓는다.
+  useEffect(() => {
+    if (held && phase && phase !== held) setHeld(null)
+  }, [phase, held])
 
   const holders = useMemo(() => {
     const names = [

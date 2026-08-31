@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Button from '../../components/common/Button'
 import { getPlayers } from '../../api/players'
 import {
@@ -107,24 +107,33 @@ export default function LiarStep({ code, playerId, onAdvance }) {
 
   // 내 차례일 때만 카운트다운을 돌리고, 다 되면 다음 사람으로 넘긴다.
   const isSpeaker = state?.stage === 'SPEAK' && state.speaker_player_id === playerId
+
+  // 차례를 넘기는 일은 이 사람당 딱 한 번이어야 한다. next-speaker는 "누구
+  // 다음"인지를 받지 않고 그냥 한 칸 미는 엔드포인트라, 두 번 불리면 한 명이
+  // 통째로 건너뛰어진다. StrictMode에서 상태 갱신 함수가 두 번 실행되기 때문에
+  // setLeft 안에서 부르던 예전 방식은 매번 두 칸씩 넘어갔다. 시간이 다 됐다는
+  // 사실만 상태로 남기고, 넘기는 일은 effect에서 한 번만 한다.
+  const handedOff = useRef(false)
   useEffect(() => {
-    if (!isSpeaker) {
-      setLeft(SPEAK_SECONDS)
-      return
-    }
+    handedOff.current = false
     setLeft(SPEAK_SECONDS)
-    const timer = setInterval(() => {
-      setLeft((v) => {
-        if (v <= 1) {
-          clearInterval(timer)
-          nextLiarSpeaker(code).catch(() => {})
-          return 0
-        }
-        return v - 1
-      })
-    }, 1000)
+  }, [isSpeaker, state?.speaker_player_id, state?.lap])
+
+  const handOff = useCallback(() => {
+    if (handedOff.current) return
+    handedOff.current = true
+    nextLiarSpeaker(code).catch(() => {})
+  }, [code])
+
+  useEffect(() => {
+    if (!isSpeaker) return
+    const timer = setInterval(() => setLeft((v) => (v <= 0 ? 0 : v - 1)), 1000)
     return () => clearInterval(timer)
-  }, [isSpeaker, code, state?.speaker_player_id, state?.lap])
+  }, [isSpeaker, state?.speaker_player_id, state?.lap])
+
+  useEffect(() => {
+    if (isSpeaker && left <= 0) handOff()
+  }, [isSpeaker, left, handOff])
 
   if (error) return <p className="game-error">{error}</p>
   if (!state) return <p className="game-hint">불러오는 중...</p>
@@ -185,7 +194,7 @@ export default function LiarStep({ code, playerId, onAdvance }) {
             </div>
             <p className="liar-turn-name">내 차례입니다</p>
             <p className="liar-hint">제시어를 그대로 말하지 않고 설명합니다</p>
-            <Button variant="secondary" onClick={() => nextLiarSpeaker(code)}>
+            <Button variant="secondary" onClick={handOff}>
               다 말했어요
             </Button>
           </div>

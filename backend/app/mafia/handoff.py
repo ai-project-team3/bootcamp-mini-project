@@ -70,7 +70,13 @@ def create_room_for(
         player_ids.append(player_id)
     # Roles are dealt only when every seat has abilities, so a partial handoff
     # would stall the room. Fill the rest in neutral rather than half-arrive.
-    if room.personas and len(room.personas) < len(player_ids):
+    #
+    # This has to run even when nobody was measured at all: the game list is
+    # reachable without playing the icebreaking run, and a group arriving from
+    # there has an empty `personas` map. Guarding on it being non-empty left
+    # those rooms with no abilities for anyone, and POST /start refused to deal
+    # roles — 마피아 could not be started at all except after a finished session.
+    if len(room.personas) < len(player_ids):
         for player_id in player_ids:
             room.personas.setdefault(player_id, PersonaScores.from_partial({}))
     room.host_player_id = player_ids[host_index]
