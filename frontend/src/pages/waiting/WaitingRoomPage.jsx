@@ -112,21 +112,20 @@ export default function WaitingRoomPage() {
         ))}
       </ul>
 
-      {isHost && (
-        <Button variant="ghost" onClick={handleRegenerate} disabled={regenerating || starting}>
-          {regenerating ? '문항 다시 만드는 중...' : '문항 다시 만들기'}
-        </Button>
-      )}
-
-      {isHost ? (
-        <Button onClick={handleStart} disabled={players.length !== room?.player_limit || starting}>
-          {starting ? '시작하는 중...' : '시작'}
-        </Button>
-      ) : (
-        <Button variant="ghost" disabled>
-          대기 중...
-        </Button>
-      )}
+      {/* "문항 다시 만들기"는 위쪽 알약 하나뿐이다. 여기 같은 버튼이 하나 더
+          있었는데, 같은 일을 하는 버튼이 한 화면에 둘이면 다른 일을 할 것 같아
+          보인다. 그리고 시작 버튼에 딱 붙어 있어서 잘못 누르기도 쉬웠다. */}
+      <div className="wr-footer">
+        {isHost ? (
+          <Button onClick={handleStart} disabled={players.length !== room?.player_limit || starting}>
+            {starting ? '시작하는 중...' : '시작'}
+          </Button>
+        ) : (
+          <Button variant="ghost" disabled>
+            대기 중...
+          </Button>
+        )}
+      </div>
     </PhoneFrame>
   )
 }

@@ -17,6 +17,13 @@ from sqlalchemy import create_engine  # noqa: E402
 from sqlalchemy.orm import sessionmaker  # noqa: E402
 from sqlalchemy.pool import StaticPool  # noqa: E402
 
+from app.config import settings  # noqa: E402
+
+# 이 스크립트는 네트워크를 타면 안 된다. 키가 잡혀 있으면 리포트 생성이 진짜
+# 호출을 날려서, 검사 한 번 돌릴 때마다 하루치 무료 한도(모델당 20회)를
+# 까먹는다. 여기서 재는 것은 흐름이 끝까지 도는가지 문장이 예쁜가가 아니다.
+settings.gemini_api_key = None
+
 from app.database import get_db  # noqa: E402
 from app.models import *  # noqa: E402,F401,F403  — Base.metadata 채우기
 from app.models.base import Base  # noqa: E402

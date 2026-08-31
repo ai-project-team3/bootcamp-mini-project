@@ -90,9 +90,13 @@ export default function AnswerStep({ code, playerId, questions, onHold, onAdvanc
         <p className="answer-situation">{question.situation}</p>
 
         <div className="split">
+          {/* 진하기는 **많이 고른 쪽**을 가리킨다. 내가 고른 쪽을 진하게 두면,
+              2대1 같은 판에서 소수파인 내 쪽이 더 진해서 그 색이 이긴 것처럼
+              보인다. 같은 수면 둘 다 진하게 — 갈린 판은 갈린 대로 보여야 한다.
+              내가 뭘 골랐는지는 아래 한 줄이 따로 말한다. */}
           <div className="split-head">
-            <span className={`split-num a${myChoice === 'A' ? ' mine' : ''}`}>{a}</span>
-            <span className={`split-num b${myChoice === 'B' ? ' mine' : ''}`}>{b}</span>
+            <span className={`split-num a${a >= b ? ' lead' : ''}`}>{a}</span>
+            <span className={`split-num b${b >= a ? ' lead' : ''}`}>{b}</span>
           </div>
           <div className="split-bar">
             {/* 만장일치일 때 진 쪽 색을 0.02만큼이라도 남기면 실제로는 표가

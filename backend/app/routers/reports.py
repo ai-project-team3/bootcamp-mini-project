@@ -295,7 +295,18 @@ def _write_report_text(
                 ],
             }
         )
-    context = report_gen.build_context(room.context_line, payload, team["rank"])
+    # 짝별 판정은 코드가 이미 냈다. 생성에는 그 값을 넘겨서 **이유만** 붙이게 한다.
+    seen_pairs: set[frozenset[str]] = set()
+    compat_pairs = []
+    for pr in player_reports:
+        for c in pr.compat:
+            key = frozenset((pr.nickname, c.nickname))
+            if key in seen_pairs:
+                continue
+            seen_pairs.add(key)
+            compat_pairs.append({"a": pr.nickname, "b": c.nickname, "grade": c.grade, "tag": c.tag})
+
+    context = report_gen.build_context(room.context_line, payload, team["rank"], compat_pairs)
     result = report_gen.generate(context, {p.nickname for p in players})
     if result is None:
         return None
@@ -304,6 +315,15 @@ def _write_report_text(
     for pr in player_reports:
         if pr.nickname in by_nick:
             pr.comment_lines = by_nick[pr.nickname]
+
+    # 궁합 문장을 갈아끼운다. 짝 단위라 양쪽에 같은 글이 붙는다. 생성이 그 짝을
+    # 빼먹었으면 사전 문장이 그대로 남는다 — 한 짝이 비어도 나머지는 살린다.
+    notes = {frozenset((c.a, c.b)): c.note for c in result.compat if c.note}
+    for pr in player_reports:
+        for c in pr.compat:
+            note = notes.get(frozenset((pr.nickname, c.nickname)))
+            if note:
+                c.note = note
     team["summary"] = result.team_summary
     team["reasons"] = result.team_reasons
     room.report_summary = result.team_summary

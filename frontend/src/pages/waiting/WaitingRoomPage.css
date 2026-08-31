@@ -93,3 +93,8 @@
   font-size: 0.78rem;
   color: var(--hot);
 }
+
+/* 명단과 시작 버튼 사이에 숨 쉴 자리. 붙어 있으면 목록의 마지막 줄처럼 보인다. */
+.wr-footer {
+  margin-top: 18px;
+}
