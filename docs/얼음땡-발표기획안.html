@@ -1,0 +1,988 @@
+<title>얼음땡 발표 기획안</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper:   #F6F9FB;
+    --card:    #FFFFFF;
+    --ink:     #10202B;
+    --muted:   #5B7181;
+    --line:    #DAE5EC;
+    --ice:     #14708F;
+    --ice-dim: #E2EFF5;
+    --ttaeng:  #C6415F;
+    --ttaeng-dim: #FBE7EC;
+    --warn-bg: #FDF4E7;
+    --warn-ink:#8A5411;
+    --ok:      #1B6E52;
+    --ok-dim:  #E3F2EB;
+    --shadow:  0 1px 2px rgba(16,32,43,.06), 0 8px 24px -12px rgba(16,32,43,.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:   #0C161D;
+      --card:    #13222C;
+      --ink:     #E4EEF4;
+      --muted:   #92A8B6;
+      --line:    #24394A;
+      --ice:     #6FC5E4;
+      --ice-dim: #14313F;
+      --ttaeng:  #F08CA4;
+      --ttaeng-dim: #3A1E27;
+      --warn-bg: #33260F;
+      --warn-ink:#E7C58A;
+      --ok:      #6FD3A9;
+      --ok-dim:  #102E24;
+      --shadow:  0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:   #0C161D;
+    --card:    #13222C;
+    --ink:     #E4EEF4;
+    --muted:   #92A8B6;
+    --line:    #24394A;
+    --ice:     #6FC5E4;
+    --ice-dim: #14313F;
+    --ttaeng:  #F08CA4;
+    --ttaeng-dim: #3A1E27;
+    --warn-bg: #33260F;
+    --warn-ink:#E7C58A;
+    --ok:      #6FD3A9;
+    --ok-dim:  #102E24;
+    --shadow:  0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans KR', system-ui, -apple-system, 'Malgun Gothic', sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.75;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px 96px; }
+
+  /* ─── 머리말 ─────────────────────────────────────────── */
+  header { padding: 72px 0 36px; border-bottom: 1px solid var(--line); }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; font-weight: 600; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--ice); margin: 0 0 14px;
+  }
+  h1 {
+    margin: 0 0 16px; font-size: clamp(30px, 5.2vw, 44px); font-weight: 700;
+    line-height: 1.22; letter-spacing: -.02em; text-wrap: balance;
+  }
+  .lede { margin: 0; font-size: 17px; color: var(--muted); max-width: 62ch; font-weight: 300; }
+
+  .facts {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px;
+  }
+  .fact {
+    display: flex; align-items: baseline; gap: 7px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+    padding: 5px 14px; font-size: 12.5px; color: var(--muted);
+  }
+  .fact b {
+    font-family: 'IBM Plex Mono', monospace; font-weight: 600;
+    font-size: 13px; color: var(--ink); font-variant-numeric: tabular-nums;
+  }
+
+  /* ─── 섹션 ─────────────────────────────────────────── */
+  section { padding-top: 64px; }
+  h2 {
+    margin: 0 0 8px; font-size: 25px; font-weight: 700; letter-spacing: -.015em;
+    display: flex; align-items: center; gap: 12px;
+  }
+  h2 .n {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600;
+    color: var(--ice); background: var(--ice-dim);
+    border-radius: 6px; padding: 3px 9px; letter-spacing: 0;
+  }
+  .sub { margin: 0 0 26px; color: var(--muted); font-size: 14.5px; max-width: 66ch; font-weight: 300; }
+
+  h3 { margin: 34px 0 12px; font-size: 16.5px; font-weight: 600; letter-spacing: -.01em; }
+
+  p { margin: 0 0 14px; }
+  a { color: var(--ice); }
+
+  /* ─── 검토 항목 ───────────────────────────────────── */
+  .finding {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 18px 20px; margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+  .finding-head { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 8px; }
+  .tag {
+    flex: none; font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .08em;
+    padding: 3px 8px; border-radius: 5px; margin-top: 4px; text-transform: uppercase;
+  }
+  .tag.cut  { background: var(--ttaeng-dim); color: var(--ttaeng); }
+  .tag.fix  { background: var(--warn-bg);    color: var(--warn-ink); }
+  .tag.add  { background: var(--ok-dim);     color: var(--ok); }
+  .finding-title { font-weight: 600; font-size: 16px; line-height: 1.5; }
+  .finding p:last-child { margin-bottom: 0; }
+  .finding .why { color: var(--muted); font-size: 14px; }
+  .finding .why b { color: var(--ink); font-weight: 600; }
+
+  /* ─── 표 ─────────────────────────────────────────── */
+  .scroller { overflow-x: auto; margin-bottom: 20px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--ink);
+  }
+  td.num, th.num {
+    font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums;
+    text-align: right; white-space: nowrap;
+  }
+  tr.total td { border-bottom: none; font-weight: 600; border-top: 1px solid var(--ink); }
+  tr.video td { background: var(--ice-dim); }
+
+  /* ─── 슬라이드 레일 ───────────────────────────────── */
+  .rail { display: grid; grid-template-columns: 62px 1fr; gap: 0 18px; }
+  .clock {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600;
+    color: var(--ice); font-variant-numeric: tabular-nums;
+    padding-top: 20px; text-align: right; position: relative;
+  }
+  .clock::after {
+    content: ''; position: absolute; right: -9px; top: 27px; bottom: -20px;
+    width: 1px; background: var(--line);
+  }
+  .rail > .slide:last-of-type + .clock::after,
+  .clock.last::after { display: none; }
+  .clock .dot {
+    position: absolute; right: -13px; top: 24px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--paper); border: 2px solid var(--ice);
+  }
+
+  .slide {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px 16px; margin-bottom: 14px; box-shadow: var(--shadow);
+  }
+  .slide.is-video { border-color: var(--ice); background: var(--ice-dim); }
+  .slide-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .slide-title { font-size: 17px; font-weight: 700; letter-spacing: -.012em; }
+  .slide-title .idx {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600;
+    color: var(--muted); margin-right: 9px;
+  }
+  .meta {
+    display: flex; gap: 8px; flex: none; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-variant-numeric: tabular-nums;
+  }
+  .meta span {
+    padding: 2px 8px; border-radius: 5px;
+    background: var(--ice-dim); color: var(--ice); font-weight: 600;
+  }
+  .meta span.orig { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+
+  .row { display: grid; grid-template-columns: 74px 1fr; gap: 4px 14px; font-size: 14px; }
+  .row dt {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: .09em; text-transform: uppercase; color: var(--muted); padding-top: 6px;
+  }
+  .row dd { margin: 0 0 10px; }
+  .row dd:last-child { margin-bottom: 0; }
+  .row ul { margin: 0; padding-left: 18px; }
+  .row li { margin-bottom: 3px; }
+  .row li::marker { color: var(--ice); }
+
+  .script {
+    background: var(--paper); border-left: 2px solid var(--ice);
+    padding: 11px 14px; border-radius: 0 8px 8px 0;
+    font-size: 14px; line-height: 1.8; color: var(--ink);
+  }
+  .script em {
+    display: block; font-family: 'IBM Plex Mono', monospace; font-style: normal;
+    font-size: 10.5px; letter-spacing: .08em; color: var(--muted);
+    text-transform: uppercase; margin-bottom: 5px;
+  }
+
+  /* ─── 콘티 ───────────────────────────────────────── */
+  .shot { display: grid; grid-template-columns: 88px 1fr; gap: 0 16px; align-items: start; }
+  .shot dt {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600;
+    color: var(--ice); font-variant-numeric: tabular-nums; padding: 9px 0;
+    border-top: 1px solid var(--line);
+  }
+  .shot dd { margin: 0; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .shot dd b { font-weight: 600; }
+  .shot dd small { display: block; color: var(--muted); font-size: 13px; }
+
+  /* ─── 노트 ───────────────────────────────────────── */
+  .note {
+    border-radius: 10px; padding: 14px 18px; font-size: 14px; margin: 18px 0;
+    background: var(--warn-bg); color: var(--warn-ink);
+  }
+  .note b { font-weight: 600; }
+  .note.good { background: var(--ok-dim); color: var(--ok); }
+
+  ul.plain { padding-left: 19px; margin: 0 0 16px; }
+  ul.plain li { margin-bottom: 6px; }
+  ul.plain li::marker { color: var(--ice); }
+
+  code {
+    font-family: 'IBM Plex Mono', monospace; font-size: .88em;
+    background: var(--ice-dim); color: var(--ice);
+    padding: 1px 5px; border-radius: 4px;
+  }
+
+  footer {
+    margin-top: 72px; padding-top: 26px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 13px;
+  }
+
+  @media (max-width: 640px) {
+    .rail { grid-template-columns: 46px 1fr; gap: 0 12px; }
+    .clock::after, .clock .dot { display: none; }
+    .row { grid-template-columns: 1fr; }
+    .row dt { padding-top: 8px; }
+    .shot { grid-template-columns: 1fr; }
+    .shot dd { border-top: none; padding-top: 0; }
+  }
+
+  /* 인쇄와 PDF 저장(Ctrl+P). 슬라이드 카드가 페이지 경계에서 반으로 잘리면
+     발표 준비에 쓸 수가 없으므로 카드 단위로 넘긴다. 화면용 그림자와 어두운
+     테마는 종이에서 의미가 없어 걷어낸다. */
+  @media print {
+    :root {
+      --paper: #FFFFFF; --card: #FFFFFF; --ink: #10202B; --muted: #4A5F6E;
+      --line: #C9D8E2; --ice: #0F5A73; --ice-dim: #EDF5F9;
+      --ttaeng: #A63450; --ttaeng-dim: #FBEEF1;
+      --warn-bg: #FCF6EC; --warn-ink: #6E430D;
+      --ok: #14563F; --ok-dim: #EDF6F1; --shadow: none;
+    }
+    body {
+      font-size: 10.5pt; line-height: 1.62;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .wrap { max-width: none; padding: 0; }
+    header { padding: 0 0 28px; }
+    section { padding-top: 28px; break-before: page; }
+    section:first-of-type { break-before: auto; }
+    .slide, .finding, .note, .shot dd, footer { break-inside: avoid; }
+    h1, h2, h3 { break-after: avoid; }
+    .scroller { overflow-x: visible; }
+    table { min-width: 0; font-size: 9.5pt; }
+    .clock::after { display: none; }
+  }
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">발표 기획안 · 10분</p>
+  <h1>얼음땡 발표, 10분에 넣기</h1>
+  <p class="lede">
+    주신 목차를 검토하고, 그대로 PPT를 만들 수 있게 슬라이드 13장으로 다시 짰습니다.
+    시연 영상 2분을 포함해 <b>9분 20초</b>, 남는 40초는 버퍼입니다.
+  </p>
+  <div class="facts">
+    <span class="fact">발표 <b>10:00</b></span>
+    <span class="fact">대본 <b>9:20</b></span>
+    <span class="fact">버퍼 <b>0:40</b></span>
+    <span class="fact">슬라이드 <b>13장</b></span>
+    <span class="fact">영상 <b>2:00</b></span>
+    <span class="fact">말할 분량 <b>약 2,400자</b></span>
+  </div>
+</header>
+
+<!-- ══════════════ 1. 검토 ══════════════ -->
+<section>
+  <h2><span class="n">01</span> 목차 검토</h2>
+  <p class="sub">
+    구성 자체는 표준 양식에 빠짐없이 들어맞습니다. 다만 지금 그대로 만들면
+    <b>시간 안에 못 끝내고</b>, 5장은 우리 프로젝트 얘기가 아닙니다. 여덟 가지를 짚었습니다.
+  </p>
+
+  <div class="finding">
+    <div class="finding-head">
+      <span class="tag cut">분량</span>
+      <span class="finding-title">소항목이 25개입니다. 한 항목당 한 장이면 25장 — 두 배 초과입니다.</span>
+    </div>
+    <p class="why">
+      10분에서 영상 2분을 빼면 말할 시간은 8분. 한국어 발표 속도는 분당 300~350자니
+      <b>총 2,400~2,800자</b>가 상한입니다. 슬라이드 한 장에 30~40초를 쓴다면
+      <b>12~14장</b>이 물리적 한계입니다. 목차를 줄이는 게 아니라
+      <b>여러 항목을 한 장에 합치는</b> 방식으로 13장을 만들었습니다.
+    </p>
+  </div>
+
+  <div class="finding">
+    <div class="finding-head">
+      <span class="tag cut">치명적</span>
+      <span class="finding-title">5장 예시(Redis 캐싱 · 이미지 레이지 로딩 · 무한 스크롤)는 우리 코드에 없습니다.</span>
+    </div>
+    <p class="why">
+      양식에 딸려온 예시를 그대로 채우면 <b>“어떤 데이터가 대용량이었나요?”</b> 한 마디에 무너집니다.
+      그리고 굳이 지어낼 이유가 없습니다 — 우리한테 훨씬 좋은 이슈가 이미 있고, 전부 커밋에 근거가 남아 있습니다.
+    </p>
+    <ul class="plain" style="margin-top:12px">
+      <li><b>LLM 무료 한도와 동시 접속 경쟁 상태</b> — 한 판에 6번 나가던 호출을 2번으로. 수치가 있습니다.</li>
+      <li><b>QR이 localhost를 가리키던 문제</b> — 방 만든 사람 화면에서는 안 보이는 비대칭 실패.</li>
+      <li>성공한 LLM 응답을 버리고 있던 두 개의 버그 (10.3초 응답을 10초 임계로 폐기 / 금칙어 하나가 13문항 전체를 폐기)</li>
+      <li>서버 단계는 넘어갔는데 화면은 결과를 끝까지 보여줘야 하는 문제 — 장치 하나로 5개 단계를 동시에 해결</li>
+      <li>‘유형 맞히기’ UX — 처음 보는 이름 8개 중 자기 유형을 고르라는 흐름이 성립하지 않아 전면 재설계</li>
+    </ul>
+    <p class="why">이 중 <b>앞의 두 개만</b> 씁니다. 하나당 50초입니다.</p>
+  </div>
+
+  <div class="finding">
+    <div class="finding-head">
+      <span class="tag fix">구조</span>
+      <span class="finding-title">5.1을 ‘백엔드 이슈’, 5.2를 ‘프론트 이슈’로 못박아 두면 약한 이슈를 고르게 됩니다.</span>
+    </div>
+    <p class="why">
+      우리 이슈 두 개는 <b>둘 다 백엔드와 프론트의 경계</b>에 걸쳐 있습니다.
+      칸 이름에 맞추려 하지 말고, 이슈를 먼저 고른 뒤 제목을 이슈에 맞추세요.
+    </p>
+  </div>
+
+  <div class="finding">
+    <div class="finding-head">
+      <span class="tag add">누락</span>
+      <span class="finding-title">결과물 화면이 목차에 없습니다. 이 서비스에서 사람들이 기억하는 건 그 화면입니다.</span>
+    </div>
+    <p class="why">
+      개인 리포트 카드 · 유형 카드 · 능력치 오각형이 2.2(UI 스크린샷)에 뭉뚱그려져 있습니다.
+      영상에서 스쳐 지나가는 것과, <b>정지 화면으로 크게 한 장</b> 띄우고 설명하는 것은 다릅니다.
+      독립된 슬라이드 7번으로 뺐습니다.
+    </p>
+  </div>
+
+  <div class="finding">
+    <div class="finding-head">
+      <span class="tag cut">분량</span>
+      <span class="finding-title">1장이 네 칸이라 도입에만 2분이 나갑니다.</span>
+    </div>
+    <p class="why">
+      1.2(페인 포인트)와 1.3(차별점)은 <b>같은 논증의 앞뒤</b>입니다 — “이래서 불편한데 기존 서비스는 이걸 못 한다”.
+      한 장으로 합치고, 1.4(목표)는 서비스 정의 슬라이드에 한 줄로 붙였습니다. 4장 → 2장.
+    </p>
+  </div>
+
+  <div class="finding">
+    <div class="finding-head">
+      <span class="tag fix">배치</span>
+      <span class="finding-title">팀 소개(7장)가 맨 뒤 = 가장 아까운 자리입니다.</span>
+    </div>
+    <p class="why">
+      마지막 30초는 여운이 남는 자리인데 이름 읽기로 끝납니다.
+      <b>표지에 팀명과 5명을 한 줄로</b> 넣고, 마지막 장은 향후 계획 + 감사 인사로 닫은 뒤
+      <b>Q&amp;A 동안 팀 소개 화면을 띄워두세요.</b> 시간도 안 쓰고 노출은 더 깁니다.
+    </p>
+  </div>
+
+  <div class="finding">
+    <div class="finding-head">
+      <span class="tag fix">가독성</span>
+      <span class="finding-title">ERD(4.3)를 통째로 넣으면 아무도 못 읽습니다. 엔티티가 12개입니다.</span>
+    </div>
+    <p class="why">
+      45초짜리 슬라이드에 테이블 12개를 넣으면 글씨만 작아집니다.
+      <b>핵심 5개</b>(Room · Player · Question · Guess · Report)만 그리고
+      전체 ERD는 <b>백업 슬라이드</b>로 뒤에 숨겨두었다가 질문이 나오면 꺼내세요.
+    </p>
+  </div>
+
+  <div class="finding">
+    <div class="finding-head">
+      <span class="tag fix">확인</span>
+      <span class="finding-title">Q&amp;A(6.4)가 10분 안인지 밖인지 확인이 필요합니다.</span>
+    </div>
+    <p class="why">
+      보통은 발표 10분과 별도입니다. 아래 배분은 <b>Q&amp;A가 10분 밖</b>이라고 보고 짰습니다.
+      만약 안에 포함이라면 발표는 <b>8분</b>으로 줄여야 하고, 그때는
+      슬라이드 4(유저 플로우)를 5번에 흡수하고 슬라이드 12를 성과만 남기면 딱 맞습니다.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════ 2. 시간 배분 ══════════════ -->
+<section>
+  <h2><span class="n">02</span> 시간 배분</h2>
+  <p class="sub">
+    원 목차의 어느 항목이 어디로 갔는지 함께 적었습니다. 버린 항목은 없고, 합쳐졌습니다.
+  </p>
+
+  <div class="scroller">
+  <table>
+    <thead>
+      <tr>
+        <th class="num">#</th><th>슬라이드</th><th>원 목차</th>
+        <th class="num">시간</th><th class="num">누적</th><th class="num">대본</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="num">1</td><td>표지 · 서비스명 · 슬로건 · 팀</td><td>1.1 + 7</td><td class="num">0:20</td><td class="num">0:20</td><td class="num">110자</td></tr>
+      <tr><td class="num">2</td><td>문제 — 처음 만난 자리의 침묵</td><td>1.2 + 1.3</td><td class="num">0:40</td><td class="num">1:00</td><td class="num">220자</td></tr>
+      <tr><td class="num">3</td><td>우리의 답 — 18분, 9단계, 말 안 해도 됨</td><td>1.1 + 1.4</td><td class="num">0:25</td><td class="num">1:25</td><td class="num">140자</td></tr>
+      <tr><td class="num">4</td><td>유저 플로우</td><td>2.1</td><td class="num">0:30</td><td class="num">1:55</td><td class="num">165자</td></tr>
+      <tr><td class="num">5</td><td>핵심 기능 3가지</td><td>3.1</td><td class="num">0:45</td><td class="num">2:40</td><td class="num">250자</td></tr>
+      <tr class="video"><td class="num">6</td><td><b>시연 영상</b></td><td>3.2</td><td class="num">2:00</td><td class="num">4:40</td><td class="num">—</td></tr>
+      <tr><td class="num">7</td><td>결과물 — 리포트 · 유형 카드 · 오각형</td><td>2.2</td><td class="num">0:30</td><td class="num">5:10</td><td class="num">165자</td></tr>
+      <tr><td class="num">8</td><td>기술 스택과 선정 이유</td><td>4.1</td><td class="num">0:35</td><td class="num">5:45</td><td class="num">190자</td></tr>
+      <tr><td class="num">9</td><td>아키텍처 + 핵심 ERD</td><td>4.2 + 4.3</td><td class="num">0:40</td><td class="num">6:25</td><td class="num">220자</td></tr>
+      <tr><td class="num">10</td><td>이슈① LLM 한도와 동시 접속</td><td>5.1</td><td class="num">0:50</td><td class="num">7:15</td><td class="num">275자</td></tr>
+      <tr><td class="num">11</td><td>이슈② 아무도 못 들어오는 QR</td><td>5.2</td><td class="num">0:50</td><td class="num">8:05</td><td class="num">275자</td></tr>
+      <tr><td class="num">12</td><td>성과와 회고(KPT)</td><td>6.1 + 6.2</td><td class="num">0:45</td><td class="num">8:50</td><td class="num">250자</td></tr>
+      <tr><td class="num">13</td><td>향후 계획 · 마무리</td><td>6.3 + 6.4</td><td class="num">0:30</td><td class="num">9:20</td><td class="num">165자</td></tr>
+      <tr class="total"><td class="num"></td><td>버퍼</td><td></td><td class="num">0:40</td><td class="num">10:00</td><td class="num">2,425자</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <b>버퍼 40초는 장식이 아닙니다.</b> 리허설에서 9:20이 나와야 본 발표에서 10:00 안에 끝납니다.
+    실제 발표는 긴장 때문에 빨라지기도 하지만, 노트북이 화면에 안 잡히거나 영상 소리가 안 나오는 데
+    30초가 그냥 갑니다. <b>발표 전에 영상만 따로 한 번 재생해 보세요.</b>
+  </div>
+</section>
+
+<!-- ══════════════ 3. 슬라이드별 기획 ══════════════ -->
+<section>
+  <h2><span class="n">03</span> 슬라이드별 기획</h2>
+  <p class="sub">
+    <b>화면</b>은 슬라이드에 실제로 들어갈 것, <b>대본</b>은 그대로 읽어도 시간이 맞는 초안입니다.
+    말투는 발표자에게 맞게 고치되 <b>길이는 유지</b>하세요.
+  </p>
+
+  <div class="rail">
+
+    <!-- 1 -->
+    <div class="clock"><span class="dot"></span>0:00</div>
+    <div class="slide">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">01</span>표지</div>
+        <div class="meta"><span>0:20</span><span class="orig">1.1 · 7</span></div>
+      </div>
+      <dl class="row">
+        <dt>화면</dt>
+        <dd>
+          <ul>
+            <li>얼음 로고(앱 첫 화면 그대로 캡처) — 이미 만들어 둔 자산이니 새로 그리지 마세요</li>
+            <li>슬로건 한 줄: <b>“말 한마디 안 해도, 18분이면 서로를 압니다”</b></li>
+            <li>맨 아래 작게: 팀명 · 팀원 5명 이름</li>
+          </ul>
+        </dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>110자 · 20초</em>
+          안녕하세요, <b>○○팀</b>입니다. 저희가 만든 서비스는 <b>얼음땡</b>입니다.
+          처음 만난 사람들이 말 한마디 안 하고도 18분이면 서로를 알게 되는 아이스브레이킹 웹 서비스입니다.
+          왜 이걸 만들었는지부터 말씀드리겠습니다.
+        </div></dd>
+      </dl>
+    </div>
+
+    <!-- 2 -->
+    <div class="clock"><span class="dot"></span>0:20</div>
+    <div class="slide">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">02</span>문제 — 처음 만난 자리의 침묵</div>
+        <div class="meta"><span>0:40</span><span class="orig">1.2 · 1.3</span></div>
+      </div>
+      <dl class="row">
+        <dt>화면</dt>
+        <dd>
+          <ul>
+            <li>왼쪽: 페인 포인트 3개. <b>“말을 잘하는 사람만 말한다 / 자기소개는 이름·전공에서 끝난다 / 어색해서 아무도 먼저 안 한다”</b></li>
+            <li>오른쪽: 기존 방식과 비교 — 자기소개 릴레이 · 아이스브레이킹 앱 · MBTI 검사 vs 얼음땡</li>
+            <li>비교축은 딱 3개만: <b>말해야 하나 / 상호작용인가 / 결과가 남나</b></li>
+          </ul>
+        </dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>220자 · 40초</em>
+          처음 만난 자리에서 자기소개를 시키면 늘 같은 일이 벌어집니다.
+          말을 잘하는 사람만 말하고, 나머지는 이름과 전공을 말하고 끝납니다.
+          기존 아이스브레이킹 앱은 결국 <b>‘질문을 던져줄 테니 말로 하세요’</b>입니다. 말하기 싫은 사람에겐 소용이 없습니다.
+          MBTI 검사는 말은 안 해도 되지만 <b>혼자 하는 것</b>이라 같이 있는 사람들과는 아무 상관이 없습니다.
+          저희는 <b>말은 안 하는데 서로 상호작용은 하는</b> 방식이 비어 있다고 봤습니다.
+        </div></dd>
+        <dt>주의</dt>
+        <dd class="why">경쟁 서비스 이름을 특정해 깎아내리지 마세요. <b>방식</b>을 비교하면 반박이 안 나옵니다.</dd>
+      </dl>
+    </div>
+
+    <!-- 3 -->
+    <div class="clock"><span class="dot"></span>1:00</div>
+    <div class="slide">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">03</span>우리의 답</div>
+        <div class="meta"><span>0:25</span><span class="orig">1.1 · 1.4</span></div>
+      </div>
+      <dl class="row">
+        <dt>화면</dt>
+        <dd>큰 숫자 세 개만: <b>18분 · 9단계 · 0마디</b>. 아래 한 줄 — “선택과 추측만으로 능력치를 만든다”.</dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>140자 · 25초</em>
+          얼음땡은 <b>18분</b> 동안 <b>9단계</b>를 지나갑니다.
+          그 사이 사용자가 말해야 하는 건 <b>한 마디도 없습니다</b>. 버튼을 누르고, 서로를 추측하는 것뿐입니다.
+          그 선택과 추측만으로 능력치 다섯 개를 계산해서, 마지막에 각자의 캐릭터 카드와 팀 리포트를 냅니다.
+        </div></dd>
+      </dl>
+    </div>
+
+    <!-- 4 -->
+    <div class="clock"><span class="dot"></span>1:25</div>
+    <div class="slide">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">04</span>유저 플로우</div>
+        <div class="meta"><span>0:30</span><span class="orig">2.1</span></div>
+      </div>
+      <dl class="row">
+        <dt>화면</dt>
+        <dd>
+          가로 한 줄 플로우, 박스 6개로 압축:<br>
+          <code>방 만들기(팀 소개 한 줄)</code> → <code>QR로 입장</code> → <code>9단계 게임</code> →
+          <code>유형 카드 공개</code> → <code>개인 리포트</code> → <code>팀 리포트</code><br>
+          <b>게임 8개를 낱개로 그리지 마세요.</b> ‘9단계 게임’ 한 박스 안에 작은 아이콘으로 넣으면 됩니다.
+        </dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>165자 · 30초</em>
+          흐름은 단순합니다. 한 명이 방을 만들면서 <b>우리 팀이 어떤 팀인지 한 줄</b>을 적습니다.
+          나머지는 <b>QR을 찍고</b> 들어옵니다. 앱 설치도, 회원가입도 없습니다.
+          다 모이면 9단계가 <b>노출도가 낮은 것부터 높은 것 순서로</b> 자동으로 넘어가고,
+          마지막에 각자 유형 카드를 받고 개인 리포트와 팀 리포트로 끝납니다.
+        </div></dd>
+        <dt>포인트</dt>
+        <dd class="why"><b>‘노출도 순서’</b>는 꼭 말하세요. 게임을 아무렇게나 나열한 게 아니라 <b>설계된 순서</b>라는 신호입니다.</dd>
+      </dl>
+    </div>
+
+    <!-- 5 -->
+    <div class="clock"><span class="dot"></span>1:55</div>
+    <div class="slide">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">05</span>핵심 기능 3가지</div>
+        <div class="meta"><span>0:45</span><span class="orig">3.1</span></div>
+      </div>
+      <dl class="row">
+        <dt>화면</dt>
+        <dd>
+          카드 3장. 각 카드에 제목 + 한 줄 + 작은 스크린샷.
+          <ul>
+            <li><b>① 음성 없는 게임 9단계</b> — 전부 선택과 추측만</li>
+            <li><b>② 집계만 공개</b> — 누가 누구를 뭐라 했는지는 끝까지 안 밝힘</li>
+            <li><b>③ 우리 팀 얘기로 만드는 문항</b> — 팀 소개 한 줄로 LLM이 문항 13개 생성</li>
+          </ul>
+        </dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>250자 · 45초</em>
+          기능은 세 가지입니다.
+          첫째, <b>9단계 전부 말이 필요 없습니다.</b> 눈치 게임, 라이어 게임까지 전부 버튼으로 합니다.
+          둘째, <b>집계만 공개합니다.</b> “누가 너를 뭐라고 했다”는 끝까지 안 밝히고, 몇 표인지만 보여줍니다.
+          이게 핵심인데, <b>지목이 드러나면 사람들이 솔직하게 안 고릅니다.</b> 안 밝히기 때문에 데이터가 쓸 만해집니다.
+          셋째, 방을 만들 때 <b>팀 소개를 한 줄</b> 적으면, LLM이 그 팀 얘기로 문항 열세 개를 만듭니다.
+          해커톤 팀과 동아리 신입 모임이 같은 문항을 풀지 않습니다.
+        </div></dd>
+        <dt>포인트</dt>
+        <dd class="why">
+          ②의 <b>“안 밝히기 때문에 데이터가 쓸 만해진다”</b>가 이 발표에서 가장 설계다운 문장입니다.
+          시간이 모자라면 다른 걸 줄이고 이건 남기세요.
+        </dd>
+      </dl>
+    </div>
+
+    <!-- 6 -->
+    <div class="clock"><span class="dot"></span>2:40</div>
+    <div class="slide is-video">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">06</span>시연 영상</div>
+        <div class="meta"><span>2:00</span><span class="orig">3.2</span></div>
+      </div>
+      <dl class="row">
+        <dt>배치</dt>
+        <dd>
+          영상을 <b>뒤가 아니라 여기</b>에 두는 이유가 있습니다. 뒤에 나올 기술 이슈 두 개가
+          <b>영상에서 본 화면</b>을 가리키게 되기 때문입니다. “아까 QR 찍고 들어오는 장면”이라고 하면 설명이 절반으로 줍니다.
+        </dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>영상 직전 한 줄만</em>
+          실제로 다섯 명이 한 판 도는 모습을 보시겠습니다.
+        </div></dd>
+        <dt>콘티</dt>
+        <dd class="why">아래 <b>04. 시연 영상 콘티</b> 참조. 초 단위로 짜뒀습니다.</dd>
+      </dl>
+    </div>
+
+    <!-- 7 -->
+    <div class="clock"><span class="dot"></span>4:40</div>
+    <div class="slide">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">07</span>결과물</div>
+        <div class="meta"><span>0:30</span><span class="orig">2.2</span></div>
+      </div>
+      <dl class="row">
+        <dt>화면</dt>
+        <dd>
+          <b>이 발표에서 가장 크게 띄울 화면입니다.</b> 정지 화면 3개를 나란히:
+          유형 카드 · 능력치 오각형 · 팀 리포트. 폰 프레임째 캡처하고, 글자가 읽힐 만큼 키우세요.
+        </dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>165자 · 30초</em>
+          18분이 끝나면 이게 남습니다.
+          능력치는 <b>주도력·순발력·표현력·공감력·관찰력</b> 다섯 축이고,
+          이 다섯 개 조합으로 <b>여덟 가지 유형</b> 중 하나가 카드로 나옵니다.
+          그리고 <b>내가 남을 어떻게 봤는지가 아니라, 남들이 나를 어떻게 봤는지</b>가 같이 나옵니다.
+          팀 전체에 대한 리포트도 따로 나옵니다.
+        </div></dd>
+      </dl>
+    </div>
+
+    <!-- 8 -->
+    <div class="clock"><span class="dot"></span>5:10</div>
+    <div class="slide">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">08</span>기술 스택과 선정 이유</div>
+        <div class="meta"><span>0:35</span><span class="orig">4.1</span></div>
+      </div>
+      <dl class="row">
+        <dt>화면</dt>
+        <dd>
+          로고 나열은 금물입니다. <b>2열 표</b>로: 왼쪽 기술, 오른쪽 <b>“왜”</b> 한 줄.
+          <ul>
+            <li><b>React 19 + Vite</b> — 18분 내내 화면이 바뀌는 서비스. 단계별로 컴포넌트를 쪼개고 즉시 확인</li>
+            <li><b>FastAPI + SQLAlchemy</b> — Pydantic 스키마가 곧 검증이자 API 문서</li>
+            <li><b>Gemini 3.6 Flash</b> — 방 만들 때 <b>사람들이 기다리는 중에</b> 문항이 나와야 함. 제약은 품질이 아니라 지연</li>
+            <li><b>SQLite → MariaDB</b> — 개발은 파일 하나로, 배포는 MariaDB</li>
+          </ul>
+        </dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>190자 · 35초</em>
+          기술 선택에서 기준이 됐던 건 두 가지입니다.
+          하나는 <b>LLM 응답을 그대로 믿을 수 없다</b>는 것. 그래서 FastAPI의 Pydantic 스키마로
+          LLM 응답까지 검증해서, 형식이 어긋나면 자동으로 다시 받게 했습니다.
+          다른 하나는 <b>지연</b>입니다. 방을 만드는 동안 사람들이 화면을 보고 기다리기 때문에,
+          Gemini에서도 가장 빠른 Flash 모델을 골랐습니다.
+        </div></dd>
+        <dt>포인트</dt>
+        <dd class="why">“왜 이 기술이어야 했는지”를 묻는 항목이니 <b>제약을 먼저 말하고 선택을 뒤에</b> 놓으세요. 순서만 바꿔도 설득력이 다릅니다.</dd>
+      </dl>
+    </div>
+
+    <!-- 9 -->
+    <div class="clock"><span class="dot"></span>5:45</div>
+    <div class="slide">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">09</span>아키텍처 + 핵심 ERD</div>
+        <div class="meta"><span>0:40</span><span class="orig">4.2 · 4.3</span></div>
+      </div>
+      <dl class="row">
+        <dt>화면</dt>
+        <dd>
+          <b>왼쪽에 아키텍처, 오른쪽에 ERD 핵심 5개.</b> 한 장에 같이 넣습니다.
+          <ul>
+            <li>아키텍처: <code>폰 브라우저</code> → <code>Vite(프록시)</code> → <code>FastAPI</code> → <code>DB</code>,
+              그리고 FastAPI에서 <code>Gemini API</code>로 빠지는 <b>점선</b> 한 줄(배경 작업이라는 뜻)</li>
+            <li>ERD: <b>Room ─&lt; Player</b>, <b>Room ─&lt; Question</b>, <b>Player ─&lt; Guess</b>, <b>Room ─&lt; Report</b> 만</li>
+            <li>전체 ERD(12개)는 <b>백업 슬라이드</b>로</li>
+          </ul>
+        </dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>220자 · 40초</em>
+          구조에서 한 가지만 말씀드리면, <b>프론트와 백엔드를 같은 주소로 묶었습니다.</b>
+          Vite가 프록시로 백엔드를 받아서, 팀원에게 알려줄 주소가 하나뿐입니다. QR도 CORS도 저절로 맞습니다.
+          데이터는 <b>방</b>이 중심이고, 사람·문항·추측·리포트가 전부 방에 매달려 있습니다.
+          게임에서 나온 모든 선택은 <b>추측 테이블 하나</b>로 모이고, 능력치는 여기서 계산됩니다.
+          LLM 호출은 화면을 막지 않게 <b>배경으로</b> 돌립니다.
+        </div></dd>
+      </dl>
+    </div>
+
+    <!-- 10 -->
+    <div class="clock"><span class="dot"></span>6:25</div>
+    <div class="slide">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">10</span>이슈① LLM 한도와 동시 접속</div>
+        <div class="meta"><span>0:50</span><span class="orig">5.1</span></div>
+      </div>
+      <dl class="row">
+        <dt>화면</dt>
+        <dd>
+          <b>4단 구성 고정</b>(현상 → 원인 → 해결 → 결과). 오른쪽에 그림 한 장:
+          폰 5대가 같은 순간에 화살표로 서버를 찌르는 그림 → 화살표가 하나로 줄어드는 그림.
+          <br>큰 수치: <b>6회 → 2회</b>, <b>하루 3판 → 10판</b>
+        </dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>275자 · 50초</em>
+          첫 번째 이슈입니다. Gemini 무료 한도는 <b>하루 20회</b>인데, 다섯 명이 한 판 돌 때마다 <b>6번</b>이 나갔습니다.
+          하루 세 판이면 끝입니다.
+          원인이 재밌습니다. 리포트 문장은 <b>방마다 한 번만 만들고 나머지는 저장된 걸 읽게</b> 돼 있었습니다.
+          그런데 <b>읽는 시점이 전원 동시</b>입니다. 마지막 게임이 끝나면 다섯 대가 같은 순간에 결과 화면으로 나오고,
+          생성에 10초에서 20초가 걸리는 그 사이에 다들 리포트를 엽니다.
+          <b>전원이 “저장된 게 없다”를 보고 각자 생성을 부른 겁니다.</b>
+          캐시가 있어도, 채워지기 전에 다 같이 도착하면 없는 것과 같습니다.
+          방 단위로 잠금을 걸어서 첫 요청만 쓰고 나머지는 기다렸다 읽게 했고,
+          다섯 명 동시 접속을 재현한 테스트에서 <b>호출이 6번에서 2번으로</b> 줄었습니다. 인원수와 무관해졌습니다.
+        </div></dd>
+        <dt>주의</dt>
+        <dd class="why">
+          <b>“인원수와 무관해졌다”</b>로 끝내세요. 단순히 빨라진 게 아니라
+          <b>비용이 인원에 비례하던 구조를 상수로 바꿨다</b>는 게 요점입니다.
+        </dd>
+      </dl>
+    </div>
+
+    <!-- 11 -->
+    <div class="clock"><span class="dot"></span>7:15</div>
+    <div class="slide">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">11</span>이슈② 아무도 못 들어오는 QR</div>
+        <div class="meta"><span>0:50</span><span class="orig">5.2</span></div>
+      </div>
+      <dl class="row">
+        <dt>화면</dt>
+        <dd>
+          같은 4단 구성. 그림: 노트북 화면에 QR이 멀쩡히 떠 있고, 폰이 그걸 찍었는데
+          화살표가 <b>폰 자신에게 되돌아오는</b> 그림. 이 그림 하나면 설명이 끝납니다.
+        </dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>275자 · 50초</em>
+          두 번째는 <b>제가 방을 만들면 다 들어오는데, 팀원이 방을 만들면 아무도 못 들어오는</b> 문제였습니다.
+          원인은 QR에 <b>방 만든 사람의 주소창 주소를 그대로</b> 담고 있었던 겁니다.
+          팀원이 자기 노트북에서 <b>localhost</b>로 열어놓고 방을 만들면 QR에도 localhost가 들어가는데,
+          그걸 찍은 <b>폰에서 localhost는 폰 자신</b>입니다. 닿을 데가 없습니다.
+          제 방만 됐던 건, 저는 팀원을 부르려고 랜 주소로 열어놨기 때문이었습니다.
+          이게 오래 안 잡힌 진짜 이유는 <b>실패가 비대칭이라서</b>입니다.
+          방 만든 사람 화면에는 QR이 정상으로 보이고, 실패는 <b>폰 든 사람에게만</b> 일어납니다.
+          그 사람이 할 수 있는 말은 “안 돼요”뿐입니다.
+          지금은 주소창이 localhost일 때만 서버에게 <b>“같은 와이파이에서 너를 부를 수 있는 주소”</b>를 물어서 바꿔 담습니다.
+        </div></dd>
+        <dt>마무리</dt>
+        <dd class="why">
+          한 줄로 닫으면 좋습니다 — <b>“테스트는 내 화면만 봅니다. 실패가 남의 화면에서만 보이는 종류가 있습니다.”</b>
+          심사위원이 기억하는 건 이런 문장입니다.
+        </dd>
+      </dl>
+    </div>
+
+    <!-- 12 -->
+    <div class="clock"><span class="dot"></span>8:05</div>
+    <div class="slide">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">12</span>성과와 회고</div>
+        <div class="meta"><span>0:45</span><span class="orig">6.1 · 6.2</span></div>
+      </div>
+      <dl class="row">
+        <dt>화면</dt>
+        <dd>
+          위쪽에 수치 4개, 아래쪽에 KPT 3열.
+          <ul>
+            <li>자동 테스트 <b>543개</b> (백엔드 302 · 프론트 241)</li>
+            <li>1·2·3·5·8인 방을 <b>끝까지 자동 재생</b>해 리포트까지 확인 (<code>flow_check</code>)</li>
+            <li>LLM 호출 <b>3배</b> 절감</li>
+            <li>커밋 <b>74개</b> · 팀원 <b>5명</b></li>
+          </ul>
+        </dd>
+        <dt>KPT</dt>
+        <dd>
+          <ul>
+            <li><b>Keep</b> — 사람별로 브랜치를 나누고 통합본만 master로. 다섯 명이 같은 화면을 동시에 건드려도 충돌이 게임 단위에 갇혔습니다.</li>
+            <li><b>Problem</b> — LLM 무료 한도를 계산에 안 넣고 개발하다 <b>테스트만으로 하루치를 태웠습니다.</b>
+              ‘유형 맞히기’는 다 만든 뒤에야 “처음 보는 이름 여덟 개 중에 고르라는 게 말이 되나”를 발견했습니다.</li>
+            <li><b>Try</b> — 외부 API는 <b>한도와 비용을 처음부터 설계 변수로.</b> 유저 플로우는 종이로 한 번 걸어본 뒤에 코드로.</li>
+          </ul>
+        </dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>250자 · 45초</em>
+          결과입니다. 자동 테스트 <b>543개</b>가 돌고 있고,
+          1명부터 8명까지 방을 <b>실제로 끝까지 재생해서</b> 리포트가 나오는지 매번 확인합니다. 서버를 안 띄우고도 됩니다.
+          아쉬웠던 건 두 가지입니다. <b>무료 한도를 설계에 안 넣고 시작했습니다.</b> 그래서 테스트만으로 하루치를 태운 날이 있었습니다.
+          그리고 ‘유형 맞히기’는 <b>다 만들고 나서야</b> 흐름이 이상하다는 걸 발견해서 갈아엎었습니다.
+          다음엔 외부 API 한도를 처음부터 설계 변수로 두고, 플로우는 종이로 먼저 걸어보려 합니다.
+        </div></dd>
+        <dt>주의</dt>
+        <dd class="why">
+          Problem을 <b>솔직하게</b> 쓰는 게 점수가 높습니다. “일정이 부족했다” 같은 말은 아무 정보가 없고,
+          <b>“한도를 설계에 안 넣었다”</b>는 배운 게 있다는 증거입니다.
+        </dd>
+      </dl>
+    </div>
+
+    <!-- 13 -->
+    <div class="clock last"><span class="dot"></span>8:50</div>
+    <div class="slide">
+      <div class="slide-head">
+        <div class="slide-title"><span class="idx">13</span>향후 계획 · 마무리</div>
+        <div class="meta"><span>0:30</span><span class="orig">6.3 · 6.4</span></div>
+      </div>
+      <dl class="row">
+        <dt>화면</dt>
+        <dd>
+          왼쪽 향후 계획 4줄, 오른쪽에 <b>팀명과 팀원 5명</b>(Q&amp;A 동안 이 화면이 떠 있습니다).
+          <ul>
+            <li>능력치가 5.0에 몰리는 문제 — 오각형이 예쁘게 안 나옴. 정규화 필요</li>
+            <li>같은 유형이 두 명 나왔을 때의 카드 처리</li>
+            <li>MariaDB 전환 + Alembic 마이그레이션</li>
+            <li>키를 각자 발급받지 않아도 되게 — 서버 키 운영</li>
+          </ul>
+        </dd>
+        <dt>대본</dt>
+        <dd><div class="script"><em>165자 · 30초</em>
+          남은 일은 네 가지입니다. 능력치가 만점 쪽에 몰려서 오각형이 예쁘게 안 나오는데, 이건 정규화가 필요합니다.
+          같은 유형이 두 명 나왔을 때 카드를 어떻게 보여줄지도 아직 안 정했습니다.
+          그리고 배포용으로 MariaDB 전환과, 팀원이 각자 API 키를 발급받지 않아도 되게 하는 작업이 남아 있습니다.
+          이상입니다. 감사합니다.
+        </div></dd>
+      </dl>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ 4. 콘티 ══════════════ -->
+<section>
+  <h2><span class="n">04</span> 시연 영상 콘티 · 2:00</h2>
+  <p class="sub">
+    9단계를 다 보여주려 하면 하나도 안 남습니다. <b>4개만</b> 고르고 나머지는 빠르게 넘깁니다.
+  </p>
+
+  <div class="note">
+    <b>나레이션 없이 자막으로.</b> 발표장 스피커가 안 될 수도 있고, 영상 소리와 발표자 목소리가 겹치면 둘 다 안 들립니다.
+    자막이면 소리가 안 나와도 발표가 안 멈춥니다.
+  </div>
+
+  <dl class="shot">
+    <dt>0:00–0:12</dt>
+    <dd><b>방 만들기</b><small>팀 소개 한 줄을 타이핑하는 장면을 실제로 보여줍니다 — “교내 해커톤 팀입니다…”. 이게 뒤에 나올 맞춤 문항의 근거입니다.</small></dd>
+
+    <dt>0:12–0:25</dt>
+    <dd><b>QR 찍고 입장 (화면 4분할)</b><small>폰 3~4대가 동시에 들어오는 게 보여야 합니다. 여기가 “설치도 가입도 없다”를 증명하는 유일한 장면입니다.</small></dd>
+
+    <dt>0:25–0:45</dt>
+    <dd><b>첫인상 투표 → 집계만 공개</b><small>지목한 사람이 안 나오고 표 수만 뜨는 걸 <b>자막으로 못 박으세요</b> — “누가 골랐는지는 끝까지 안 밝힙니다”.</small></dd>
+
+    <dt>0:45–1:05</dt>
+    <dd><b>동시에 답하기</b><small>갈린 결과 바가 채워지는 애니메이션. 화면이 예쁜 구간이라 조금 길게 둬도 됩니다.</small></dd>
+
+    <dt>1:05–1:22</dt>
+    <dd><b>눈치 게임</b><small>폭탄과 빵파레가 터지는 순간. 발표장에서 웃음이 나오는 유일한 지점입니다.</small></dd>
+
+    <dt>1:22–1:35</dt>
+    <dd><b>라이어 게임</b><small>버튼에 손을 대면 제시어가 보이고 떼면 가려지는 동작. 손가락이 화면에 보이게 찍으세요.</small></dd>
+
+    <dt>1:35–1:48</dt>
+    <dd><b>유형 카드 공개</b><small>카드가 뒤집히는 순간에서 <b>0.5초 멈춤</b>. 이 서비스의 결과물이 처음 드러나는 지점입니다.</small></dd>
+
+    <dt>1:48–2:00</dt>
+    <dd><b>개인 리포트 → 팀 리포트</b><small>스크롤로 훑고 끝냅니다. 마지막 프레임은 <b>유형 카드에서 정지</b>시켜 두면 다음 슬라이드로 자연스럽게 넘어갑니다.</small></dd>
+  </dl>
+
+  <h3>촬영 시 주의</h3>
+  <ul class="plain">
+    <li><b>실제 폰 화면 녹화</b>로 찍으세요. 브라우저 개발자도구 모바일 뷰는 티가 납니다.</li>
+    <li>닉네임은 <b>실명 대신 팀원 별명</b>으로. 발표 자료는 어디에 남을지 모릅니다.</li>
+    <li>18분을 2분으로 압축하니 <b>배속 구간에는 자막으로 “×8 배속”</b>을 표시하세요. 안 하면 “게임이 이렇게 빨리 끝나요?” 질문이 나옵니다.</li>
+    <li><b>영상은 PPT에 삽입하고, 파일도 따로 챙기세요.</b> 발표장 PC에서 코덱이 없으면 삽입 영상만 안 나옵니다.</li>
+  </ul>
+</section>
+
+<!-- ══════════════ 5. 백업 ══════════════ -->
+<section>
+  <h2><span class="n">05</span> 백업 슬라이드와 예상 질문</h2>
+  <p class="sub">
+    본 발표에서 뺀 것들입니다. 슬라이드 13 뒤에 숨겨두고 질문이 나올 때만 꺼내세요.
+  </p>
+
+  <div class="scroller">
+  <table>
+    <thead><tr><th>예상 질문</th><th>백업 슬라이드</th><th>핵심 답변</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>능력치 다섯 개는 어떻게 계산하나요?</td>
+        <td>능력치 산출 로직</td>
+        <td>게임별 행동 + 남들의 지목을 합산. 첫인상(초반)과 다시 보기(후반)를 나눠 저장해 <b>인식 변화</b>를 냄</td>
+      </tr>
+      <tr>
+        <td>LLM이 이상한 문항을 만들면요?</td>
+        <td>검증·폴백 구조</td>
+        <td>Pydantic 스키마 + 금칙어 검사. 실패하면 <b>기본 문항 세트</b>로 폴백하고, 이미 시작한 방은 안 바꿈</td>
+      </tr>
+      <tr>
+        <td>전체 ERD를 볼 수 있나요?</td>
+        <td>전체 ERD (12개 엔티티)</td>
+        <td>Room 중심. Guess 하나로 모든 게임의 선택을 흡수한 게 설계 요점</td>
+      </tr>
+      <tr>
+        <td>동시 접속은 몇 명까지요?</td>
+        <td>인원 처리</td>
+        <td>방당 1~8명. 인원에 따라 일부 단계를 건너뜀. 1·2·3·5·8인을 <b>자동 검증</b> 중</td>
+      </tr>
+      <tr>
+        <td>배포는 했나요?</td>
+        <td>배포 상태</td>
+        <td>지금은 로컬 + 같은 네트워크/터널. MariaDB 전환이 배포의 선결 조건</td>
+      </tr>
+      <tr>
+        <td>왜 음성을 안 쓰나요?</td>
+        <td>—<span style="color:var(--muted)">(구두로)</span></td>
+        <td>말하기 싫은 사람을 위한 서비스인데 음성을 쓰면 <b>전제가 무너짐</b></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note good">
+    <b>“왜 음성을 안 쓰나요”는 반드시 나옵니다.</b> 준비 안 하면 기술적 한계처럼 들리고,
+    준비하면 <b>설계 결정</b>으로 들립니다. 같은 사실인데 답변 하나로 갈립니다.
+  </div>
+</section>
+
+<!-- ══════════════ 6. 제작 ══════════════ -->
+<section>
+  <h2><span class="n">06</span> 제작 분담과 체크리스트</h2>
+  <p class="sub">담당은 <b>확인 후 채우세요</b> — 커밋 기록으로 추정한 것이라 실제 역할과 다를 수 있습니다.</p>
+
+  <div class="scroller">
+  <table>
+    <thead><tr><th>덩어리</th><th>슬라이드</th><th>필요한 것</th><th>담당</th></tr></thead>
+    <tbody>
+      <tr><td>도입·기획</td><td>1–3</td><td>슬로건 확정, 경쟁 비교 3축, 로고 캡처</td><td>기획</td></tr>
+      <tr><td>플로우·기능</td><td>4–5</td><td>플로우 다이어그램, 기능 카드 3장 + 스크린샷</td><td>기획 / 프론트</td></tr>
+      <tr><td><b>시연 영상</b></td><td>6</td><td>폰 4대 화면녹화, 편집, 자막 — <b>가장 오래 걸립니다. 먼저 시작하세요</b></td><td>—</td></tr>
+      <tr><td>결과물 캡처</td><td>7</td><td>유형 카드 · 오각형 · 팀 리포트 고해상도 캡처</td><td>프론트</td></tr>
+      <tr><td>기술·아키텍처</td><td>8–9</td><td>아키텍처 도식, 핵심 ERD 5개</td><td>백엔드</td></tr>
+      <tr><td>이슈 2개</td><td>10–11</td><td>4단 구성 + 도식 2개 — <b>내용은 이 문서에 다 있습니다</b></td><td>백엔드</td></tr>
+      <tr><td>성과·회고</td><td>12–13</td><td>수치 재확인, KPT 팀 합의</td><td>전원</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>발표 전날 체크리스트</h3>
+  <ul class="plain">
+    <li>리허설에서 <b>9:20</b>이 나오는가 (안 나오면 슬라이드 4를 5에 합치기)</li>
+    <li>영상이 발표장 PC에서 <b>소리까지</b> 재생되는가</li>
+    <li>영상 파일을 <b>USB에도</b> 챙겼는가</li>
+    <li>백업 슬라이드가 발표 모드에서 <b>숨김</b> 처리돼 있는가</li>
+    <li>슬라이드 12의 수치를 <b>발표 당일 기준</b>으로 다시 셌는가 (테스트 개수·커밋 수는 계속 늘어납니다)</li>
+    <li>발표자가 이슈 2개를 <b>슬라이드 안 보고</b> 설명할 수 있는가 — 질문이 여기서 나옵니다</li>
+  </ul>
+</section>
+
+<footer>
+  수치는 2026-08-31 기준 리포지토리에서 확인한 값입니다 —
+  백엔드 테스트 302개, 프론트 테스트 241개, 커밋 74개, 엔티티 12개.
+  발표 당일에 다시 세면 달라질 수 있습니다.
+</footer>
+
+</div>
