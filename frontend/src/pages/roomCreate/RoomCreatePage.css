@@ -110,3 +110,14 @@
   min-width: 48px;
   text-align: center;
 }
+
+/* QR이 조용히 쓸모없어지는 경우를 화면에서 말해준다. 방을 만든 사람 눈에는
+   멀쩡해 보이고 찍는 쪽만 실패하는 종류라, 안 띄우면 아무도 원인을 못 찾는다. */
+.rc-qr-warn {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--warn, #b4530a);
+  text-align: center;
+  word-break: keep-all;
+}
