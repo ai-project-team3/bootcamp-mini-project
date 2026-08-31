@@ -28,7 +28,9 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  overflow-y: auto;
+  /* 스크롤은 PhoneFrame이 받는다. 여기서 또 받으면 폰 안에 스크롤 영역이
+     두 개가 되고, 안쪽 것은 막대가 그대로 보인다 — 화면에 줄이 그어져 있으면
+     앱이 아니라 웹페이지로 보인다. 넘치는 만큼은 껍데기가 밀어낸다. */
 }
 
 .report-header {
