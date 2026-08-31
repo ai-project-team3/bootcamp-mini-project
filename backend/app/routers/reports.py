@@ -1,4 +1,5 @@
 import json
+import threading
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -181,6 +182,21 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
     # §5-2 나올 때 호출 — 세션당 한 번. 이미 쓰인 리포트가 있으면 그걸 그대로
     # 쓴다. 다시 열 때마다 문장이 바뀌면 캡처해서 공유한 것과 달라진다.
     cached = _cached_lines(db, room, players)
+    if cached is None:
+        # 한 방의 문장은 한 번만 쓴다. 마지막 단계가 끝나면 전원이 같은 순간에
+        # 결과 화면으로 나오고, 거기서 다들 몇 초 안에 리포트를 연다. 잠그지
+        # 않으면 그 몇 초 사이에 들어온 사람마다 캐시가 빈 것을 보고 각자 생성을
+        # 부른다 — 다섯 명이면 한 판에 여섯 번이고, 무료 한도는 하루 스무 번이다.
+        with _write_lock(room.id):
+            # 기다리는 동안 앞사람이 이미 썼을 수 있다. 롤백해서 이 세션이
+            # 붙들고 있던 트랜잭션을 끊어야 그 커밋이 보인다.
+            db.rollback()
+            cached = _cached_lines(db, room, players)
+            if cached is None:
+                written = _write_report_text(db, room, players, player_reports, hits, team, highlights)
+                if written:
+                    highlights = written
+
     if cached is not None:
         for pr in player_reports:
             if pr.player_id in cached:
@@ -191,10 +207,6 @@ def get_report(code: str, db: Session = Depends(get_db)) -> RoomReportResponse:
             team["reasons"] = json.loads(room.report_reasons)
         if room.report_highlights:
             highlights = json.loads(room.report_highlights)
-    else:
-        written = _write_report_text(db, room, players, player_reports, hits, team, highlights)
-        if written:
-            highlights = written
 
     _upsert_cache(db, room, players, final_types, badges, player_reports)
     _persist_abilities(db, room, abilities, impression_pre, impression_post)
@@ -248,6 +260,17 @@ def _shift(db: Session, room: Room, player: Player) -> ImpressionShift | None:
     if pre is None or post is None:
         return None
     return ImpressionShift(pre_label=pre[0], pre_votes=pre[1], post_label=post[0], post_votes=post[1])
+
+
+#: 방마다 하나. 리포트 문장을 쓰는 구간을 한 번에 하나만 지나가게 한다.
+#: 방이 끝나도 남지만 한 방에 자물쇠 하나라 무게가 없다.
+_WRITE_LOCKS: dict[str, threading.Lock] = {}
+_LOCKS_GUARD = threading.Lock()
+
+
+def _write_lock(room_id: str) -> threading.Lock:
+    with _LOCKS_GUARD:
+        return _WRITE_LOCKS.setdefault(room_id, threading.Lock())
 
 
 def _cached_lines(db: Session, room: Room, players: list[Player]) -> dict[str, list[str]] | None:
